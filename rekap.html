@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rekap Penjualan — Zaytun Riverside</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="_layout.css">
 <style>
   .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px; }
   .filter-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
-  .filter-bar input { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); outline:none; }
+  .filter-bar input { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); outline:none; }
   .filter-bar input:focus { border-color:var(--hijau-mid); }
 
   .summary-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
@@ -62,7 +62,7 @@
 
     <div class="summary-cards">
       <div class="sum-card"><div class="sum-label">Total Omzet</div><div class="sum-val hijau" id="sumOmzet">—</div></div>
-      <div class="sum-card"><div class="sum-label">Total Item Terjual</div><div class="sum-val emas" id="sumQty">—</div></div>
+      <div class="sum-card"><div class="sum-label">Total Qty Terjual</div><div class="sum-val emas" id="sumQty">—</div></div>
       <div class="sum-card"><div class="sum-label">Jenis Menu Terjual</div><div class="sum-val" id="sumMenu">—</div></div>
     </div>
 
@@ -102,12 +102,12 @@ function renderRekap(data) {
   if (!data.length) { document.getElementById('rekapContainer').innerHTML='<div class="empty-state"><div class="empty-icon">📊</div>Tidak ada data penjualan untuk periode ini</div>'; return; }
 
   const totalOmzet = data.reduce((s,d) => s+(Number(d.total_omzet)||0), 0);
-  const totalQty   = data.reduce((s,d) => s+(Number(d.total_qty)||0), 0);
+  const totalQty   = data.reduce((s,d) => s+(Number(d.total_qty)||0), 0);  // total qty terjual (jumlah barang)
   const maxQty     = Math.max(...data.map(d => d.total_qty));
 
   document.getElementById('sumOmzet').textContent = rp(totalOmzet);
-  document.getElementById('sumQty').textContent   = totalQty + ' item';
-  document.getElementById('sumMenu').textContent  = data.length + ' menu';
+  document.getElementById('sumQty').textContent   = totalQty + ' porsi';   // qty = jumlah barang terjual
+  document.getElementById('sumMenu').textContent  = data.length + ' menu'; // jumlah jenis menu
   document.getElementById('rekapBadge').textContent = `${data.length} menu`;
 
   let html = `<table class="rekap-table"><thead><tr>
