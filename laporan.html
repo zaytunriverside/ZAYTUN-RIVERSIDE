@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Laba Rugi — Zaytun Riverside</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px; }
+  .filter-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
+  .filter-bar input, .filter-bar select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); outline:none; }
+  .filter-bar input:focus { border-color:var(--hijau-mid); }
+
+  /* Kartu utama laba rugi */
+  .lr-header { background:linear-gradient(135deg,var(--hijau-tua),var(--hijau)); border-radius:18px; padding:28px 32px; color:var(--putih); margin-bottom:20px; position:relative; overflow:hidden; }
+  .lr-header::before { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.05); }
+  .lr-header::after  { content:''; position:absolute; bottom:-60px; right:60px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,0.04); }
+  .lr-periode { font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-bottom:16px; }
+  .lr-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; }
+  .lr-item .li-label { font-size:11px; color:rgba(255,255,255,0.6); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+  .lr-item .li-val   { font-size:24px; font-weight:700; }
+  .lr-item .li-val.laba { color:var(--hijau-muda); }
+  .lr-item .li-val.rugi { color:#ff8a80; }
+  .lr-item .li-val.putih { color:var(--putih); }
+  .lr-item .li-val.kuning { color:#ffe082; }
+  .lr-divider { width:1px; background:rgba(255,255,255,0.15); }
+
+  /* Section cards */
+  .section-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+
+  .breakdown-list { display:flex; flex-direction:column; gap:8px; }
+  .breakdown-item { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--krem); border-radius:10px; }
+  .breakdown-item .bi-label { font-size:13px; color:var(--teks); font-weight:500; }
+  .breakdown-item .bi-val   { font-size:13px; font-weight:700; color:var(--teks); }
+  .breakdown-item .bi-pct  { font-size:11px; color:var(--teks-abu); margin-left:8px; }
+
+  .breakdown-item.pemasukan .bi-val { color:var(--hijau); }
+  .breakdown-item.pengeluaran .bi-val { color:var(--merah); }
+
+  /* Timeline transaksi harian */
+  .daily-chart { display:flex; flex-direction:column; gap:8px; }
+  .daily-row { display:flex; align-items:center; gap:10px; }
+  .daily-date { font-size:12px; color:var(--teks-abu); min-width:80px; }
+  .daily-bar-wrap { flex:1; height:24px; background:var(--krem); border-radius:6px; overflow:hidden; }
+  .daily-bar-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,var(--hijau),var(--hijau-mid)); transition:width 0.6s ease; display:flex; align-items:center; padding:0 8px; }
+  .daily-bar-fill span { font-size:10px; color:var(--putih); font-weight:600; white-space:nowrap; }
+  .daily-val { font-size:12px; font-weight:600; color:var(--hijau); min-width:100px; text-align:right; }
+
+  .residu-note { background:var(--emas-pale); border:1px solid rgba(201,168,76,0.3); border-radius:10px; padding:12px 16px; font-size:13px; color:#8a6914; margin-top:12px; }
+
+  @media (max-width:768px) {
+    .lr-grid { grid-template-columns:1fr; }
+    .lr-divider { display:none; }
+    .section-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Laporan Laba Rugi</h1><div class="breadcrumb">Ringkasan keuangan per periode</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-action" onclick="loadLaporan()">↻ Refresh</button>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="card-title">🔎 Filter Periode</div></div>
+      <div class="filter-bar">
+        <div><label>Preset</label>
+          <select id="preset" onchange="applyPreset()">
+            <option value="">— Pilih —</option>
+            <option value="hari_ini">Hari Ini</option>
+            <option value="minggu_ini">Minggu Ini</option>
+            <option value="bulan_ini" selected>Bulan Ini</option>
+            <option value="bulan_lalu">Bulan Lalu</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div><label>Dari Tanggal</label><input type="date" id="filterDari"></div>
+        <div><label>Sampai Tanggal</label><input type="date" id="filterSampai"></div>
+        <div style="align-self:flex-end;"><button class="btn-primary" onclick="loadLaporan()">Tampilkan</button></div>
+      </div>
+    </div>
+
+    <div id="laporanContent">
+      <div class="loading-state"><div class="loading-spinner"></div>Pilih periode dan klik Tampilkan</div>
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = localStorage.getItem('zaytun_api')||'';
+initPage('laporan');
+applyPreset();
+
+function applyPreset() {
+  const p   = document.getElementById('preset').value;
+  const now = new Date();
+  let dari, sampai;
+
+  if (p==='hari_ini') {
+    dari = sampai = now.toISOString().split('T')[0];
+  } else if (p==='minggu_ini') {
+    const day = now.getDay();
+    const mon = new Date(now); mon.setDate(now.getDate() - (day===0?6:day-1));
+    dari = mon.toISOString().split('T')[0]; sampai = now.toISOString().split('T')[0];
+  } else if (p==='bulan_ini') {
+    dari   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+    sampai = now.toISOString().split('T')[0];
+  } else if (p==='bulan_lalu') {
+    const bl = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const el = new Date(now.getFullYear(), now.getMonth(), 0);
+    dari   = bl.toISOString().split('T')[0];
+    sampai = el.toISOString().split('T')[0];
+  } else return;
+
+  document.getElementById('filterDari').value   = dari;
+  document.getElementById('filterSampai').value = sampai;
+  if (p !== 'custom') loadLaporan();
+}
+
+async function loadLaporan() {
+  const dari   = document.getElementById('filterDari').value;
+  const sampai = document.getElementById('filterSampai').value;
+  if (!dari || !sampai) return;
+  document.getElementById('laporanContent').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat laporan...</div>';
+
+  try {
+    const [lapRes, trxRes] = await Promise.all([
+      fetch(`${API_URL}?action=getLaporan&dari=${fmtDate(dari)}&sampai=${fmtDate(sampai)}`),
+      fetch(`${API_URL}?action=getTransaksi&dari=${fmtDate(dari)}&sampai=${fmtDate(sampai)}`)
+    ]);
+    const lap = await lapRes.json();
+    const trx = await trxRes.json();
+    if (lap.status==='ok') renderLaporan(lap.data, trx.data||[]);
+  } catch(e) { document.getElementById('laporanContent').innerHTML='<div class="empty-state">⚠️ Gagal memuat laporan</div>'; }
+}
+
+function renderLaporan(d, trxList) {
+  const laba = d.laba_rugi;
+  const labaClass = laba>=0 ? 'laba' : 'rugi';
+
+  let html = `
+  <div class="lr-header">
+    <div class="lr-periode">📅 Periode: ${d.periode.dari} — ${d.periode.sampai}</div>
+    <div class="lr-grid">
+      <div class="lr-item">
+        <div class="li-label">Total Pemasukan</div>
+        <div class="li-val putih">${rp(d.total_pemasukan)}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">${d.jumlah_transaksi} transaksi</div>
+      </div>
+      <div class="lr-divider"></div>
+      <div class="lr-item">
+        <div class="li-label">Total Pengeluaran</div>
+        <div class="li-val kuning">${rp(d.total_pengeluaran)}</div>
+        ${d.total_residu_stok>0?`<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">Residu stok: ${rp(d.total_residu_stok)}</div>`:''}
+      </div>
+      <div class="lr-divider"></div>
+      <div class="lr-item">
+        <div class="li-label">Laba Bersih</div>
+        <div class="li-val ${labaClass}">${rp(laba)}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">${laba>=0?'✅ Untung':'⚠️ Rugi'}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Breakdown
+  html += `<div class="section-grid">`;
+
+  // Pemasukan per metode bayar
+  html += `<div class="card"><div class="card-header"><div class="card-title">💰 Pemasukan per Metode</div></div><div class="breakdown-list">`;
+  const totalPms = d.total_pemasukan || 1;
+  Object.entries(d.per_metode_bayar||{}).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+    html += `<div class="breakdown-item pemasukan">
+      <div><span class="bi-label">${k}</span><span class="bi-pct">${((v/totalPms)*100).toFixed(1)}%</span></div>
+      <span class="bi-val">${rp(v)}</span>
+    </div>`;
+  });
+  if (!Object.keys(d.per_metode_bayar||{}).length) html += `<div class="empty-state" style="padding:16px;">Tidak ada data</div>`;
+  html += `</div></div>`;
+
+  // Pengeluaran per kategori
+  html += `<div class="card"><div class="card-header"><div class="card-title">💸 Pengeluaran per Kategori</div></div><div class="breakdown-list">`;
+  const totalKel = d.total_pengeluaran || 1;
+  Object.entries(d.per_kategori_pengeluaran||{}).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+    html += `<div class="breakdown-item pengeluaran">
+      <div><span class="bi-label">${k}</span><span class="bi-pct">${((v/totalKel)*100).toFixed(1)}%</span></div>
+      <span class="bi-val">${rp(v)}</span>
+    </div>`;
+  });
+  if (!Object.keys(d.per_kategori_pengeluaran||{}).length) html += `<div class="empty-state" style="padding:16px;">Tidak ada data</div>`;
+  html += `</div></div>`;
+  html += `</div>`;
+
+  // Chart omzet harian
+  if (trxList.length) {
+    const dailyMap = {};
+    trxList.forEach(t => { dailyMap[t.tanggal] = (dailyMap[t.tanggal]||0) + (Number(t.total)||0); });
+    const dailySorted = Object.entries(dailyMap).sort((a,b) => a[0].localeCompare(b[0]));
+    const maxVal = Math.max(...Object.values(dailyMap));
+
+    html += `<div class="card"><div class="card-header"><div class="card-title">📊 Omzet Harian</div><span class="card-badge badge-hijau">${dailySorted.length} hari</span></div><div class="daily-chart">`;
+    dailySorted.forEach(([tgl, val]) => {
+      const pct = maxVal > 0 ? Math.round((val/maxVal)*100) : 0;
+      html += `<div class="daily-row">
+        <div class="daily-date">${tgl}</div>
+        <div class="daily-bar-wrap"><div class="daily-bar-fill" style="width:${pct}%"><span>${pct>=30?rp(val):''}</span></div></div>
+        <div class="daily-val">${rp(val)}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  if (d.total_residu_stok > 0) {
+    html += `<div class="residu-note">⚠️ <strong>Catatan Residu Stok:</strong> Total ${rp(d.total_residu_stok)} dari stok yang hilang/rusak/kadaluarsa dalam periode ini. Nilai ini belum dikurangi dari laba di atas karena dicatat terpisah sebagai kerugian stok.</div>`;
+  }
+
+  document.getElementById('laporanContent').innerHTML = html;
+}
+</script>
+</body>
+</html>

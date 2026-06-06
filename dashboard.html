@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Zaytun Riverside</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --hijau-tua:  #1B4332;
+    --hijau:      #2D6A4F;
+    --hijau-mid:  #40916C;
+    --hijau-muda: #74C69D;
+    --hijau-pale: #D8F3DC;
+    --krem:       #F8F3E8;
+    --krem-gelap: #EDE8D8;
+    --emas:       #C9A84C;
+    --emas-pale:  #FDF3DC;
+    --merah:      #C0392B;
+    --merah-pale: #FDECEA;
+    --biru:       #2471A3;
+    --biru-pale:  #D6EAF8;
+    --teks:       #1a1a1a;
+    --teks-abu:   #6b7280;
+    --putih:      #ffffff;
+    --bg:         #F2EDE0;
+    --sidebar-w:  240px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--teks);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--hijau-tua);
+    min-height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-logo {
+    padding: 28px 20px 24px;
+    border-bottom: 1px solid rgba(116,198,157,0.15);
+  }
+
+  .sidebar-logo .icon { font-size: 28px; display:block; margin-bottom:8px; }
+
+  .sidebar-logo .name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--putih);
+    line-height: 1.2;
+  }
+
+  .sidebar-logo .sub {
+    font-size: 10px;
+    color: var(--hijau-muda);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .sidebar-user {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(116,198,157,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-avatar {
+    width: 34px; height: 34px;
+    background: var(--hijau-mid);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .user-info .uname { font-size: 13px; font-weight: 600; color: var(--putih); }
+  .user-info .urole { font-size: 11px; color: var(--hijau-muda); text-transform: capitalize; }
+
+  .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+
+  .nav-section {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(116,198,157,0.5);
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+
+  .nav-item:hover { background: rgba(116,198,157,0.1); color: var(--putih); }
+  .nav-item.active {
+    background: rgba(116,198,157,0.15);
+    color: var(--hijau-muda);
+    border-left-color: var(--hijau-muda);
+    font-weight: 600;
+  }
+
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align:center; }
+  .nav-item .nav-label { flex: 1; }
+
+  .sidebar-bottom {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(116,198,157,0.15);
+  }
+
+  .btn-logout {
+    width: 100%;
+    padding: 10px;
+    background: rgba(192,57,43,0.15);
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 10px;
+    color: #e57373;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-logout:hover { background: rgba(192,57,43,0.25); }
+
+  /* ── MAIN CONTENT ────────────────────────── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Topbar */
+  .topbar {
+    background: var(--putih);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--krem-gelap);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .topbar-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--hijau-tua);
+  }
+
+  .topbar-left .breadcrumb {
+    font-size: 12px;
+    color: var(--teks-abu);
+    margin-top: 1px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-date {
+    font-size: 13px;
+    color: var(--teks-abu);
+    background: var(--krem);
+    padding: 6px 12px;
+    border-radius: 8px;
+  }
+
+  .btn-refresh {
+    background: var(--hijau-pale);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--hijau);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-refresh:hover { background: var(--hijau-muda); color: var(--putih); }
+
+  /* Mobile menu toggle */
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--hijau-tua);
+  }
+
+  /* ── PAGE CONTENT ────────────────────────── */
+  .page-content {
+    padding: 28px;
+    flex: 1;
+  }
+
+  /* Kartu statistik */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--putih);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.04);
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    opacity: 0.08;
+    transform: translate(20px, -20px);
+  }
+
+  .stat-card.omzet::before   { background: var(--hijau); }
+  .stat-card.keluar::before  { background: var(--merah); }
+  .stat-card.laba::before    { background: var(--emas); }
+  .stat-card.trx::before     { background: var(--biru); }
+
+  .stat-card:nth-child(1) { animation-delay: 0.1s; }
+  .stat-card:nth-child(2) { animation-delay: 0.2s; }
+  .stat-card:nth-child(3) { animation-delay: 0.3s; }
+  .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--teks-abu);
+    margin-bottom: 10px;
+  }
+
+  .stat-icon {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-size: 22px;
+    opacity: 0.7;
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--teks);
+    line-height: 1;
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-value.positif { color: var(--hijau); }
+  .stat-value.negatif { color: var(--merah); }
+  .stat-value.emas    { color: var(--emas); }
+  .stat-value.biru    { color: var(--biru); }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--teks-abu);
+  }
+
+  /* ── GRID BAWAH ──────────────────────────── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--putih);
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.04);
+    animation: fadeUp 0.5s 0.4s ease both;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--hijau-tua);
+  }
+
+  .card-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-hijau { background: var(--hijau-pale); color: var(--hijau); }
+  .badge-merah { background: var(--merah-pale); color: var(--merah); }
+  .badge-emas  { background: var(--emas-pale);  color: #8a6914; }
+
+  /* Tabel transaksi */
+  .trx-table { width: 100%; border-collapse: collapse; }
+  .trx-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--teks-abu);
+    padding: 0 12px 10px;
+    border-bottom: 1px solid var(--krem-gelap);
+  }
+  .trx-table td {
+    padding: 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--krem);
+    vertical-align: middle;
+  }
+  .trx-table tr:last-child td { border-bottom: none; }
+  .trx-table tr:hover td { background: var(--krem); }
+
+  .metode-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .metode-tunai  { background: var(--hijau-pale); color: var(--hijau); }
+  .metode-bank   { background: var(--biru-pale);  color: var(--biru); }
+  .metode-emoney { background: var(--emas-pale);  color: #8a6914; }
+  .metode-lain   { background: var(--krem-gelap); color: var(--teks-abu); }
+
+  /* Stok perhatian */
+  .stok-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .stok-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--merah-pale);
+    border-radius: 10px;
+    border-left: 3px solid var(--merah);
+  }
+
+  .stok-item-icon { font-size: 18px; }
+
+  .stok-item-info { flex: 1; min-width: 0; }
+  .stok-item-name { font-size: 13px; font-weight: 600; color: var(--teks); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stok-item-meta { font-size: 11px; color: var(--teks-abu); margin-top: 2px; }
+
+  .stok-item-val {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--merah);
+    background: rgba(192,57,43,0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  /* Loading & empty state */
+  .loading-state, .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--teks-abu);
+    font-size: 14px;
+  }
+
+  .loading-spinner {
+    width: 28px; height: 28px;
+    border: 3px solid var(--krem-gelap);
+    border-top-color: var(--hijau-mid);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* Overlay sidebar mobile */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 90;
+  }
+
+  /* ── RESPONSIVE ──────────────────────────── */
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .bottom-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .main { margin-left: 0; }
+    .menu-toggle { display: block; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .page-content { padding: 16px; }
+    .topbar { padding: 12px 16px; }
+    .stat-value { font-size: 18px; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .topbar-date { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Overlay mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="icon">🌿</span>
+    <div class="name">Zaytun Riverside</div>
+    <div class="sub">Pembukuan Cafe</div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">👤</div>
+    <div class="user-info">
+      <div class="uname" id="sidebarUname">—</div>
+      <div class="urole" id="sidebarUrole">—</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu Utama</div>
+    <a class="nav-item active" href="dashboard.html">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+    <a class="nav-item" href="transaksi.html">
+      <span class="nav-icon">🧾</span>
+      <span class="nav-label">Transaksi</span>
+    </a>
+
+    <div class="nav-section">Operasional</div>
+    <a class="nav-item" href="belanja.html">
+      <span class="nav-icon">🛒</span>
+      <span class="nav-label">Input Belanja</span>
+    </a>
+    <a class="nav-item" href="stok.html">
+      <span class="nav-icon">📦</span>
+      <span class="nav-label">Stok Opname</span>
+    </a>
+
+    <div class="nav-section">Laporan</div>
+    <a class="nav-item" href="rekap.html">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Rekap Penjualan</span>
+    </a>
+    <a class="nav-item" href="laporan.html">
+      <span class="nav-icon">📈</span>
+      <span class="nav-label">Laba Rugi</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="doLogout()">🚪 Keluar</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1>Dashboard</h1>
+        <div class="breadcrumb" id="topbarDate">Memuat tanggal...</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="topbarTime">--:--</div>
+      <button class="btn-refresh" onclick="loadDashboard()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="page-content">
+
+    <!-- Kartu Statistik -->
+    <div class="stats-grid">
+      <div class="stat-card omzet">
+        <div class="stat-label">Omzet Hari Ini</div>
+        <span class="stat-icon">💰</span>
+        <div class="stat-value positif" id="statOmzet">—</div>
+        <div class="stat-sub" id="statTrxCount">— transaksi</div>
+      </div>
+      <div class="stat-card keluar">
+        <div class="stat-label">Pengeluaran</div>
+        <span class="stat-icon">🧾</span>
+        <div class="stat-value negatif" id="statKeluar">—</div>
+        <div class="stat-sub">Total hari ini</div>
+      </div>
+      <div class="stat-card laba">
+        <div class="stat-label">Laba Bersih</div>
+        <span class="stat-icon">📈</span>
+        <div class="stat-value emas" id="statLaba">—</div>
+        <div class="stat-sub">Omzet − Pengeluaran</div>
+      </div>
+      <div class="stat-card trx">
+        <div class="stat-label">Stok Perhatian</div>
+        <span class="stat-icon">⚠️</span>
+        <div class="stat-value biru" id="statStok">—</div>
+        <div class="stat-sub">Item menipis/habis</div>
+      </div>
+    </div>
+
+    <!-- Bottom grid -->
+    <div class="bottom-grid">
+
+      <!-- Transaksi hari ini -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Transaksi Hari Ini</div>
+          <span class="card-badge badge-hijau" id="trxBadge">Memuat...</span>
+        </div>
+        <div id="trxContainer">
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            Mengambil data transaksi...
+          </div>
+        </div>
+      </div>
+
+      <!-- Stok perhatian -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚠️ Stok Perhatian</div>
+          <span class="card-badge badge-merah" id="stokBadge">—</span>
+        </div>
+        <div id="stokContainer">
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            Mengambil data stok...
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  const API_URL = localStorage.getItem('zaytun_api') || '';
+
+  // ── Auth check ───────────────────────────────────
+  const userRaw = localStorage.getItem('zaytun_user');
+  if (!userRaw) { window.location.href = 'index.html'; }
+  const user = JSON.parse(userRaw || '{}');
+
+  document.getElementById('sidebarUname').textContent = user.username || '—';
+  document.getElementById('sidebarUrole').textContent = user.role    || '—';
+
+  // ── Tanggal & waktu ──────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    const tgl = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const jam = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('topbarDate').textContent = tgl;
+    document.getElementById('topbarTime').textContent = jam;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Format rupiah ────────────────────────────────
+  function rp(n) {
+    return 'Rp ' + Number(n).toLocaleString('id-ID');
+  }
+
+  // ── Load dashboard ───────────────────────────────
+  async function loadDashboard() {
+    try {
+      const [dashRes, trxRes] = await Promise.all([
+        fetch(`${API_URL}?action=getDashboard`),
+        fetch(`${API_URL}?action=getTransaksi&tanggal=${getTodayStr()}`)
+      ]);
+      const dash = await dashRes.json();
+      const trx  = await trxRes.json();
+
+      if (dash.status === 'ok') renderStats(dash.data);
+      if (trx.status  === 'ok') renderTransaksi(trx.data);
+    } catch (err) {
+      document.getElementById('trxContainer').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">⚠️</div>Gagal memuat data.<br>Periksa koneksi internet.</div>`;
+    }
+  }
+
+  function getTodayStr() {
+    const d = new Date();
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  }
+
+  function renderStats(data) {
+    document.getElementById('statOmzet').textContent    = rp(data.omzet_hari_ini);
+    document.getElementById('statKeluar').textContent   = rp(data.keluar_hari_ini);
+    document.getElementById('statTrxCount').textContent = `${data.jumlah_transaksi} transaksi`;
+
+    const laba = data.laba_hari_ini;
+    const labaEl = document.getElementById('statLaba');
+    labaEl.textContent = rp(laba);
+    labaEl.className = 'stat-value ' + (laba >= 0 ? 'positif' : 'negatif');
+
+    const stokPerhatian = data.stok_perhatian || [];
+    document.getElementById('statStok').textContent = stokPerhatian.length;
+    renderStok(stokPerhatian);
+  }
+
+  function renderTransaksi(data) {
+    document.getElementById('trxBadge').textContent = `${data.length} transaksi`;
+
+    if (!data.length) {
+      document.getElementById('trxContainer').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">🧾</div>Belum ada transaksi hari ini</div>`;
+      return;
+    }
+
+    // Tampilkan max 10 transaksi terbaru
+    const tampil = data.slice(-10).reverse();
+    let html = `<table class="trx-table">
+      <thead><tr>
+        <th>No. Faktur</th>
+        <th>Waktu</th>
+        <th>Total</th>
+        <th>Metode</th>
+      </tr></thead><tbody>`;
+
+    tampil.forEach(t => {
+      const metodeClass = {
+        'Tunai': 'metode-tunai',
+        'Bank Transfer': 'metode-bank',
+        'E-Money': 'metode-emoney',
+      }[t.metode_bayar] || 'metode-lain';
+
+      html += `<tr>
+        <td style="font-size:12px; color:var(--teks-abu);">${t.id_transaksi}</td>
+        <td>${t.tanggal}</td>
+        <td style="font-weight:600; color:var(--hijau);">${rp(t.total)}</td>
+        <td><span class="metode-badge ${metodeClass}">${t.metode_bayar || '-'}</span></td>
+      </tr>`;
+    });
+
+    html += `</tbody></table>`;
+    if (data.length > 10) {
+      html += `<div style="text-align:center; padding:12px; font-size:12px; color:var(--teks-abu);">
+        + ${data.length - 10} transaksi lainnya — <a href="transaksi.html" style="color:var(--hijau);">Lihat semua</a>
+      </div>`;
+    }
+
+    document.getElementById('trxContainer').innerHTML = html;
+  }
+
+  function renderStok(items) {
+    document.getElementById('stokBadge').textContent = `${items.length} item`;
+    if (!items.length) {
+      document.getElementById('stokContainer').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">✅</div>Semua stok aman</div>`;
+      return;
+    }
+
+    let html = `<div class="stok-list">`;
+    items.forEach(s => {
+      const satuan = String(s.satuan).toUpperCase();
+      const val = satuan === 'BSH' ? String(s.stok_awal) : `${s.stok_awal} ${s.satuan}`;
+      html += `<div class="stok-item">
+        <span class="stok-item-icon">📦</span>
+        <div class="stok-item-info">
+          <div class="stok-item-name">${s.nama_item}</div>
+          <div class="stok-item-meta">${s.kategori}</div>
+        </div>
+        <span class="stok-item-val">${val}</span>
+      </div>`;
+    });
+    html += `</div>`;
+    document.getElementById('stokContainer').innerHTML = html;
+  }
+
+  // ── Sidebar mobile ───────────────────────────────
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+
+  // ── Logout ───────────────────────────────────────
+  function doLogout() {
+    if (confirm('Yakin ingin keluar?')) {
+      localStorage.removeItem('zaytun_user');
+      window.location.href = 'index.html';
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────
+  loadDashboard();
+</script>
+</body>
+</html>

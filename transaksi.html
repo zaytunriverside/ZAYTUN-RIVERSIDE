@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transaksi — Zaytun Riverside</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="_layout.css">
+<style>
+  .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px; }
+  .filter-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
+  .filter-bar input, .filter-bar select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); color:var(--teks); outline:none; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color:var(--hijau-mid); }
+
+  .import-zone { border:2px dashed var(--hijau-muda); border-radius:16px; padding:32px; text-align:center; background:var(--hijau-pale); cursor:pointer; transition:all 0.2s; margin-bottom:20px; }
+  .import-zone:hover { border-color:var(--hijau); background:rgba(116,198,157,0.2); }
+  .import-zone.dragover { border-color:var(--hijau); background:rgba(116,198,157,0.3); transform:scale(1.01); }
+  .import-zone .iz-icon { font-size:36px; margin-bottom:8px; }
+  .import-zone .iz-title { font-size:15px; font-weight:600; color:var(--hijau-tua); }
+  .import-zone .iz-sub { font-size:12px; color:var(--teks-abu); margin-top:4px; }
+  #fileInput { display:none; }
+
+  .preview-box { background:var(--putih); border-radius:12px; padding:16px; margin-bottom:16px; border:1px solid var(--krem-gelap); display:none; }
+  .preview-title { font-size:13px; font-weight:600; color:var(--hijau-tua); margin-bottom:10px; }
+  .preview-list { max-height:200px; overflow-y:auto; }
+  .preview-item { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--krem); font-size:12px; }
+  .preview-item:last-child { border-bottom:none; }
+  .preview-item .pi-faktur { color:var(--teks-abu); }
+  .preview-item .pi-total { font-weight:600; color:var(--hijau); }
+  .preview-item .pi-skip { color:var(--merah); font-style:italic; }
+
+  .import-actions { display:flex; gap:10px; }
+
+  .trx-table { width:100%; border-collapse:collapse; }
+  .trx-table th { text-align:left; font-size:11px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 12px 10px; border-bottom:1px solid var(--krem-gelap); }
+  .trx-table td { padding:11px 12px; font-size:13px; border-bottom:1px solid var(--krem); vertical-align:middle; }
+  .trx-table tr:last-child td { border-bottom:none; }
+  .trx-table tr:hover td { background:var(--krem); cursor:pointer; }
+  .trx-table .faktur { font-size:11px; color:var(--teks-abu); font-family:monospace; }
+
+  .metode-badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+  .metode-tunai  { background:var(--hijau-pale); color:var(--hijau); }
+  .metode-bank   { background:var(--biru-pale);  color:var(--biru); }
+  .metode-emoney { background:var(--emas-pale);  color:#8a6914; }
+  .metode-lain   { background:var(--krem-gelap); color:var(--teks-abu); }
+
+  /* Modal detail */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:16px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--putih); border-radius:20px; width:100%; max-width:520px; max-height:85vh; overflow-y:auto; animation:modalIn 0.3s ease; }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+  .modal-header { padding:20px 24px; border-bottom:1px solid var(--krem-gelap); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:var(--putih); border-radius:20px 20px 0 0; }
+  .modal-title { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:var(--hijau-tua); }
+  .modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--teks-abu); padding:4px 8px; border-radius:6px; }
+  .modal-close:hover { background:var(--krem); }
+  .modal-body { padding:20px 24px; }
+  .modal-info { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .modal-info-item { background:var(--krem); border-radius:10px; padding:10px 12px; }
+  .modal-info-item .mi-label { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); margin-bottom:4px; }
+  .modal-info-item .mi-val { font-size:14px; font-weight:600; color:var(--teks); }
+  .detail-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .detail-table th { text-align:left; padding:6px 8px; border-bottom:2px solid var(--krem-gelap); font-size:11px; text-transform:uppercase; color:var(--teks-abu); font-weight:600; }
+  .detail-table td { padding:8px; border-bottom:1px solid var(--krem); }
+  .detail-table tr:last-child td { border-bottom:none; }
+  .detail-total { display:flex; justify-content:space-between; margin-top:14px; padding:12px 16px; background:var(--hijau-pale); border-radius:10px; font-weight:700; color:var(--hijau-tua); }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Transaksi</h1><div class="breadcrumb">Import & Riwayat Penjualan KasPOS</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-action" onclick="loadTransaksi()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <!-- Import Area -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div class="card-title">📥 Import dari KasPOS</div>
+        <span class="card-badge badge-hijau">Laporan Penjualan Perfaktur</span>
+      </div>
+      <div class="import-zone" id="importZone" onclick="document.getElementById('fileInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <div class="iz-icon">📂</div>
+        <div class="iz-title">Klik atau drag file di sini</div>
+        <div class="iz-sub">Format: Laporan Penjualan Perfaktur.xlsx dari KasPOS</div>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFile(event)">
+
+      <div class="preview-box" id="previewBox">
+        <div class="preview-title" id="previewTitle"></div>
+        <div class="preview-list" id="previewList"></div>
+      </div>
+
+      <div id="importStatus" style="margin-bottom:12px;font-size:13px;color:var(--teks-abu);"></div>
+
+      <div class="import-actions" id="importActions" style="display:none;">
+        <button class="btn-primary" onclick="konfirmasiImport()">✅ Import Sekarang</button>
+        <button class="btn-secondary" onclick="batalImport()">✕ Batal</button>
+      </div>
+    </div>
+
+    <!-- Filter & Tabel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 Riwayat Transaksi</div>
+        <span class="card-badge badge-hijau" id="trxBadge">—</span>
+      </div>
+      <div class="filter-bar">
+        <div><label>Dari Tanggal</label><input type="date" id="filterDari" onchange="loadTransaksi()"></div>
+        <div><label>Sampai Tanggal</label><input type="date" id="filterSampai" onchange="loadTransaksi()"></div>
+        <div><label>Metode Bayar</label>
+          <select id="filterMetode" onchange="renderTabel()">
+            <option value="">Semua</option>
+            <option>Tunai</option><option>Bank Transfer</option><option>E-Money</option><option>Campuran</option>
+          </select>
+        </div>
+      </div>
+      <div id="trxContainer"><div class="loading-state"><div class="loading-spinner"></div>Memuat transaksi...</div></div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal Detail -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Detail Transaksi</div>
+      <button class="modal-close" onclick="tutupModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = localStorage.getItem('zaytun_api')||'';
+let allTrx = [];
+let previewData = [];
+
+initPage('transaksi');
+
+// Default filter: bulan ini
+const now = new Date();
+document.getElementById('filterDari').value   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+document.getElementById('filterSampai').value = now.toISOString().split('T')[0];
+loadTransaksi();
+
+async function loadTransaksi() {
+  const dari   = document.getElementById('filterDari').value;
+  const sampai = document.getElementById('filterSampai').value;
+  if (!dari || !sampai) return;
+  const url = `${API_URL}?action=getTransaksi&dari=${fmtDate(dari)}&sampai=${fmtDate(sampai)}`;
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.status === 'ok') { allTrx = data.data; renderTabel(); }
+  } catch(e) {
+    document.getElementById('trxContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>Gagal memuat data</div>';
+  }
+}
+
+function renderTabel() {
+  const metode = document.getElementById('filterMetode').value;
+  let data = allTrx;
+  if (metode) data = data.filter(t => t.metode_bayar === metode);
+  document.getElementById('trxBadge').textContent = `${data.length} transaksi`;
+  if (!data.length) { document.getElementById('trxContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🧾</div>Tidak ada transaksi</div>'; return; }
+  const totalOmzet = data.reduce((s,t) => s+(Number(t.total)||0), 0);
+  let html = `<table class="trx-table"><thead><tr><th>No. Faktur</th><th>Tanggal</th><th>Total</th><th>Metode</th></tr></thead><tbody>`;
+  [...data].reverse().forEach(t => {
+    const mc = {'Tunai':'metode-tunai','Bank Transfer':'metode-bank','E-Money':'metode-emoney'}[t.metode_bayar]||'metode-lain';
+    html += `<tr onclick="lihatDetail('${t.id_transaksi}')">
+      <td class="faktur">${t.id_transaksi}</td>
+      <td>${t.tanggal}</td>
+      <td style="font-weight:600;color:var(--hijau);">${rp(t.total)}</td>
+      <td><span class="metode-badge ${mc}">${t.metode_bayar||'-'}</span></td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  html += `<div style="padding:12px 12px 4px;text-align:right;font-size:13px;font-weight:600;color:var(--hijau-tua);">Total Omzet: <span style="color:var(--hijau);font-size:15px;">${rp(totalOmzet)}</span></div>`;
+  document.getElementById('trxContainer').innerHTML = html;
+}
+
+async function lihatDetail(id) {
+  document.getElementById('modalTitle').textContent = id;
+  document.getElementById('modalBody').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat detail...</div>';
+  document.getElementById('modalOverlay').classList.add('open');
+  try {
+    const res  = await fetch(`${API_URL}?action=getDetailTrx&id_transaksi=${id}`);
+    const data = await res.json();
+    const trx  = allTrx.find(t => t.id_transaksi === id) || {};
+    if (data.status === 'ok') renderModalDetail(trx, data.data);
+  } catch(e) { document.getElementById('modalBody').innerHTML = '<div class="empty-state">Gagal memuat detail</div>'; }
+}
+
+function renderModalDetail(trx, items) {
+  const mc = {'Tunai':'metode-tunai','Bank Transfer':'metode-bank','E-Money':'metode-emoney'}[trx.metode_bayar]||'metode-lain';
+  let html = `<div class="modal-info">
+    <div class="modal-info-item"><div class="mi-label">Tanggal</div><div class="mi-val">${trx.tanggal||'-'}</div></div>
+    <div class="modal-info-item"><div class="mi-label">Metode</div><div class="mi-val"><span class="metode-badge ${mc}">${trx.metode_bayar||'-'}</span></div></div>
+    <div class="modal-info-item"><div class="mi-label">Total</div><div class="mi-val" style="color:var(--hijau);">${rp(trx.total)}</div></div>
+    <div class="modal-info-item"><div class="mi-label">Sumber</div><div class="mi-val">${trx.catatan||'-'}</div></div>
+  </div>
+  <table class="detail-table"><thead><tr><th>Menu</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead><tbody>`;
+  items.forEach(d => {
+    html += `<tr><td>${d.nama_menu}</td><td style="text-align:center;">${d.qty}</td><td>${rp(d.harga)}</td><td style="font-weight:600;">${rp(d.subtotal)}</td></tr>`;
+  });
+  html += `</tbody></table><div class="detail-total"><span>Total</span><span>${rp(trx.total)}</span></div>`;
+  document.getElementById('modalBody').innerHTML = html;
+}
+
+function tutupModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) tutupModal(); }
+
+// ── IMPORT KASPOS ────────────────────────────
+function onDragOver(e) { e.preventDefault(); document.getElementById('importZone').classList.add('dragover'); }
+function onDragLeave() { document.getElementById('importZone').classList.remove('dragover'); }
+function onDrop(e) { e.preventDefault(); document.getElementById('importZone').classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) prosesFile(f); }
+function handleFile(e) { const f = e.target.files[0]; if (f) prosesFile(f); }
+
+async function prosesFile(file) {
+  setStatus('⏳ Membaca file...');
+  try {
+    const trxList = await parseKaspos(file);
+    previewData = trxList;
+    tampilPreview(trxList);
+  } catch(e) { setStatus('❌ Gagal membaca file: ' + e.message); }
+}
+
+async function parseKaspos(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb   = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        const list = [];
+        let cur = null;
+
+        rows.forEach(row => {
+          const c0 = String(row[0]||'').trim();
+          const c2 = String(row[2]||'').trim();
+
+          if (c0.startsWith('No. Faktur')) {
+            if (cur && cur.items.length) list.push(cur);
+            const noFaktur = c0.match(/No\.\s*Faktur\s*:\s*(\S+)/)?.[1]||'';
+            const wm = c0.match(/Waktu\s*:\s*([\d\/]+)\s*\|\s*([\d:]+)/);
+            cur = { no_faktur:noFaktur, tanggal:wm?wm[1]:'', waktu:wm?wm[2]:'', items:[], total:0, metode_bayar:'' };
+          } else if (c0==='Total Penjualan' && cur) {
+            cur.total  = Number(row[6])||0;
+            const tunai  = Number(row[7])||0;
+            const bank   = Number(row[8])||0;
+            const emoney = Number(row[9])||0;
+            cur.metode_bayar = tunai>0&&bank===0&&emoney===0?'Tunai':bank>0&&tunai===0?'Bank Transfer':emoney>0&&tunai===0?'E-Money':'Campuran';
+          } else if (cur && !isNaN(c0) && c0!=='' && c2!=='') {
+            cur.items.push({ nama:c2, qty:Number(row[3])||0, harga:Number(row[4])||0, subtotal:Number(row[6])||0 });
+          }
+        });
+        if (cur && cur.items.length) list.push(cur);
+        resolve(list);
+      } catch(err) { reject(err); }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function tampilPreview(list) {
+  const box = document.getElementById('previewBox');
+  box.style.display = 'block';
+  document.getElementById('previewTitle').textContent = `📦 Ditemukan ${list.length} faktur di file:`;
+  let html = '';
+  list.forEach(t => {
+    html += `<div class="preview-item">
+      <span class="pi-faktur">${t.no_faktur} — ${t.tanggal} — ${t.items.length} item</span>
+      <span class="pi-total">${rp(t.total)}</span>
+    </div>`;
+  });
+  document.getElementById('previewList').innerHTML = html;
+  document.getElementById('importActions').style.display = 'flex';
+  setStatus(`✅ ${list.length} faktur siap diimport. Klik "Import Sekarang" untuk melanjutkan.`);
+}
+
+async function konfirmasiImport() {
+  if (!previewData.length) return;
+  setStatus('⏳ Mengimport ke database...');
+  document.getElementById('importActions').style.display = 'none';
+  try {
+    const res  = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'importTransaksi', transaksi:previewData }) });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      setStatus(`✅ ${data.message}`);
+      document.getElementById('previewBox').style.display = 'none';
+      previewData = [];
+      document.getElementById('fileInput').value = '';
+      loadTransaksi();
+    } else { setStatus('❌ ' + data.message); document.getElementById('importActions').style.display='flex'; }
+  } catch(e) { setStatus('❌ Gagal konek ke server'); document.getElementById('importActions').style.display='flex'; }
+}
+
+function batalImport() {
+  previewData = [];
+  document.getElementById('previewBox').style.display = 'none';
+  document.getElementById('importActions').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  setStatus('');
+}
+
+function setStatus(msg) { document.getElementById('importStatus').textContent = msg; }
+</script>
+</body>
+</html>

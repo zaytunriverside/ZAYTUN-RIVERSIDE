@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zaytun Riverside — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --hijau-tua:   #1B4332;
+    --hijau:       #2D6A4F;
+    --hijau-mid:   #40916C;
+    --hijau-muda:  #74C69D;
+    --krem:        #F8F3E8;
+    --krem-gelap:  #EDE8D8;
+    --emas:        #C9A84C;
+    --teks:        #1a1a1a;
+    --teks-abu:    #6b7280;
+    --putih:       #ffffff;
+    --error:       #c0392b;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    min-height: 100vh;
+    background: var(--hijau-tua);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Background dekoratif */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(64,145,108,0.25) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(201,168,76,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse 100% 80% at 50% 50%, rgba(27,67,50,0.8) 0%, var(--hijau-tua) 100%);
+    pointer-events: none;
+  }
+
+  /* Lingkaran dekoratif */
+  .deco-circle {
+    position: fixed;
+    border-radius: 50%;
+    border: 1px solid rgba(116,198,157,0.12);
+    pointer-events: none;
+    animation: rotate 30s linear infinite;
+  }
+  .deco-circle:nth-child(1) { width:600px; height:600px; top:-200px; right:-200px; }
+  .deco-circle:nth-child(2) { width:400px; height:400px; bottom:-100px; left:-100px; animation-direction: reverse; animation-duration: 20s; }
+  .deco-circle:nth-child(3) { width:200px; height:200px; top:50%; left:10%; border-color: rgba(201,168,76,0.1); animation-duration: 15s; }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* Card login */
+  .login-card {
+    position: relative;
+    z-index: 10;
+    background: var(--krem);
+    border-radius: 24px;
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 420px;
+    margin: 16px;
+    box-shadow:
+      0 32px 80px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(201,168,76,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+    animation: cardIn 0.7s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes cardIn {
+    from { opacity:0; transform: translateY(32px) scale(0.96); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  /* Logo area */
+  .logo-area {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .logo-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--hijau) 0%, var(--hijau-mid) 100%);
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(45,106,79,0.35);
+    animation: iconIn 0.8s 0.2s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  @keyframes iconIn {
+    from { opacity:0; transform: scale(0.5) rotate(-15deg); }
+    to   { opacity:1; transform: scale(1) rotate(0deg); }
+  }
+
+  .logo-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--hijau-tua);
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  .logo-sub {
+    font-size: 12px;
+    color: var(--teks-abu);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* Divider emas */
+  .divider {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--emas), transparent);
+    margin: 12px auto 0;
+    border-radius: 2px;
+  }
+
+  /* Form */
+  .form-group {
+    margin-bottom: 18px;
+    animation: slideUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .form-group:nth-child(1) { animation-delay: 0.3s; }
+  .form-group:nth-child(2) { animation-delay: 0.4s; }
+  .form-group:nth-child(3) { animation-delay: 0.5s; }
+
+  @keyframes slideUp {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--teks-abu);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-wrap .icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: var(--hijau-mid);
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 13px 14px 13px 42px;
+    border: 1.5px solid var(--krem-gelap);
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--putih);
+    color: var(--teks);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: var(--hijau-mid);
+    box-shadow: 0 0 0 3px rgba(64,145,108,0.12);
+  }
+
+  input::placeholder { color: #bbb; }
+
+  /* Toggle password */
+  .toggle-pw {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--teks-abu);
+    padding: 4px;
+    line-height: 1;
+  }
+
+  /* Error msg */
+  .error-msg {
+    display: none;
+    background: #fdf2f2;
+    border: 1px solid #f5c6c6;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--error);
+    margin-bottom: 16px;
+    text-align: center;
+    animation: shake 0.4s ease;
+  }
+  .error-msg.show { display: block; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+  }
+
+  /* Tombol login */
+  .btn-login {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--hijau) 0%, var(--hijau-mid) 100%);
+    color: var(--putih);
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(45,106,79,0.3);
+    position: relative;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .btn-login::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  }
+
+  .btn-login:hover  { opacity:0.92; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,106,79,0.4); }
+  .btn-login:active { transform: translateY(0); }
+  .btn-login:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+  .btn-login .spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  .btn-login.loading .btn-text { display:none; }
+  .btn-login.loading .spinner  { display:block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Footer */
+  .card-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--teks-abu);
+  }
+
+  .card-footer span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .login-card { padding: 36px 28px; }
+    .logo-title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deco-circle"></div>
+<div class="deco-circle"></div>
+<div class="deco-circle"></div>
+
+<div class="login-card">
+  <div class="logo-area">
+    <div class="logo-icon">🌿</div>
+    <div class="logo-title">Zaytun Riverside</div>
+    <div class="logo-sub">Sistem Pembukuan Cafe</div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg">⚠️ Username atau password salah</div>
+
+  <div class="form-group">
+    <label for="username">Username</label>
+    <div class="input-wrap">
+      <span class="icon">👤</span>
+      <input type="text" id="username" placeholder="Masukkan username" autocomplete="username">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="password">Password</label>
+    <div class="input-wrap">
+      <span class="icon">🔒</span>
+      <input type="password" id="password" placeholder="Masukkan password" autocomplete="current-password">
+      <button class="toggle-pw" onclick="togglePw()" type="button" title="Lihat password">👁️</button>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <button class="btn-login" id="btnLogin" onclick="doLogin()">
+      <span class="btn-text">Masuk</span>
+      <span class="spinner"></span>
+    </button>
+  </div>
+
+  <div class="card-footer">
+    <span>🔐 Sistem internal Zaytun Riverside</span>
+  </div>
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────
+  const API_URL = localStorage.getItem('zaytun_api') || '';
+
+  // ── Jika belum ada API_URL, minta input ──────────
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!API_URL) {
+      const url = prompt('Masukkan URL Apps Script (dari Deploy):\n\nContoh: https://script.google.com/macros/s/xxxxx/exec');
+      if (url && url.trim()) {
+        localStorage.setItem('zaytun_api', url.trim());
+        location.reload();
+      }
+    }
+
+    // Enter key support
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+    document.getElementById('username').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('password').focus();
+    });
+  });
+
+  // ── Toggle password visibility ───────────────────
+  function togglePw() {
+    const inp = document.getElementById('password');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  // ── Login ────────────────────────────────────────
+  async function doLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const btn      = document.getElementById('btnLogin');
+    const errMsg   = document.getElementById('errorMsg');
+
+    if (!username || !password) {
+      showError('Username dan password wajib diisi');
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btn.classList.add('loading');
+    errMsg.classList.remove('show');
+
+    try {
+      const url = `${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+      const res  = await fetch(url);
+      const data = await res.json();
+
+      if (data.status === 'ok') {
+        // Simpan session
+        localStorage.setItem('zaytun_user', JSON.stringify(data.data));
+        // Redirect ke dashboard
+        window.location.href = 'dashboard.html';
+      } else {
+        showError(data.message || 'Username atau password salah');
+      }
+    } catch (err) {
+      showError('Gagal terhubung ke server. Periksa koneksi internet.');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '⚠️ ' + msg;
+    el.classList.remove('show');
+    void el.offsetWidth; // reflow untuk restart animasi
+    el.classList.add('show');
+  }
+</script>
+</body>
+</html>

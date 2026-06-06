@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekap Penjualan — Zaytun Riverside</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px; }
+  .filter-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
+  .filter-bar input { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); outline:none; }
+  .filter-bar input:focus { border-color:var(--hijau-mid); }
+
+  .summary-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .sum-card { background:var(--putih); border-radius:14px; padding:18px; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04); }
+  .sum-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--teks-abu); margin-bottom:8px; }
+  .sum-val { font-size:22px; font-weight:700; color:var(--teks); }
+  .sum-val.hijau { color:var(--hijau); }
+  .sum-val.emas  { color:var(--emas); }
+
+  .rekap-table { width:100%; border-collapse:collapse; }
+  .rekap-table th { text-align:left; font-size:11px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 12px 10px; border-bottom:1px solid var(--krem-gelap); }
+  .rekap-table td { padding:11px 12px; font-size:13px; border-bottom:1px solid var(--krem); vertical-align:middle; }
+  .rekap-table tr:last-child td { border-bottom:none; }
+  .rekap-table tr:hover td { background:var(--krem); }
+
+  .rank-badge { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; font-size:11px; font-weight:700; }
+  .rank-1 { background:#FFD700; color:#5a4200; }
+  .rank-2 { background:#C0C0C0; color:#444; }
+  .rank-3 { background:#CD7F32; color:#fff; }
+  .rank-n { background:var(--krem-gelap); color:var(--teks-abu); }
+
+  .bar-wrap { display:flex; align-items:center; gap:10px; }
+  .bar { height:8px; border-radius:4px; background:var(--hijau-pale); flex:1; }
+  .bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--hijau),var(--hijau-mid)); transition:width 0.6s ease; }
+  .bar-pct { font-size:11px; color:var(--teks-abu); min-width:36px; text-align:right; }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Rekap Penjualan</h1><div class="breadcrumb">Menu terlaris per periode</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-action" onclick="loadRekap()">↻ Refresh</button>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="card-title">🔎 Filter Periode</div></div>
+      <div class="filter-bar">
+        <div><label>Dari Tanggal</label><input type="date" id="filterDari"></div>
+        <div><label>Sampai Tanggal</label><input type="date" id="filterSampai"></div>
+        <div style="align-self:flex-end;"><button class="btn-primary" onclick="loadRekap()">Tampilkan</button></div>
+      </div>
+    </div>
+
+    <div class="summary-cards">
+      <div class="sum-card"><div class="sum-label">Total Omzet</div><div class="sum-val hijau" id="sumOmzet">—</div></div>
+      <div class="sum-card"><div class="sum-label">Total Item Terjual</div><div class="sum-val emas" id="sumQty">—</div></div>
+      <div class="sum-card"><div class="sum-label">Jenis Menu Terjual</div><div class="sum-val" id="sumMenu">—</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏆 Rekap Per Menu</div>
+        <span class="card-badge badge-hijau" id="rekapBadge">—</span>
+      </div>
+      <div id="rekapContainer"><div class="loading-state"><div class="loading-spinner"></div>Pilih periode dan klik Tampilkan</div></div>
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = localStorage.getItem('zaytun_api')||'';
+initPage('rekap');
+
+const now = new Date();
+document.getElementById('filterDari').value   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+document.getElementById('filterSampai').value = now.toISOString().split('T')[0];
+loadRekap();
+
+async function loadRekap() {
+  const dari   = document.getElementById('filterDari').value;
+  const sampai = document.getElementById('filterSampai').value;
+  if (!dari || !sampai) return;
+  document.getElementById('rekapContainer').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat rekap...</div>';
+  try {
+    const res  = await fetch(`${API_URL}?action=getRekap&dari=${fmtDate(dari)}&sampai=${fmtDate(sampai)}`);
+    const data = await res.json();
+    if (data.status==='ok') renderRekap(data.data);
+  } catch(e) { document.getElementById('rekapContainer').innerHTML='<div class="empty-state">⚠️ Gagal memuat data</div>'; }
+}
+
+function renderRekap(data) {
+  if (!data.length) { document.getElementById('rekapContainer').innerHTML='<div class="empty-state"><div class="empty-icon">📊</div>Tidak ada data penjualan untuk periode ini</div>'; return; }
+
+  const totalOmzet = data.reduce((s,d) => s+(Number(d.total_omzet)||0), 0);
+  const totalQty   = data.reduce((s,d) => s+(Number(d.total_qty)||0), 0);
+  const maxQty     = Math.max(...data.map(d => d.total_qty));
+
+  document.getElementById('sumOmzet').textContent = rp(totalOmzet);
+  document.getElementById('sumQty').textContent   = totalQty + ' item';
+  document.getElementById('sumMenu').textContent  = data.length + ' menu';
+  document.getElementById('rekapBadge').textContent = `${data.length} menu`;
+
+  let html = `<table class="rekap-table"><thead><tr>
+    <th style="width:44px;">No.</th>
+    <th>Nama Menu</th>
+    <th style="width:120px;text-align:right;">Qty Terjual</th>
+    <th>Proporsi</th>
+    <th style="width:150px;text-align:right;">Total Omzet</th>
+  </tr></thead><tbody>`;
+
+  data.forEach((d, i) => {
+    const rank = i<3 ? `rank-${i+1}` : 'rank-n';
+    const pct  = maxQty > 0 ? Math.round((d.total_qty/maxQty)*100) : 0;
+    const pctOmzet = totalOmzet > 0 ? ((d.total_omzet/totalOmzet)*100).toFixed(1) : 0;
+    html += `<tr>
+      <td><span class="rank-badge ${rank}">${i+1}</span></td>
+      <td style="font-weight:500;">${d.nama_menu}</td>
+      <td style="text-align:right;font-weight:700;color:var(--hijau);">${d.total_qty}</td>
+      <td>
+        <div class="bar-wrap">
+          <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <span class="bar-pct">${pctOmzet}%</span>
+        </div>
+      </td>
+      <td style="text-align:right;font-weight:600;">${rp(d.total_omzet)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('rekapContainer').innerHTML = html;
+}
+</script>
+</body>
+</html>
