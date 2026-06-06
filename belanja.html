@@ -4,52 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Input Belanja — Zaytun Riverside</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="_layout.css">
 <style>
+  body { font-family:'Inter',sans-serif; }
   .belanja-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
-  .belanja-toolbar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
-  .belanja-toolbar input { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); outline:none; }
-  .belanja-toolbar input:focus { border-color:var(--hijau-mid); }
-  .search-input { padding:9px 12px 9px 36px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); outline:none; width:220px; }
   .search-wrap { position:relative; }
   .search-wrap::before { content:'🔍'; position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:14px; pointer-events:none; }
-
+  .search-input { padding:9px 12px 9px 36px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); outline:none; width:220px; }
+  .search-input:focus { border-color:var(--hijau-mid); }
   .kat-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
   .kat-tab { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1.5px solid var(--krem-gelap); background:var(--putih); color:var(--teks-abu); transition:all 0.2s; white-space:nowrap; }
   .kat-tab.active { background:var(--hijau); color:var(--putih); border-color:var(--hijau); }
   .kat-tab:hover:not(.active) { border-color:var(--hijau-mid); color:var(--hijau); }
-
   .belanja-table { width:100%; border-collapse:collapse; }
   .belanja-table th { text-align:left; font-size:11px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 10px 10px; border-bottom:1px solid var(--krem-gelap); }
-  .belanja-table td { padding:8px 10px; border-bottom:1px solid var(--krem); vertical-align:middle; font-size:13px; }
+  .belanja-table td { padding:8px 10px; border-bottom:1px solid var(--krem); vertical-align:middle; font-size:13px; font-family:'Inter',sans-serif; }
   .belanja-table tr:last-child td { border-bottom:none; }
   .belanja-table tr.has-input { background:var(--hijau-pale); }
-
-  .belanja-table input[type=number] { width:100%; padding:7px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; outline:none; text-align:right; background:var(--putih); }
-  .belanja-table input[type=number]:focus { border-color:var(--hijau-mid); background:#fff; }
-  .belanja-table .nama-cell { font-weight:500; }
-  .belanja-table .kat-badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; background:var(--krem-gelap); color:var(--teks-abu); }
-  .belanja-table .subtotal { font-weight:700; color:var(--hijau); text-align:right; min-width:100px; }
-  .belanja-table .keterangan-input { width:100%; padding:6px 8px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:12px; font-family:'DM Sans',sans-serif; outline:none; }
-  .belanja-table .keterangan-input:focus { border-color:var(--hijau-mid); }
-
+  .belanja-table input[type=number] { width:100%; padding:7px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; outline:none; text-align:right; background:var(--putih); }
+  .belanja-table input[type=number]:focus { border-color:var(--hijau-mid); }
+  .no-urut { font-size:11px; font-weight:700; color:var(--putih); background:var(--hijau-mid); border-radius:6px; padding:2px 7px; display:inline-block; min-width:28px; text-align:center; }
+  .kat-badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; background:var(--krem-gelap); color:var(--teks-abu); }
+  .subtotal { font-weight:700; color:var(--hijau); text-align:right; min-width:100px; font-family:'Inter',sans-serif; }
   .total-bar { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:var(--hijau-tua); border-radius:12px; margin-top:20px; }
   .total-bar .tl { color:rgba(255,255,255,0.7); font-size:13px; }
-  .total-bar .tr-val { color:var(--putih); font-size:20px; font-weight:700; }
+  .total-bar .tr-val { color:var(--putih); font-size:20px; font-weight:700; font-family:'Inter',sans-serif; }
   .total-bar .tr-item { color:var(--hijau-muda); font-size:12px; margin-top:2px; }
-
-  .btn-simpan { padding:12px 28px; background:linear-gradient(135deg,var(--hijau),var(--hijau-mid)); color:var(--putih); border:none; border-radius:12px; font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(45,106,79,0.3); transition:all 0.2s; }
-  .btn-simpan:hover { opacity:0.9; transform:translateY(-1px); }
-  .btn-simpan:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-  .btn-reset { padding:12px 20px; background:var(--krem-gelap); color:var(--teks-abu); border:none; border-radius:12px; font-size:14px; font-weight:500; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; }
-  .btn-reset:hover { background:var(--krem); }
-
   .tambah-item-form { background:var(--krem); border-radius:12px; padding:16px; margin-top:16px; display:none; }
   .tambah-item-form.open { display:block; }
   .tambah-grid { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end; }
-  .tambah-grid input, .tambah-grid select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); outline:none; width:100%; }
-  .tambah-grid input:focus, .tambah-grid select:focus { border-color:var(--hijau-mid); }
+  .tambah-grid input, .tambah-grid select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); outline:none; width:100%; }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    body { background:white; font-family:'Inter',sans-serif; }
+    .sidebar, .topbar, .belanja-toolbar, .kat-tabs, .total-bar, .tambah-item-form,
+    .btn-simpan, .btn-reset, #simpanStatus, .btn-secondary, #btnTambah, .btn-unduh { display:none !important; }
+    .main { margin-left:0 !important; }
+    .page-content { padding:0 !important; }
+    .card { box-shadow:none !important; border:none !important; padding:0 !important; }
+    .card-header { margin-bottom:10px !important; }
+    .print-header { display:block !important; }
+    @page { size:A4; margin:1cm; }
+  }
+  .print-header { display:none; font-family:'Inter',sans-serif; margin-bottom:16px; }
+  .print-header h2 { font-size:16px; font-weight:700; color:#1B4332; }
+  .print-header p { font-size:12px; color:#666; margin-top:4px; }
+  .print-header .print-meta { display:flex; gap:24px; margin-top:8px; font-size:12px; border-top:2px solid #1B4332; padding-top:8px; }
 </style>
 </head>
 <body>
@@ -61,14 +63,27 @@
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-left"><h1>Input Belanja</h1><div class="breadcrumb">Catat pengeluaran harian cafe</div></div>
     </div>
+    <div class="topbar-right">
+      <button class="btn-action btn-unduh" onclick="unduhDraft()">⬇ Unduh Draft</button>
+    </div>
   </div>
   <div class="page-content">
     <div class="card">
       <div class="card-header">
         <div class="card-title">🛒 Form Belanja</div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <div><label style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teks-abu);">Tanggal</label>
-            <input type="date" id="tglBelanja"></div>
+          <div><label style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--teks-abu);display:block;margin-bottom:4px;">Tanggal</label>
+            <input type="date" id="tglBelanja" style="padding:9px 12px;border:1.5px solid var(--krem-gelap);border-radius:10px;font-size:13px;font-family:'Inter',sans-serif;background:var(--putih);outline:none;"></div>
+        </div>
+      </div>
+
+      <!-- Print header (hanya muncul saat print) -->
+      <div class="print-header" id="printHeader">
+        <h2>🌿 ZAYTUN RIVERSIDE — Draft Belanja</h2>
+        <div class="print-meta">
+          <span id="printTgl"></span>
+          <span id="printJml"></span>
+          <span id="printTotal"></span>
         </div>
       </div>
 
@@ -76,12 +91,10 @@
         <div class="search-wrap">
           <input class="search-input" type="text" id="searchItem" placeholder="Cari item..." oninput="filterTable()">
         </div>
-        <button class="btn-secondary" onclick="toggleTambahItem()">+ Tambah Item Baru</button>
+        <button class="btn-secondary" id="btnTambah" onclick="toggleTambahItem()">+ Tambah Item Baru</button>
       </div>
-
       <div class="kat-tabs" id="katTabs"></div>
 
-      <!-- Form tambah item baru -->
       <div class="tambah-item-form" id="tambahItemForm">
         <div style="font-size:13px;font-weight:600;color:var(--hijau-tua);margin-bottom:10px;">Tambah Item Baru ke Master Belanja</div>
         <div class="tambah-grid">
@@ -95,13 +108,13 @@
             </select></div>
           <div><label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--teks-abu);display:block;margin-bottom:4px;">Satuan</label>
             <input type="text" id="newSatuan" placeholder="kg / pcs / botol"></div>
-          <div><button class="btn-primary" onclick="simpanItemBaru()" style="white-space:nowrap;">Simpan Item</button></div>
+          <div><button class="btn-primary" onclick="simpanItemBaru()">Simpan</button></div>
         </div>
       </div>
 
       <div id="belanjaContainer"><div class="loading-state"><div class="loading-spinner"></div>Memuat daftar belanja...</div></div>
 
-      <div class="total-bar">
+      <div class="total-bar" id="totalBar">
         <div class="tl">Total Belanja</div>
         <div>
           <div class="tr-val" id="totalBelanja">Rp 0</div>
@@ -113,60 +126,57 @@
         <button class="btn-simpan" id="btnSimpan" onclick="simpanBelanja()">💾 Simpan Belanja</button>
         <button class="btn-reset" onclick="resetForm()">↺ Reset</button>
       </div>
-      <div id="simpanStatus" style="margin-top:10px;font-size:13px;"></div>
+      <div id="simpanStatus" style="margin-top:10px;font-size:13px;font-family:'Inter',sans-serif;"></div>
     </div>
   </div>
 </main>
 
 <script src="_app.js"></script>
 <script>
-const API_URL = localStorage.getItem('zaytun_api')||'';
+const API_URL = getApiUrl();
 let masterData = [];
 let activeKat  = 'Semua';
 
 initPage('belanja');
-
-// Default tanggal hari ini
 const now = new Date();
 document.getElementById('tglBelanja').value = now.toISOString().split('T')[0];
-
 loadMaster();
 
 async function loadMaster() {
   try {
-    const res  = await fetch(`${API_URL}?action=getMasterBelanja`);
-    const data = await res.json();
-    if (data.status === 'ok') { masterData = data.data; buildKatTabs(); renderTable(); }
+    const data = await apiGet({ action:'getMasterBelanja' });
+    if (data.status === 'ok') {
+      // Tambahkan no urut global ke setiap item
+      masterData = data.data.map((m, i) => ({ ...m, no_urut: i + 1 }));
+      buildKatTabs();
+      renderTable();
+    }
   } catch(e) { document.getElementById('belanjaContainer').innerHTML = '<div class="empty-state">⚠️ Gagal memuat daftar belanja</div>'; }
 }
 
 function buildKatTabs() {
   const kats = ['Semua', ...new Set(masterData.map(m => m.kategori))];
-  const html = kats.map(k => `<div class="kat-tab${k===activeKat?' active':''}" onclick="setKat('${k}')">${k}</div>`).join('');
-  document.getElementById('katTabs').innerHTML = html;
+  document.getElementById('katTabs').innerHTML = kats.map(k =>
+    `<div class="kat-tab${k===activeKat?' active':''}" onclick="setKat('${k}')">${k}</div>`
+  ).join('');
 }
 
-function setKat(kat) {
-  activeKat = kat;
-  buildKatTabs();
-  renderTable();
-}
-
+function setKat(kat) { activeKat = kat; buildKatTabs(); renderTable(); }
 function filterTable() { renderTable(); }
 
 function renderTable() {
-  const q   = document.getElementById('searchItem').value.toLowerCase();
-  let data  = masterData;
+  const q    = document.getElementById('searchItem').value.toLowerCase();
+  let data   = masterData;
   if (activeKat !== 'Semua') data = data.filter(m => m.kategori === activeKat);
-  if (q) data = data.filter(m => m.nama_item.toLowerCase().includes(q));
-
+  if (q) data = data.filter(m => m.nama_item.toLowerCase().includes(q) || String(m.no_urut).includes(q));
   if (!data.length) { document.getElementById('belanjaContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div>Tidak ada item ditemukan</div>'; return; }
 
   let html = `<table class="belanja-table">
     <thead><tr>
-      <th style="width:36%;">Nama Item</th>
+      <th style="width:44px;">No.</th>
+      <th style="width:34%;">Nama Item</th>
       <th style="width:13%;">Kategori</th>
-      <th style="width:12%;">Satuan</th>
+      <th style="width:10%;">Satuan</th>
       <th style="width:14%;">Jumlah Beli</th>
       <th style="width:14%;">Harga Satuan</th>
       <th style="width:12%;">Total</th>
@@ -174,7 +184,8 @@ function renderTable() {
 
   data.forEach(item => {
     html += `<tr id="row-${item.id_item}">
-      <td class="nama-cell">${item.nama_item}</td>
+      <td><span class="no-urut">${item.no_urut}</span></td>
+      <td style="font-weight:500;">${item.nama_item}</td>
       <td><span class="kat-badge">${item.kategori}</span></td>
       <td style="color:var(--teks-abu);">${item.satuan}</td>
       <td><input type="number" min="0" step="0.1" placeholder="0" id="qty-${item.id_item}" oninput="hitungSubtotal('${item.id_item}')"></td>
@@ -193,14 +204,13 @@ function hitungSubtotal(id) {
   const sub   = qty * harga;
   const subEl = document.getElementById(`sub-${id}`);
   if (subEl) subEl.textContent = sub > 0 ? rp(sub) : '—';
-  // Highlight baris jika ada isian
   const row = document.getElementById(`row-${id}`);
   if (row) row.classList.toggle('has-input', qty > 0);
   hitungTotal();
 }
 
 function hitungTotal() {
-  let total = 0; let count = 0;
+  let total=0, count=0;
   masterData.forEach(item => {
     const qty   = parseFloat(document.getElementById(`qty-${item.id_item}`)?.value)   || 0;
     const harga = parseFloat(document.getElementById(`harga-${item.id_item}`)?.value) || 0;
@@ -213,7 +223,7 @@ function hitungTotal() {
 async function simpanBelanja() {
   const tgl  = document.getElementById('tglBelanja').value;
   if (!tgl) { alert('Pilih tanggal belanja terlebih dahulu'); return; }
-  const user = JSON.parse(localStorage.getItem('zaytun_user')||'{}');
+  const user  = JSON.parse(localStorage.getItem('zaytun_user')||'{}');
   const items = [];
   masterData.forEach(item => {
     const qty   = parseFloat(document.getElementById(`qty-${item.id_item}`)?.value)   || 0;
@@ -222,19 +232,25 @@ async function simpanBelanja() {
   });
   if (!items.length) { alert('Belum ada item yang diisi'); return; }
   const btn = document.getElementById('btnSimpan');
-  btn.disabled = true; btn.textContent = '⏳ Menyimpan...';
+  btn.disabled=true; btn.textContent='⏳ Menyimpan...';
   try {
-    const res  = await fetch(API_URL, { method:'POST', body:JSON.stringify({ action:'simpanBelanja', items, tanggal:fmtDate(tgl), kasir:user.username||'admin' }) });
-    const data = await res.json();
+    const data = await apiPost({ action:'simpanBelanja', items, tanggal:fmtDate(tgl), kasir:user.username||'admin' });
     if (data.status === 'ok') {
       document.getElementById('simpanStatus').innerHTML = `<span style="color:var(--hijau);">✅ ${data.message} — Total: ${rp(data.total)}</span>`;
       resetForm();
     } else { document.getElementById('simpanStatus').innerHTML = `<span style="color:var(--merah);">❌ ${data.message}</span>`; }
   } catch(e) { document.getElementById('simpanStatus').innerHTML = `<span style="color:var(--merah);">❌ Gagal konek ke server</span>`; }
-  finally { btn.disabled = false; btn.textContent = '💾 Simpan Belanja'; }
+  finally { btn.disabled=false; btn.textContent='💾 Simpan Belanja'; }
 }
 
-function resetForm() { masterData.forEach(item => { const q = document.getElementById(`qty-${item.id_item}`); const h = document.getElementById(`harga-${item.id_item}`); if(q) q.value=''; if(h) h.value=''; hitungSubtotal(item.id_item); }); }
+function resetForm() {
+  masterData.forEach(item => {
+    const q = document.getElementById(`qty-${item.id_item}`);
+    const h = document.getElementById(`harga-${item.id_item}`);
+    if(q) q.value=''; if(h) h.value='';
+    hitungSubtotal(item.id_item);
+  });
+}
 
 function toggleTambahItem() { document.getElementById('tambahItemForm').classList.toggle('open'); }
 
@@ -244,15 +260,36 @@ async function simpanItemBaru() {
   const satuan = document.getElementById('newSatuan').value.trim();
   if (!nama || !satuan) { alert('Nama dan satuan wajib diisi'); return; }
   try {
-    const res  = await fetch(API_URL, { method:'POST', body:JSON.stringify({ action:'tambahItemBelanja', nama_item:nama, kategori:kat, satuan }) });
-    const data = await res.json();
+    const data = await apiPost({ action:'tambahItemBelanja', nama_item:nama, kategori:kat, satuan });
     if (data.status === 'ok') {
-      document.getElementById('newNama').value = '';
-      document.getElementById('newSatuan').value = '';
+      document.getElementById('newNama').value='';
+      document.getElementById('newSatuan').value='';
       document.getElementById('tambahItemForm').classList.remove('open');
       loadMaster();
     } else { alert('Gagal: ' + data.message); }
   } catch(e) { alert('Gagal konek ke server'); }
+}
+
+// ── Unduh Draft (Print A4) ───────────────────
+function unduhDraft() {
+  const tgl = document.getElementById('tglBelanja').value;
+  let total=0, count=0;
+  masterData.forEach(item => {
+    const qty = parseFloat(document.getElementById(`qty-${item.id_item}`)?.value) || 0;
+    const harga = parseFloat(document.getElementById(`harga-${item.id_item}`)?.value) || 0;
+    if (qty > 0) { total += qty*harga; count++; }
+  });
+
+  document.getElementById('printTgl').textContent  = `Tanggal: ${tgl || '—'}`;
+  document.getElementById('printJml').textContent  = `Item diisi: ${count}`;
+  document.getElementById('printTotal').textContent = `Total: ${rp(total)}`;
+
+  // Set filter ke semua agar semua item tampil saat print
+  activeKat = 'Semua';
+  document.getElementById('searchItem').value = '';
+  renderTable();
+
+  setTimeout(() => window.print(), 300);
 }
 </script>
 </body>
