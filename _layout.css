@@ -19,7 +19,7 @@
   --sidebar-w:  240px;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--teks); min-height:100vh; display:flex; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--teks); min-height:100vh; display:flex; }
 
 /* SIDEBAR */
 .sidebar { width:var(--sidebar-w); background:var(--hijau-tua); min-height:100vh; position:fixed; left:0; top:0; display:flex; flex-direction:column; z-index:100; transition:transform 0.3s ease; }
@@ -38,7 +38,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--teks)
 .nav-item.active { background:rgba(116,198,157,0.15); color:var(--hijau-muda); border-left-color:var(--hijau-muda); font-weight:600; }
 .nav-icon { font-size:16px; width:20px; text-align:center; }
 .sidebar-bottom { padding:16px 20px; border-top:1px solid rgba(116,198,157,0.15); }
-.btn-logout { width:100%; padding:10px; background:rgba(192,57,43,0.15); border:1px solid rgba(192,57,43,0.3); border-radius:10px; color:#e57373; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.btn-logout { width:100%; padding:10px; background:rgba(192,57,43,0.15); border:1px solid rgba(192,57,43,0.3); border-radius:10px; color:#e57373; font-size:13px; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
 .btn-logout:hover { background:rgba(192,57,43,0.25); }
 
 /* MAIN */
@@ -61,16 +61,16 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--teks)
 .badge-emas  { background:var(--emas-pale);  color:#8a6914; }
 
 /* BUTTONS */
-.btn-primary { padding:9px 18px; background:linear-gradient(135deg,var(--hijau),var(--hijau-mid)); color:var(--putih); border:none; border-radius:10px; font-size:13px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; }
+.btn-primary { padding:9px 18px; background:linear-gradient(135deg,var(--hijau),var(--hijau-mid)); color:var(--putih); border:none; border-radius:10px; font-size:13px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.2s; }
 .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
-.btn-secondary { padding:9px 16px; background:var(--krem); border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-weight:500; font-family:'DM Sans',sans-serif; cursor:pointer; color:var(--teks-abu); transition:all 0.2s; }
+.btn-secondary { padding:9px 16px; background:var(--krem); border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-weight:500; font-family:'Inter',sans-serif; cursor:pointer; color:var(--teks-abu); transition:all 0.2s; }
 .btn-secondary:hover { border-color:var(--hijau-mid); color:var(--hijau); }
-.btn-action { background:var(--hijau-pale); border:none; border-radius:8px; padding:8px 14px; font-size:13px; color:var(--hijau); cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; transition:background 0.2s; }
+.btn-action { background:var(--hijau-pale); border:none; border-radius:8px; padding:8px 14px; font-size:13px; color:var(--hijau); cursor:pointer; font-family:'Inter',sans-serif; font-weight:500; transition:background 0.2s; }
 .btn-action:hover { background:var(--hijau-muda); color:var(--putih); }
-.btn-simpan { padding:12px 28px; background:linear-gradient(135deg,var(--hijau),var(--hijau-mid)); color:var(--putih); border:none; border-radius:12px; font-size:14px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(45,106,79,0.3); transition:all 0.2s; }
+.btn-simpan { padding:12px 28px; background:linear-gradient(135deg,var(--hijau),var(--hijau-mid)); color:var(--putih); border:none; border-radius:12px; font-size:14px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; box-shadow:0 4px 16px rgba(45,106,79,0.3); transition:all 0.2s; }
 .btn-simpan:hover { opacity:0.9; transform:translateY(-1px); }
 .btn-simpan:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-.btn-reset { padding:12px 20px; background:var(--krem-gelap); color:var(--teks-abu); border:none; border-radius:12px; font-size:14px; font-weight:500; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; }
+.btn-reset { padding:12px 20px; background:var(--krem-gelap); color:var(--teks-abu); border:none; border-radius:12px; font-size:14px; font-weight:500; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.2s; }
 .btn-reset:hover { background:var(--krem); }
 
 /* STATES */
