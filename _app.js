@@ -54,22 +54,85 @@ function fmtDate(str) {
   return `${d}/${m}/${y}`;
 }
 
-// ── API GET ──────────────────────────────────
-async function apiGet(params) {
-  const API_URL = localStorage.getItem('zaytun_api') || '';
-  const qs  = Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join('&');
-  const res = await fetch(`${API_URL}?${qs}`);
-  return await res.json();
+// ── API GET via no-cors + script tag (bypass CORS) ──
+function apiGet(params) {
+  return new Promise((resolve, reject) => {
+    const API_URL = localStorage.getItem('zaytun_api') || '';
+    const cbName  = 'zrcb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const qs      = Object.entries(params)
+                      .map(([k,v]) => `${k}=${encodeURIComponent(v)}`)
+                      .join('&');
+    const url = `${API_URL}?${qs}&callback=${cbName}`;
+
+    // Timeout 15 detik
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Request timeout — periksa koneksi'));
+    }, 15000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      const el = document.getElementById(cbName);
+      if (el) el.remove();
+    }
+
+    window[cbName] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+
+    const script  = document.createElement('script');
+    script.id     = cbName;
+    script.src    = url;
+    script.onerror = () => { cleanup(); reject(new Error('Gagal terhubung ke server')); };
+    document.head.appendChild(script);
+  });
 }
 
-// ── API POST ─────────────────────────────────
+// ── API POST via fetch (Apps Script menerima POST tanpa CORS preflight) ──
 async function apiPost(body) {
   const API_URL = localStorage.getItem('zaytun_api') || '';
-  const res = await fetch(API_URL, {
-    method : 'POST',
-    body   : JSON.stringify(body),
+  try {
+    const res = await fetch(API_URL, {
+      method    : 'POST',
+      mode      : 'no-cors',   // skip preflight
+      body      : JSON.stringify(body),
+    });
+    // no-cors tidak bisa baca response — pakai workaround GET setelah POST
+    return { status: 'ok' };
+  } catch(e) {
+    throw new Error('Gagal terhubung ke server');
+  }
+}
+
+// ── API POST dengan response (pakai redirect GET trick) ──
+async function apiPostWithResponse(body) {
+  const API_URL = localStorage.getItem('zaytun_api') || '';
+  // Kirim via form POST — Apps Script menerima dan redirect ke GET
+  return new Promise((resolve, reject) => {
+    const cbName = 'zrcb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const timer  = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 20000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      const el = document.getElementById(cbName);
+      if (el) el.remove();
+    }
+
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+
+    // Tambahkan callback ke body, kirim via script inject ke URL dengan body di query
+    const encoded = encodeURIComponent(JSON.stringify(body));
+    const url     = `${API_URL}?_postbody=${encoded}&callback=${cbName}`;
+
+    const script  = document.createElement('script');
+    script.id     = cbName;
+    script.src    = url;
+    script.onerror = () => { cleanup(); reject(new Error('Gagal terhubung')); };
+    document.head.appendChild(script);
   });
-  return await res.json();
 }
 
 // ── Sidebar mobile ───────────────────────────
