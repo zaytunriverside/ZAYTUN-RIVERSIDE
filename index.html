@@ -388,7 +388,8 @@
     errMsg.classList.remove('show');
 
     try {
-      const url = `${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+      const cbName = 'zrcb_' + Date.now();
+      const url = `${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&callback=${cbName}`;
       const res  = await fetch(url);
       const data = await res.json();
 
