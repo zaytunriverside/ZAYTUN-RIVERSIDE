@@ -4,48 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stok Opname — Zaytun Riverside</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="_layout.css">
 <style>
+  body { font-family:'Inter',sans-serif; }
   .periode-bar { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; }
   .periode-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
-  .periode-bar input, .periode-bar select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--putih); outline:none; }
-  .periode-bar input:focus { border-color:var(--hijau-mid); }
-
+  .periode-bar input, .periode-bar select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); outline:none; }
   .mode-tabs { display:flex; gap:0; margin-bottom:20px; border:1.5px solid var(--krem-gelap); border-radius:12px; overflow:hidden; width:fit-content; }
-  .mode-tab { padding:9px 20px; font-size:13px; font-weight:500; cursor:pointer; background:var(--putih); color:var(--teks-abu); border:none; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
+  .mode-tab { padding:9px 20px; font-size:13px; font-weight:500; cursor:pointer; background:var(--putih); color:var(--teks-abu); border:none; font-family:'Inter',sans-serif; transition:all 0.2s; }
   .mode-tab.active { background:var(--hijau); color:var(--putih); font-weight:600; }
-  .mode-tab:hover:not(.active) { background:var(--krem); }
-
   .stok-table { width:100%; border-collapse:collapse; }
   .stok-table th { text-align:left; font-size:11px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 10px 10px; border-bottom:1px solid var(--krem-gelap); white-space:nowrap; }
-  .stok-table td { padding:8px 10px; border-bottom:1px solid var(--krem); vertical-align:middle; font-size:13px; }
+  .stok-table td { padding:8px 10px; border-bottom:1px solid var(--krem); vertical-align:middle; font-size:13px; font-family:'Inter',sans-serif; }
   .stok-table tr:last-child td { border-bottom:none; }
-  .stok-table .nama-cell { font-weight:500; }
-  .stok-table input[type=number], .stok-table select { padding:7px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; outline:none; width:100%; background:var(--putih); }
+  .stok-table input[type=number], .stok-table select { padding:7px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; outline:none; width:100%; background:var(--putih); }
   .stok-table input[type=number]:focus, .stok-table select:focus { border-color:var(--hijau-mid); }
-  .stok-table .num { text-align:right; font-variant-numeric:tabular-nums; }
-  .stok-table .tercatat { font-weight:700; color:var(--hijau-tua); text-align:right; }
-  .stok-table .residu-pos { color:var(--hijau); font-weight:600; text-align:right; }
-  .stok-table .residu-neg { color:var(--merah); font-weight:600; text-align:right; }
-  .stok-table .residu-zero { color:var(--teks-abu); text-align:right; }
-
+  .no-urut { font-size:11px; font-weight:700; color:var(--putih); background:var(--hijau-mid); border-radius:6px; padding:2px 7px; display:inline-block; min-width:28px; text-align:center; }
   .kat-badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; background:var(--krem-gelap); color:var(--teks-abu); }
-
-  .bsh-badge { display:inline-block; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600; }
-  .bsh-banyak  { background:var(--hijau-pale); color:var(--hijau); }
-  .bsh-sedikit { background:var(--emas-pale);  color:#8a6914; }
-  .bsh-habis   { background:var(--merah-pale); color:var(--merah); }
-
+  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .tercatat { font-weight:700; color:var(--hijau-tua); text-align:right; }
+  .residu-pos { color:var(--hijau); font-weight:600; text-align:right; }
+  .residu-neg { color:var(--merah); font-weight:600; text-align:right; }
+  .residu-zero { color:var(--teks-abu); text-align:right; }
   .residu-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
   .rs-card { background:var(--putih); border-radius:12px; padding:16px; border:1px solid var(--krem-gelap); }
   .rs-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--teks-abu); margin-bottom:6px; }
-  .rs-val { font-size:20px; font-weight:700; }
-  .rs-val.ok   { color:var(--hijau); }
-  .rs-val.warn { color:var(--emas); }
-  .rs-val.bad  { color:var(--merah); }
+  .rs-val { font-size:20px; font-weight:700; font-family:'Inter',sans-serif; }
+  .rs-val.ok { color:var(--hijau); } .rs-val.warn { color:var(--emas); } .rs-val.bad { color:var(--merah); }
+  .info-box { background:var(--hijau-pale); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--hijau-tua); margin-bottom:16px; border-left:3px solid var(--hijau-mid); font-family:'Inter',sans-serif; }
 
-  .info-box { background:var(--hijau-pale); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--hijau-tua); margin-bottom:16px; border-left:3px solid var(--hijau-mid); }
+  /* ── PRINT STYLES ── */
+  @media print {
+    body { font-family:'Inter',sans-serif; background:white; }
+    .sidebar, .topbar, .mode-tabs, .periode-bar, .btn-simpan, .btn-reset,
+    #stokStatus, .info-box, .btn-action { display:none !important; }
+    .main { margin-left:0 !important; }
+    .page-content { padding:0 !important; }
+    .card { box-shadow:none !important; border:none !important; padding:0 !important; }
+    .print-header { display:block !important; }
+    @page { size:A4; margin:1cm; }
+  }
+  .print-header { display:none; font-family:'Inter',sans-serif; margin-bottom:16px; }
+  .print-header h2 { font-size:16px; font-weight:700; color:#1B4332; }
+  .print-header .print-meta { display:flex; gap:24px; margin-top:8px; font-size:12px; border-top:2px solid #1B4332; padding-top:8px; }
 </style>
 </head>
 <body>
@@ -58,12 +60,11 @@
       <div class="topbar-left"><h1>Stok Opname</h1><div class="breadcrumb">Pantau stok mingguan setiap Jumat</div></div>
     </div>
     <div class="topbar-right">
+      <button class="btn-action" onclick="unduhDraft()">⬇ Unduh Draft</button>
       <button class="btn-action" onclick="loadStok()">↻ Refresh</button>
     </div>
   </div>
   <div class="page-content">
-
-    <!-- Mode tabs -->
     <div class="mode-tabs">
       <button class="mode-tab active" id="tabInput"   onclick="setMode('input')">📝 Input Stok</button>
       <button class="mode-tab"        id="tabRiwayat" onclick="setMode('riwayat')">📋 Riwayat</button>
@@ -72,9 +73,7 @@
     <!-- MODE INPUT -->
     <div id="modeInput">
       <div class="card" style="margin-bottom:16px;">
-        <div class="card-header">
-          <div class="card-title">📅 Periode Minggu</div>
-        </div>
+        <div class="card-header"><div class="card-title">📅 Periode Minggu</div></div>
         <div class="periode-bar">
           <div><label>Tanggal Jumat Periode Ini</label>
             <input type="date" id="tglJumat" onchange="loadStokMingguIni()"></div>
@@ -82,8 +81,7 @@
             <select id="modeStok" onchange="renderStokTable()">
               <option value="awal">Stok Awal (Hitung Fisik)</option>
               <option value="jumat_depan">Stok Jumat Depan (Tutup Periode)</option>
-            </select>
-          </div>
+            </select></div>
         </div>
         <div class="info-box" id="infoBox">💡 Pilih tanggal Jumat periode ini, lalu isi stok awal dari hasil hitung fisik.</div>
       </div>
@@ -93,12 +91,23 @@
           <div class="card-title" id="stokTableTitle">📦 Input Stok</div>
           <span class="card-badge badge-hijau" id="stokBadge">—</span>
         </div>
+
+        <!-- Print header -->
+        <div class="print-header" id="printHeader">
+          <h2>🌿 ZAYTUN RIVERSIDE — Draft Stok Opname</h2>
+          <div class="print-meta">
+            <span id="printTgl"></span>
+            <span id="printMode"></span>
+            <span id="printJml"></span>
+          </div>
+        </div>
+
         <div id="stokContainer"><div class="loading-state"><div class="loading-spinner"></div>Memuat data stok...</div></div>
         <div style="margin-top:16px;display:flex;gap:10px;">
           <button class="btn-simpan" id="btnSimpanStok" onclick="simpanStok()">💾 Simpan Stok</button>
-          <button class="btn-reset"  onclick="resetStokForm()">↺ Reset</button>
+          <button class="btn-reset" onclick="resetStokForm()">↺ Reset</button>
         </div>
-        <div id="stokStatus" style="margin-top:10px;font-size:13px;"></div>
+        <div id="stokStatus" style="margin-top:10px;font-size:13px;font-family:'Inter',sans-serif;"></div>
       </div>
     </div>
 
@@ -108,13 +117,11 @@
         <div><label>Pilih Periode (Tanggal Jumat)</label>
           <input type="date" id="tglRiwayat" onchange="loadRiwayat()"></div>
       </div>
-
       <div class="residu-summary" id="residuSummary" style="display:none;">
         <div class="rs-card"><div class="rs-label">Total Item Dipantau</div><div class="rs-val ok" id="rsTotal">—</div></div>
         <div class="rs-card"><div class="rs-label">Item Ada Residu</div><div class="rs-val warn" id="rsResidu">—</div></div>
         <div class="rs-card"><div class="rs-label">Item Aman</div><div class="rs-val ok" id="rsAman">—</div></div>
       </div>
-
       <div class="card">
         <div class="card-header">
           <div class="card-title">📋 Rekap Stok Opname</div>
@@ -123,43 +130,38 @@
         <div id="riwayatContainer"><div class="empty-state"><div class="empty-icon">📅</div>Pilih tanggal Jumat untuk melihat riwayat</div></div>
       </div>
     </div>
-
   </div>
 </main>
 
 <script src="_app.js"></script>
 <script>
-const API_URL = localStorage.getItem('zaytun_api')||'';
-let stokMingguIni = [];
+const API_URL = getApiUrl();
+let stokMingguIni   = [];
 let masterStokItems = [];
-let activeMode = 'input';
-
-// Daftar item stok (semua kecuali Sayuran & Operasional)
+let activeMode      = 'input';
 const ITEM_STOK_KAT = ['Kemasan','Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
-const SATUAN_BSH    = ['pcs-kemasan']; // Kemasan pakai BSH
 
 initPage('stok');
 
 // Default Jumat terdekat
 const now = new Date();
 const day = now.getDay();
-const diffToFri = day <= 5 ? 5 - day : 6;
-const jumat = new Date(now); jumat.setDate(now.getDate() + (day===5?0:diffToFri-(day>5?7:0)));
-// Jumat lalu jika hari ini bukan Jumat
-const jumatLalu = new Date(now); jumatLalu.setDate(now.getDate() - (day===0?2:day===6?1:day-5+7)%7);
-const jumatStr = (day===5?now:jumatLalu).toISOString().split('T')[0];
+const jumatLalu = new Date(now);
+jumatLalu.setDate(now.getDate() - (day === 5 ? 0 : (day + 2) % 7 === 0 ? 7 : day === 0 ? 2 : day + 2 > 7 ? day - 5 : 5 - day + (day < 5 ? 0 : 7)));
+const jumatStr = (day === 5 ? now : jumatLalu).toISOString().split('T')[0];
 document.getElementById('tglJumat').value   = jumatStr;
 document.getElementById('tglRiwayat').value = jumatStr;
 
 loadStok();
 
 async function loadStok() {
-  // Load master belanja untuk dapat daftar item stok
   try {
-    const res  = await fetch(`${API_URL}?action=getMasterBelanja`);
-    const data = await res.json();
+    const data = await apiGet({ action:'getMasterBelanja' });
     if (data.status === 'ok') {
-      masterStokItems = data.data.filter(m => ITEM_STOK_KAT.includes(m.kategori));
+      // No urut sama dengan belanja — berdasarkan index global
+      masterStokItems = data.data
+        .map((m, i) => ({ ...m, no_urut: i + 1 }))
+        .filter(m => ITEM_STOK_KAT.includes(m.kategori));
     }
     loadStokMingguIni();
   } catch(e) { document.getElementById('stokContainer').innerHTML='<div class="empty-state">⚠️ Gagal memuat data</div>'; }
@@ -169,25 +171,21 @@ async function loadStokMingguIni() {
   const tgl = document.getElementById('tglJumat').value;
   if (!tgl) return;
   try {
-    const res  = await fetch(`${API_URL}?action=getStokOpname&tanggal_jumat=${fmtDate(tgl)}`);
-    const data = await res.json();
+    const data = await apiGet({ action:'getStokOpname', tanggal_jumat:fmtDate(tgl) });
     stokMingguIni = data.status==='ok' ? data.data : [];
     renderStokTable();
   } catch(e) {}
 }
 
 function renderStokTable() {
-  const mode = document.getElementById('modeStok').value;
+  const mode  = document.getElementById('modeStok').value;
   const title = mode==='awal' ? '📦 Input Stok Awal (Hitung Fisik)' : '🔒 Input Stok Jumat Depan (Tutup Periode)';
   document.getElementById('stokTableTitle').textContent = title;
-  document.getElementById('stokBadge').textContent = `${masterStokItems.length} item`;
+  document.getElementById('stokBadge').textContent      = `${masterStokItems.length} item`;
+  document.getElementById('infoBox').textContent        = mode==='awal'
+    ? '💡 Isi jumlah stok fisik yang ada sekarang. Item Kemasan gunakan: Banyak / Sedikit / Habis.'
+    : '💡 Isi hasil hitung fisik Jumat depan untuk menutup periode. Residu dihitung otomatis.';
 
-  const infoMsg = mode==='awal'
-    ? '💡 Isi jumlah stok fisik yang ada sekarang untuk setiap item. Item Kemasan gunakan: Banyak / Sedikit / Habis.'
-    : '💡 Isi hasil hitung fisik Jumat depan untuk menutup periode ini. Residu akan dihitung otomatis.';
-  document.getElementById('infoBox').textContent = infoMsg;
-
-  // Group by kategori
   const grouped = {};
   masterStokItems.forEach(item => {
     if (!grouped[item.kategori]) grouped[item.kategori] = [];
@@ -195,25 +193,26 @@ function renderStokTable() {
   });
 
   let html = `<table class="stok-table"><thead><tr>
-    <th style="width:32%;">Nama Item</th>
+    <th style="width:44px;">No.</th>
+    <th style="width:30%;">Nama Item</th>
     <th style="width:14%;">Kategori</th>
     <th style="width:8%;">Satuan</th>
     <th style="width:14%;">Stok Awal</th>
-    <th style="width:14%;">+Tambahan</th>
+    <th style="width:10%;">+Tambahan</th>
     <th style="width:10%;">Tercatat</th>
     ${mode==='jumat_depan'?'<th style="width:14%;">Jumat Depan</th><th style="width:10%;">Residu</th>':''}
   </tr></thead><tbody>`;
 
   Object.entries(grouped).forEach(([kat, items]) => {
-    html += `<tr><td colspan="${mode==='jumat_depan'?8:6}" style="background:var(--krem);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--teks-abu);padding:6px 10px;">${kat}</td></tr>`;
+    html += `<tr><td colspan="${mode==='jumat_depan'?9:7}" style="background:var(--krem);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--teks-abu);padding:6px 10px;">${kat}</td></tr>`;
     items.forEach(item => {
-      const existing = stokMingguIni.find(s => s.id_item === item.id_item) || {};
+      const ex        = stokMingguIni.find(s => s.id_item === item.id_item) || {};
       const isKemasan = item.kategori === 'Kemasan';
-      const stokAwal  = existing.stok_awal     || '';
-      const tambahan  = existing.stok_tambahan || 0;
-      const tercatat  = existing.stok_tercatat || '';
-      const jumatDep  = existing.stok_jumat_depan || '';
-      const residu    = existing.stok_residu   || '';
+      const stokAwal  = ex.stok_awal || '';
+      const tambahan  = ex.stok_tambahan || 0;
+      const tercatat  = ex.stok_tercatat || '';
+      const jumatDep  = ex.stok_jumat_depan || '';
+      const residu    = ex.stok_residu || '';
 
       const inputAwal = isKemasan
         ? `<select id="sa-${item.id_item}" ${mode==='jumat_depan'?'disabled':''}>
@@ -222,63 +221,52 @@ function renderStokTable() {
             <option ${stokAwal==='Sedikit'?'selected':''}>Sedikit</option>
             <option ${stokAwal==='Habis'?'selected':''}>Habis</option>
           </select>`
-        : `<input type="number" min="0" step="0.1" id="sa-${item.id_item}" value="${stokAwal}" placeholder="0" ${mode==='jumat_depan'?'disabled':''} oninput="hitungTercatat('${item.id_item}')">`;
+        : `<input type="number" min="0" step="0.1" id="sa-${item.id_item}" value="${stokAwal}" placeholder="0" ${mode==='jumat_depan'?'disabled':''}>`;
 
       const tercatatDisplay = isKemasan ? (stokAwal||'—') : (tercatat !== '' ? tercatat : (stokAwal ? Number(stokAwal)+Number(tambahan) : '—'));
 
-      let residuDisplay = '';
+      let residuTd = '';
       if (mode==='jumat_depan' && residu !== '') {
         const r = Number(residu);
-        residuDisplay = `<td class="${r>0?'residu-pos':r<0?'residu-neg':'residu-zero'}">${isKemasan?'-':residu}</td>`;
+        residuTd = `<td class="${r>0?'residu-neg':r===0?'residu-zero':'residu-pos'}">${isKemasan?'-':residu}</td>`;
+      } else if (mode==='jumat_depan') {
+        residuTd = `<td class="residu-zero">—</td>`;
       }
 
       html += `<tr>
-        <td class="nama-cell">${item.nama_item}</td>
+        <td><span class="no-urut">${item.no_urut}</span></td>
+        <td style="font-weight:500;">${item.nama_item}</td>
         <td><span class="kat-badge">${item.kategori}</span></td>
         <td style="color:var(--teks-abu);">${isKemasan?'BSH':item.satuan}</td>
         <td>${inputAwal}</td>
         <td class="num" style="color:var(--hijau);font-weight:600;">${tambahan>0?'+'+tambahan:'—'}</td>
         <td class="tercatat">${tercatatDisplay}</td>
-        ${mode==='jumat_depan'?`<td><input type="number" min="0" step="0.1" id="jd-${item.id_item}" value="${jumatDep}" placeholder="0"></td>${residuDisplay}`:''}
+        ${mode==='jumat_depan'?`<td><input type="number" min="0" step="0.1" id="jd-${item.id_item}" value="${jumatDep}" placeholder="0"></td>${residuTd}`:''}
       </tr>`;
     });
   });
-
   html += `</tbody></table>`;
   document.getElementById('stokContainer').innerHTML = html;
-}
-
-function hitungTercatat(id) {
-  const item     = masterStokItems.find(m => m.id_item === id) || {};
-  const existing = stokMingguIni.find(s => s.id_item === id)   || {};
-  const tambahan = Number(existing.stok_tambahan) || 0;
-  const awal     = parseFloat(document.getElementById(`sa-${id}`)?.value) || 0;
-  // Update visual tercatat (tidak submit ke server, hanya preview)
 }
 
 async function simpanStok() {
   const tgl  = document.getElementById('tglJumat').value;
   const mode = document.getElementById('modeStok').value;
   if (!tgl) { alert('Pilih tanggal Jumat terlebih dahulu'); return; }
-
   const items = masterStokItems.map(item => {
     const val = document.getElementById(mode==='awal'?`sa-${item.id_item}`:`jd-${item.id_item}`)?.value;
-    return { id_item:item.id_item, nama_item:item.nama_item, kategori:item.kategori, satuan:item.satuan, [mode==='awal'?'stok_awal':'stok_jumat_depan']: val||0 };
+    return { id_item:item.id_item, nama_item:item.nama_item, kategori:item.kategori, satuan:item.satuan, [mode==='awal'?'stok_awal':'stok_jumat_depan']:val||0 };
   });
-
   const action  = mode==='awal' ? 'simpanStokAwal' : 'simpanStokJumatDepan';
-  const payload = { action, tanggal_jumat:fmtDate(tgl), items };
-
   const btn = document.getElementById('btnSimpanStok');
-  btn.disabled = true; btn.textContent = '⏳ Menyimpan...';
+  btn.disabled=true; btn.textContent='⏳ Menyimpan...';
   try {
-    const res  = await fetch(API_URL, { method:'POST', body:JSON.stringify(payload) });
-    const data = await res.json();
+    const data = await apiPost({ action, tanggal_jumat:fmtDate(tgl), items });
     document.getElementById('stokStatus').innerHTML = data.status==='ok'
       ? `<span style="color:var(--hijau);">✅ ${data.message}</span>`
       : `<span style="color:var(--merah);">❌ ${data.message}</span>`;
     if (data.status==='ok') loadStokMingguIni();
-  } catch(e) { document.getElementById('stokStatus').innerHTML = `<span style="color:var(--merah);">❌ Gagal konek ke server</span>`; }
+  } catch(e) { document.getElementById('stokStatus').innerHTML=`<span style="color:var(--merah);">❌ Gagal konek ke server</span>`; }
   finally { btn.disabled=false; btn.textContent='💾 Simpan Stok'; }
 }
 
@@ -297,46 +285,56 @@ async function loadRiwayat() {
   const tgl = document.getElementById('tglRiwayat').value;
   if (!tgl) return;
   try {
-    const res  = await fetch(`${API_URL}?action=getStokOpname&tanggal_jumat=${fmtDate(tgl)}`);
-    const data = await res.json();
+    const data = await apiGet({ action:'getStokOpname', tanggal_jumat:fmtDate(tgl) });
     if (data.status==='ok') renderRiwayat(data.data);
   } catch(e) {}
 }
 
 function renderRiwayat(data) {
   if (!data.length) { document.getElementById('riwayatContainer').innerHTML='<div class="empty-state"><div class="empty-icon">📅</div>Belum ada data untuk periode ini</div>'; document.getElementById('residuSummary').style.display='none'; return; }
-
-  const itemDenganResidu = data.filter(d => d.stok_residu!=='' && d.stok_residu!=='-' && Number(d.stok_residu)>0).length;
+  const itemDenganResidu = data.filter(d => d.stok_residu!==''&&d.stok_residu!=='-'&&Number(d.stok_residu)>0).length;
   document.getElementById('rsTotal').textContent  = data.length;
   document.getElementById('rsResidu').textContent = itemDenganResidu;
   document.getElementById('rsAman').textContent   = data.length - itemDenganResidu;
-  document.getElementById('residuSummary').style.display = 'grid';
+  document.getElementById('residuSummary').style.display='grid';
   document.getElementById('riwayatBadge').textContent = `${data.length} item`;
 
+  // Tambah no urut dari masterStokItems
   let html = `<table class="stok-table"><thead><tr>
-    <th>Nama Item</th><th>Kategori</th><th>Satuan</th>
+    <th>No.</th><th>Nama Item</th><th>Kategori</th><th>Satuan</th>
     <th class="num">Stok Awal</th><th class="num">+Tambahan</th>
     <th class="tercatat">Tercatat</th><th class="num">Jumat Depan</th><th>Residu</th>
   </tr></thead><tbody>`;
-
   data.forEach(d => {
+    const master    = masterStokItems.find(m => m.id_item === d.id_item);
+    const noUrut    = master ? master.no_urut : '—';
     const isKemasan = d.kategori==='Kemasan';
     const r = Number(d.stok_residu);
     const residuClass = isKemasan||d.stok_residu==='' ? 'residu-zero' : r>0 ? 'residu-neg' : r===0 ? 'residu-zero' : 'residu-pos';
-    const residuVal = isKemasan ? '—' : (d.stok_residu===''?'—':d.stok_residu);
     html += `<tr>
-      <td class="nama-cell">${d.nama_item}</td>
+      <td><span class="no-urut">${noUrut}</span></td>
+      <td style="font-weight:500;">${d.nama_item}</td>
       <td><span class="kat-badge">${d.kategori}</span></td>
       <td style="color:var(--teks-abu);">${isKemasan?'BSH':d.satuan}</td>
       <td class="num">${d.stok_awal||'—'}</td>
       <td class="num" style="color:var(--hijau);">${d.stok_tambahan>0?'+'+d.stok_tambahan:'—'}</td>
       <td class="tercatat">${d.stok_tercatat||'—'}</td>
       <td class="num">${d.stok_jumat_depan||'—'}</td>
-      <td class="${residuClass}">${residuVal}</td>
+      <td class="${residuClass}">${isKemasan?'—':(d.stok_residu===''?'—':d.stok_residu)}</td>
     </tr>`;
   });
   html += `</tbody></table>`;
   document.getElementById('riwayatContainer').innerHTML = html;
+}
+
+// ── Unduh Draft (Print A4) ───────────────────
+function unduhDraft() {
+  const tgl  = document.getElementById('tglJumat').value;
+  const mode = document.getElementById('modeStok').value;
+  document.getElementById('printTgl').textContent  = `Periode: ${tgl||'—'}`;
+  document.getElementById('printMode').textContent = mode==='awal' ? 'Mode: Stok Awal' : 'Mode: Tutup Periode';
+  document.getElementById('printJml').textContent  = `Item: ${masterStokItems.length}`;
+  setTimeout(() => window.print(), 300);
 }
 </script>
 </body>
