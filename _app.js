@@ -24,19 +24,13 @@ function initPage(activeId) {
   const sections = [...new Set(NAV_ITEMS.map(n => n.section))];
 
   let html = `
-    <div class="sidebar-top">
-      <button class="sidebar-logout" onclick="doLogout()" title="Keluar">⏻</button>
-    </div>
-    <div class="sidebar-logo">
-      <span class="icon">🌿</span>
-      <div class="name">Zaytun Riverside</div>
-      <div class="sub">Pembukuan Cafe</div>
-    </div>
-    <div class="sidebar-user">
-      <div class="user-avatar">👤</div>
-      <div class="user-info">
-        <div class="uname">${user.username||'—'}</div>
-        <div class="urole">${user.role||'—'}</div>
+    <div class="sidebar-logo" onclick="doLogout()" title="Klik untuk keluar" style="cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="icon" style="margin-bottom:0;">🌿</span>
+        <div>
+          <div class="name">Zaytun Riverside</div>
+          <div class="sub">${user.username||'—'}</div>
+        </div>
       </div>
     </div>
     <nav class="sidebar-nav">`;
