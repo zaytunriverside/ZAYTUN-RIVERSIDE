@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { id:'belanja',   href:'belanja.html',   icon:'🛒', label:'Input Belanja',   section:'Operasional' },
   { id:'stok',      href:'stok.html',      icon:'📦', label:'Stok Opname',     section:'Operasional' },
   { id:'resep',     href:'resep.html',     icon:'📖', label:'Resep Menu',      section:'Operasional' },
+  { id:'modal',     href:'modal.html',     icon:'💰', label:'Modal & Kas',     section:'Keuangan' },
   { id:'rekap',     href:'rekap.html',     icon:'📊', label:'Rekap Penjualan', section:'Laporan' },
   { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',       section:'Laporan' },
 ];
@@ -23,6 +24,9 @@ function initPage(activeId) {
   const sections = [...new Set(NAV_ITEMS.map(n => n.section))];
 
   let html = `
+    <div class="sidebar-top">
+      <button class="sidebar-logout" onclick="doLogout()" title="Keluar">⏻</button>
+    </div>
     <div class="sidebar-logo">
       <span class="icon">🌿</span>
       <div class="name">Zaytun Riverside</div>
