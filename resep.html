@@ -70,6 +70,7 @@
     </div>
     <div class="topbar-right">
       <button class="btn-action" onclick="init()">↻ Refresh</button>
+      <button onclick="doLogout()" title="Keluar" style="background:rgba(192,57,43,0.1);border:1.5px solid rgba(192,57,43,0.3);border-radius:8px;padding:7px 12px;font-size:16px;cursor:pointer;color:#c0392b;transition:all 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.2)'" onmouseout="this.style.background='rgba(192,57,43,0.1)'">⏻</button>
     </div>
   </div>
 
@@ -319,22 +320,32 @@ function renderResepPanel(nama) {
 function renderBahanRows() {
   const container = document.getElementById('bahanRows');
   if (!container) return;
+
   if (!bahanRows.length) {
     container.innerHTML = '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0 8px;">Klik "+ Tambah Bahan"</div>';
     return;
   }
+
+  if (!masterBahan.length) {
+    container.innerHTML = '<div style="color:var(--emas);font-size:13px;padding:4px 0;">⏳ Memuat daftar bahan...</div>';
+    // Retry setelah 1 detik
+    setTimeout(renderBahanRows, 1000);
+    return;
+  }
+
   const STOK_KAT = ['Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
+  const bahanFiltered = masterBahan.filter(m => STOK_KAT.includes(m.kategori));
+
   let html = '';
   bahanRows.forEach((b, i) => {
-    const opts = masterBahan
-      .filter(m => STOK_KAT.includes(m.kategori))
+    const opts = bahanFiltered
       .map(m => `<option value="${m.id_item}" data-nama="${m.nama_item}" data-satuan="${m.satuan}" ${m.id_item===b.id_bahan?'selected':''}>${m.nama_item}</option>`)
       .join('');
     html += `<div class="bahan-row">
       <select onchange="patchBahan(${i},this)">
         <option value="">— Pilih Bahan Baku —</option>${opts}
       </select>
-      <input type="number" min="0" step="0.001" placeholder="0" value="${b.jumlah||''}" oninput="bahanRows[${i}].jumlah=this.value">
+      <input type="number" min="0" step="0.001" placeholder="0" value="${b.jumlah||''}" oninput="bahanRows[${i}].jumlah=parseFloat(this.value)||0">
       <input type="text" placeholder="satuan" value="${b.satuan||''}" oninput="bahanRows[${i}].satuan=this.value">
       <button class="btn-del-row" onclick="hapusBahanRow(${i})">✕</button>
     </div>`;
