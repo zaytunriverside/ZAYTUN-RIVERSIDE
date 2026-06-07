@@ -617,7 +617,7 @@
 </main>
 
 <script>
-  const API_URL = localStorage.getItem('zaytun_api') || '';
+  const API_URL = getApiUrl();
 
   // ── Auth check ───────────────────────────────────
   const userRaw = localStorage.getItem('zaytun_user');
@@ -646,12 +646,10 @@
   // ── Load dashboard ───────────────────────────────
   async function loadDashboard() {
     try {
-      const [dashRes, trxRes] = await Promise.all([
-        fetch(`${API_URL}?action=getDashboard`),
-        fetch(`${API_URL}?action=getTransaksi&tanggal=${getTodayStr()}`)
+      const [dash, trx] = await Promise.all([
+        apiGet({ action:'getDashboard' }),
+        apiGet({ action:'getTransaksi', tanggal:getTodayStr() })
       ]);
-      const dash = await dashRes.json();
-      const trx  = await trxRes.json();
 
       if (dash.status === 'ok') renderStats(dash.data);
       if (trx.status  === 'ok') renderTransaksi(trx.data);
