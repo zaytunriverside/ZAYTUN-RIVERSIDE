@@ -141,7 +141,7 @@
 
 <script src="_app.js"></script>
 <script>
-const API_URL = localStorage.getItem('zaytun_api')||'';
+const API_URL = getApiUrl();
 let allTrx = [];
 let previewData = [];
 
@@ -194,8 +194,7 @@ async function lihatDetail(id) {
   document.getElementById('modalBody').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat detail...</div>';
   document.getElementById('modalOverlay').classList.add('open');
   try {
-    const res  = await fetch(`${API_URL}?action=getDetailTrx&id_transaksi=${id}`);
-    const data = await res.json();
+    const data = await apiGet({ action:'getDetailTrx', id_transaksi:id });
     const trx  = allTrx.find(t => t.id_transaksi === id) || {};
     if (data.status === 'ok') renderModalDetail(trx, data.data);
   } catch(e) { document.getElementById('modalBody').innerHTML = '<div class="empty-state">Gagal memuat detail</div>'; }
