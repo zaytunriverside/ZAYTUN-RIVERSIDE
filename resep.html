@@ -259,32 +259,31 @@ function renderResepPanel(nama) {
     <div class="resep-panel-title">📖 ${nama}</div>
     <div class="resep-panel-sub">Bahan baku utama per 1 porsi — untuk hitung stok keluar otomatis</div>`;
 
-  // Form input/edit
-  if (isEditMode || !resep.length) {
-    html += `<div class="form-bahan">
-      <div class="form-bahan-title">${isEditMode ? '✏️ Edit Resep' : '➕ Tambah Bahan Baku'}</div>
-      <div style="display:grid;grid-template-columns:1fr 100px 80px 36px;gap:8px;margin-bottom:6px;padding:0 0 4px;">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Bahan Baku</span>
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Qty/Porsi</span>
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Satuan</span>
-        <span></span>
-      </div>
-      <div id="bahanRows"></div>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn-secondary" onclick="tambahBahanRow()">+ Tambah Bahan</button>
-        ${isEditMode ? `<button class="btn-secondary" onclick="batalEdit()">✕ Batal</button>` : ''}
-      </div>
+  // Form input/edit - selalu render, toggle visibility via CSS
+  const formDisplay = (isEditMode || !resep.length) ? 'block' : 'none';
+  html += `<div class="form-bahan" id="formBahan" style="display:${formDisplay};">
+    <div class="form-bahan-title" id="formBahanTitle">${isEditMode ? '✏️ Edit Resep' : '➕ Tambah Bahan Baku'}</div>
+    <div style="display:grid;grid-template-columns:1fr 100px 80px 36px;gap:8px;margin-bottom:6px;padding:0 0 4px;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Bahan Baku</span>
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Qty/Porsi</span>
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Satuan</span>
+      <span></span>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:16px;">
-      <button class="btn-primary" onclick="simpanResep()">💾 Simpan Resep</button>
+    <div id="bahanRows"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn-secondary" onclick="tambahBahanRow()">+ Tambah Bahan</button>
+      <button class="btn-secondary" onclick="tutupForm()" style="${!isEditMode&&!resep.length?'display:none':''}">✕ Batal</button>
     </div>
-    <div id="resepStatus" style="margin-bottom:12px;font-size:13px;"></div>`;
-  }
+  </div>
+  <div id="formAction" style="display:${formDisplay};margin-bottom:16px;margin-top:12px;">
+    <button class="btn-primary" onclick="simpanResep()">💾 Simpan Resep</button>
+  </div>
+  <div id="resepStatus" style="margin-bottom:12px;font-size:13px;"></div>`;
 
   // Tabel resep tersimpan
   html += `<div class="section-label">
     <span>Resep Tersimpan (${resep.length} bahan)</span>
-    ${resep.length && !isEditMode ? `<button class="btn-edit" onclick="mulaiEdit()">✏️ Edit</button>` : ''}
+    ${resep.length ? `<button class="btn-edit" onclick="mulaiEdit()">✏️ Edit Resep</button>` : ''}
   </div>`;
 
   if (!resep.length) {
@@ -314,7 +313,7 @@ function renderResepPanel(nama) {
       bahanRows = [{ id_bahan:'', nama_bahan:'', jumlah:'', satuan:'' }];
     }
     // Delay kecil untuk pastikan DOM sudah ter-render
-    setTimeout(renderBahanRows, 50);
+    setTimeout(renderBahanRows, 100);
   }
 }
 
@@ -365,8 +364,25 @@ function patchBahan(i, sel) {
 
 function tambahBahanRow() { bahanRows.push({ id_bahan:'', nama_bahan:'', jumlah:'', satuan:'' }); renderBahanRows(); }
 function hapusBahanRow(i) { bahanRows.splice(i,1); renderBahanRows(); }
-function mulaiEdit() { isEditMode=true; bahanRows=(resepCache[activeMenu]||[]).map(r=>({id_bahan:r.id_bahan,nama_bahan:r.nama_bahan,jumlah:r.jumlah_per_porsi,satuan:r.satuan})); renderResepPanel(activeMenu); }
-function batalEdit() { isEditMode=false; bahanRows=[]; renderResepPanel(activeMenu); }
+function mulaiEdit() {
+  isEditMode = true;
+  bahanRows  = (resepCache[activeMenu]||[]).map(r => ({ id_bahan:r.id_bahan, nama_bahan:r.nama_bahan, jumlah:r.jumlah_per_porsi, satuan:r.satuan }));
+  const fb = document.getElementById('formBahan');
+  const fa = document.getElementById('formAction');
+  const ft = document.getElementById('formBahanTitle');
+  if (fb) { fb.style.display='block'; fb.querySelector('button:last-child').style.display=''; }
+  if (fa) fa.style.display='block';
+  if (ft) ft.textContent='✏️ Edit Resep';
+  renderBahanRows();
+}
+function batalEdit() { isEditMode=false; bahanRows=[]; tutupForm(); }
+function tutupForm() {
+  const fb = document.getElementById('formBahan');
+  const fa = document.getElementById('formAction');
+  if (fb) fb.style.display='none';
+  if (fa) fa.style.display='none';
+  isEditMode = false;
+}
 
 async function simpanResep() {
   const valid = bahanRows.filter(b => b.id_bahan && Number(b.jumlah)>0);
