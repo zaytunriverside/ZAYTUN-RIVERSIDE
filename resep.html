@@ -10,8 +10,6 @@
   body{font-family:'Inter',sans-serif;}
   .resep-layout{display:grid;grid-template-columns:260px 1fr;gap:20px;}
   @media(max-width:768px){.resep-layout{grid-template-columns:1fr;}}
-
-  /* Panel kiri */
   .menu-panel{background:var(--putih);border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04);position:sticky;top:80px;max-height:calc(100vh - 100px);display:flex;flex-direction:column;}
   .mp-title{font-size:13px;font-weight:700;color:var(--hijau-tua);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--krem-gelap);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
   .mp-search{width:100%;padding:8px 12px;border:1.5px solid var(--krem-gelap);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:8px;flex-shrink:0;}
@@ -21,50 +19,38 @@
   .mp-item{padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--teks);transition:all 0.15s;display:flex;align-items:center;gap:6px;}
   .mp-item:hover{background:var(--krem);}
   .mp-item.active{background:var(--hijau-pale);color:var(--hijau);font-weight:600;}
-  .mp-item .badge{font-size:10px;background:var(--hijau-pale);color:var(--hijau);padding:1px 7px;border-radius:10px;font-weight:700;flex-shrink:0;}
-  .mp-item .del-menu{background:none;border:none;color:var(--merah);cursor:pointer;font-size:13px;opacity:0;padding:2px 4px;flex-shrink:0;}
-  .mp-item:hover .del-menu{opacity:1;}
-  .btn-add-menu{font-size:11px;background:var(--hijau-pale);color:var(--hijau);border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;white-space:nowrap;}
+  .mp-badge{font-size:10px;background:var(--hijau-pale);color:var(--hijau);padding:1px 7px;border-radius:10px;font-weight:700;flex-shrink:0;}
+  .mp-del{background:none;border:none;color:var(--merah);cursor:pointer;font-size:13px;opacity:0;padding:2px 4px;flex-shrink:0;}
+  .mp-item:hover .mp-del{opacity:1;}
+  .btn-add-menu{font-size:11px;background:var(--hijau-pale);color:var(--hijau);border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;}
   .btn-add-menu:hover{background:var(--hijau);color:white;}
-
-  .form-menu-new{background:var(--krem);border-radius:10px;padding:12px;margin-bottom:8px;display:none;flex-shrink:0;}
-  .form-menu-new.open{display:block;}
-  .form-menu-new input,.form-menu-new select{width:100%;padding:8px 10px;border:1.5px solid var(--krem-gelap);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:8px;}
-  .form-menu-new input:focus,.form-menu-new select:focus{border-color:var(--hijau-mid);}
-
-  /* Panel kanan */
+  .form-new-menu{background:var(--krem);border-radius:10px;padding:12px;margin-bottom:8px;display:none;flex-shrink:0;}
+  .form-new-menu.open{display:block;}
+  .form-new-menu input,.form-new-menu select{width:100%;padding:8px 10px;border:1.5px solid var(--krem-gelap);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:8px;}
   .resep-panel{background:var(--putih);border-radius:16px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04);}
   .rp-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--hijau-tua);margin-bottom:4px;}
   .rp-sub{font-size:12px;color:var(--teks-abu);margin-bottom:20px;}
-  .rp-divider{border:none;border-top:1px solid var(--krem-gelap);margin:18px 0 14px;}
-  .rp-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--teks-abu);display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-
-  /* Form bahan */
   .form-bahan-box{background:var(--krem);border-radius:12px;padding:16px;margin-bottom:16px;}
   .form-bahan-title{font-size:13px;font-weight:600;color:var(--hijau-tua);margin-bottom:12px;}
-  .bahan-header{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;margin-bottom:4px;}
-  .bahan-header span{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);}
-  .bahan-row-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  #bahanList{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
   .bahan-row{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;align-items:center;}
   .bahan-row select,.bahan-row input{padding:8px 10px;border:1.5px solid var(--krem-gelap);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;width:100%;background:var(--putih);}
   .bahan-row select:focus,.bahan-row input:focus{border-color:var(--hijau-mid);}
   .btn-del-row{background:var(--merah-pale);border:none;border-radius:8px;color:var(--merah);font-size:13px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .btn-del-row:hover{background:var(--merah);color:white;}
-
-  /* Tabel tersimpan */
   .resep-tbl{width:100%;border-collapse:collapse;}
   .resep-tbl th{text-align:left;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--teks-abu);padding:0 10px 8px;border-bottom:1px solid var(--krem-gelap);}
   .resep-tbl td{padding:10px;border-bottom:1px solid var(--krem);font-size:13px;vertical-align:middle;}
   .resep-tbl tr:last-child td{border-bottom:none;}
   .resep-tbl tr:hover td{background:var(--krem);}
-
   .btn-edit{background:var(--emas-pale);border:none;border-radius:6px;color:#8a6914;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;font-family:'Inter',sans-serif;}
   .btn-edit:hover{background:var(--emas);color:white;}
   .btn-del{background:var(--merah-pale);border:none;border-radius:6px;color:var(--merah);font-size:12px;cursor:pointer;padding:4px 8px;}
   .btn-del:hover{background:var(--merah);color:white;}
-
+  .sec-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--teks-abu);display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--krem-gelap);padding-top:14px;margin-top:14px;margin-bottom:10px;}
   .empty-panel{text-align:center;padding:48px 16px;color:var(--teks-abu);}
   .empty-panel .ei{font-size:40px;margin-bottom:12px;}
+  #formStatus{font-size:13px;margin:8px 0;}
 </style>
 </head>
 <body>
@@ -80,155 +66,120 @@
       <button class="btn-action" onclick="init()">↻ Refresh</button>
     </div>
   </div>
-
   <div class="page-content">
     <div class="resep-layout">
-
       <!-- Panel Kiri -->
       <div class="menu-panel">
         <div class="mp-title">
           <span>📋 Menu (<span id="menuCount">0</span>)</span>
           <button class="btn-add-menu" onclick="toggleFormMenu()">+ Tambah</button>
         </div>
-        <div class="form-menu-new" id="formMenuNew">
-          <input type="text" id="inputNamaMenu" placeholder="Nama menu baru...">
-          <select id="inputKatMenu">
-            <option value="Ayam Kota">Ayam Kota</option>
-            <option value="Ayam Kp">Ayam Kp</option>
-            <option value="Ikan">Ikan</option>
-            <option value="Olahan Nasi">Olahan Nasi</option>
-            <option value="Sayuran">Sayuran</option>
-            <option value="Seblak & Mie">Seblak & Mie</option>
-            <option value="Cemilan">Cemilan</option>
-            <option value="Minum">Minum</option>
-            <option value="Tambahan">Tambahan</option>
-            <option value="Manual">Lainnya</option>
+        <div class="form-new-menu" id="formNewMenu">
+          <input type="text" id="inpNamaMenu" placeholder="Nama menu baru...">
+          <select id="inpKatMenu">
+            <option value="Ayam Kota">Ayam Kota</option><option value="Ayam Kp">Ayam Kp</option>
+            <option value="Ikan">Ikan</option><option value="Olahan Nasi">Olahan Nasi</option>
+            <option value="Sayuran">Sayuran</option><option value="Seblak & Mie">Seblak & Mie</option>
+            <option value="Cemilan">Cemilan</option><option value="Minum">Minum</option>
+            <option value="Tambahan">Tambahan</option><option value="Manual">Lainnya</option>
           </select>
           <div style="display:flex;gap:8px;">
             <button class="btn-primary" style="flex:1;" onclick="tambahMenuBaru()">Tambah</button>
             <button class="btn-secondary" onclick="toggleFormMenu()">Batal</button>
           </div>
         </div>
-        <input class="mp-search" type="text" id="menuSearch" placeholder="Cari menu..." oninput="renderMenuList()">
+        <input class="mp-search" id="menuSearch" placeholder="Cari menu..." oninput="renderMenuList()">
         <div class="mp-scroll" id="menuScroll">
           <div class="loading-state"><div class="loading-spinner"></div></div>
         </div>
       </div>
-
       <!-- Panel Kanan -->
       <div class="resep-panel" id="resepPanel">
-        <div class="empty-panel">
-          <div class="ei">📖</div>
+        <div class="empty-panel"><div class="ei">📖</div>
           <div style="font-size:14px;font-weight:600;">Pilih menu di sebelah kiri</div>
           <div style="font-size:13px;margin-top:4px;">untuk input atau edit resep</div>
         </div>
       </div>
-
     </div>
   </div>
 </main>
-
 <script src="_app.js"></script>
 <script>
-// ── State ─────────────────────────────────────
 const API_URL   = getApiUrl();
-let menuList    = [];   // [{id_menu, nama_menu, kategori, harga}]
-let bahanMaster = [];   // dari getMasterBelanja
-let resepCache  = {};   // nama_menu → [{id_resep, nama_bahan, jumlah_per_porsi, satuan}]
+let menuList    = [];
+let bahanList   = [];   // hanya kategori stok
+let resepCache  = {};
 let activeMenu  = null;
+// bahan rows: array of {id_bahan, nama_bahan, jumlah, satuan}
+let _rows       = [];
+
+const STOK_KAT = ['Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
 
 initPage('resep');
 init();
 
-// ── Init ─────────────────────────────────────
 async function init() {
   try {
-    const [mRes, bRes] = await Promise.all([
-      apiGet({action:'getMenuList'}),
-      apiGet({action:'getMasterBelanja'})
-    ]);
-    if (mRes.status==='ok') menuList    = mRes.data;
-    if (bRes.status==='ok') bahanMaster = bRes.data;
+    const [mR, bR] = await Promise.all([apiGet({action:'getMenuList'}), apiGet({action:'getMasterBelanja'})]);
+    if (mR.status==='ok') menuList  = mR.data;
+    if (bR.status==='ok') bahanList = bR.data.filter(m => STOK_KAT.includes(m.kategori));
     document.getElementById('menuCount').textContent = menuList.length;
     renderMenuList();
   } catch(e) {
-    document.getElementById('menuScroll').innerHTML =
-      '<div style="padding:12px;color:var(--merah);font-size:13px;">⚠️ Gagal memuat</div>';
+    document.getElementById('menuScroll').innerHTML = '<div style="padding:12px;color:var(--merah);font-size:13px;">⚠️ Gagal memuat</div>';
   }
 }
 
-// ── Menu List ─────────────────────────────────
 function renderMenuList() {
-  const q    = document.getElementById('menuSearch').value.toLowerCase();
+  const q = document.getElementById('menuSearch').value.toLowerCase();
   const list = q ? menuList.filter(m => m.nama_menu.toLowerCase().includes(q)) : menuList;
-
-  if (!list.length) {
-    document.getElementById('menuScroll').innerHTML =
-      '<div style="padding:12px;color:var(--teks-abu);font-size:13px;">Tidak ada menu</div>';
-    return;
-  }
-
+  if (!list.length) { document.getElementById('menuScroll').innerHTML = '<div style="padding:12px;color:var(--teks-abu);font-size:13px;">Tidak ada menu</div>'; return; }
   const grouped = {};
-  list.forEach(m => {
-    const k = m.kategori || 'Lainnya';
-    if (!grouped[k]) grouped[k] = [];
-    grouped[k].push(m);
-  });
-
+  list.forEach(m => { const k=m.kategori||'Lainnya'; if(!grouped[k]) grouped[k]=[]; grouped[k].push(m); });
   let html = '';
   Object.entries(grouped).forEach(([kat, items]) => {
     html += `<div class="mp-kat">${kat}</div>`;
     items.forEach(m => {
-      const r       = resepCache[m.nama_menu];
-      const jmlBhn  = r ? r.length : 0;
-      const isActive= activeMenu === m.nama_menu;
-      html += `<div class="mp-item${isActive?' active':''}" onclick="pilihMenu(${JSON.stringify(m.nama_menu)})">
+      const r = resepCache[m.nama_menu]; const jml = r?r.length:0;
+      html += `<div class="mp-item${activeMenu===m.nama_menu?' active':''}" onclick="pilihMenu(${JSON.stringify(m.nama_menu)})">
         <span style="flex:1;">${m.nama_menu}</span>
-        ${jmlBhn>0 ? `<span class="badge">${jmlBhn}</span>` : ''}
-        <button class="del-menu" onclick="hapusMenuItem(event,${JSON.stringify(m.id_menu)},${JSON.stringify(m.nama_menu)})" title="Hapus menu">🗑</button>
+        ${jml>0?`<span class="mp-badge">${jml}</span>`:''}
+        <button class="mp-del" onclick="hapusMenuItem(event,${JSON.stringify(m.id_menu||'')},${JSON.stringify(m.nama_menu)})" title="Hapus">🗑</button>
       </div>`;
     });
   });
   document.getElementById('menuScroll').innerHTML = html;
 }
 
-function toggleFormMenu() {
-  const f = document.getElementById('formMenuNew');
-  f.classList.toggle('open');
-  if (f.classList.contains('open')) document.getElementById('inputNamaMenu').focus();
-}
+function toggleFormMenu() { document.getElementById('formNewMenu').classList.toggle('open'); }
 
 async function tambahMenuBaru() {
-  const nama = document.getElementById('inputNamaMenu').value.trim();
-  const kat  = document.getElementById('inputKatMenu').value;
+  const nama = document.getElementById('inpNamaMenu').value.trim();
+  const kat  = document.getElementById('inpKatMenu').value;
   if (!nama) { alert('Nama menu wajib diisi'); return; }
-  if (menuList.find(m => m.nama_menu === nama)) { alert('Menu sudah ada'); return; }
+  if (menuList.find(m=>m.nama_menu===nama)) { alert('Menu sudah ada'); return; }
   try {
     const d = await apiPost({action:'tambahMenu', nama_menu:nama, kategori:kat});
     if (d.status==='ok') {
-      menuList.push({id_menu:d.id_menu||'', nama_menu:nama, kategori:kat, harga:0});
+      menuList.push({id_menu:d.id_menu||('MNU'+Date.now()), nama_menu:nama, kategori:kat, harga:0});
       document.getElementById('menuCount').textContent = menuList.length;
-      document.getElementById('inputNamaMenu').value = '';
-      toggleFormMenu();
+      document.getElementById('inpNamaMenu').value = '';
+      document.getElementById('formNewMenu').classList.remove('open');
       renderMenuList();
       pilihMenu(nama);
     }
-  } catch(e) { alert('Gagal'); }
+  } catch(e) { alert('Gagal menambah menu'); }
 }
 
 async function hapusMenuItem(e, idMenu, nama) {
   e.stopPropagation();
   if (!confirm(`Hapus menu "${nama}"?`)) return;
   try {
-    await apiPost({action:'hapusMenu', id_menu:idMenu});
-    menuList = menuList.filter(m => m.id_menu !== idMenu);
+    await apiPost({action:'hapusMenu', id_menu:idMenu, nama_menu:nama});
+    menuList = menuList.filter(m => m.id_menu !== idMenu && m.nama_menu !== nama);
     delete resepCache[nama];
     document.getElementById('menuCount').textContent = menuList.length;
-    if (activeMenu === nama) {
-      activeMenu = null;
-      document.getElementById('resepPanel').innerHTML =
-        '<div class="empty-panel"><div class="ei">📖</div><div style="font-size:14px;font-weight:600;">Pilih menu di sebelah kiri</div></div>';
-    }
+    if (activeMenu === nama) { activeMenu=null; tampilEmpty(); }
     renderMenuList();
   } catch(e) {}
 }
@@ -236,206 +187,195 @@ async function hapusMenuItem(e, idMenu, nama) {
 // ── Pilih Menu ────────────────────────────────
 async function pilihMenu(nama) {
   activeMenu = nama;
+  _rows      = [];
   renderMenuList();
-  document.getElementById('resepPanel').innerHTML =
-    '<div class="loading-state"><div class="loading-spinner"></div>Memuat resep...</div>';
+  document.getElementById('resepPanel').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat resep...</div>';
   try {
     const d = await apiGet({action:'getResep', nama_menu:nama});
     resepCache[nama] = d.status==='ok' ? d.data : [];
-    renderPanel();
+    renderPanel(nama);
     renderMenuList();
-  } catch(e) {
-    document.getElementById('resepPanel').innerHTML =
-      '<div class="empty-panel"><div class="ei">⚠️</div><div>Gagal memuat resep</div></div>';
-  }
+  } catch(e) { document.getElementById('resepPanel').innerHTML = '<div class="empty-panel"><div class="ei">⚠️</div><div>Gagal memuat resep</div></div>'; }
 }
 
-// ── Render Panel ──────────────────────────────
-function renderPanel() {
-  const nama  = activeMenu;
+function tampilEmpty() {
+  document.getElementById('resepPanel').innerHTML = '<div class="empty-panel"><div class="ei">📖</div><div style="font-size:14px;font-weight:600;">Pilih menu di sebelah kiri</div></div>';
+}
+
+// ── Render Panel (HTML statis, form via DOM) ──
+function renderPanel(nama) {
   const resep = resepCache[nama] || [];
+  const panelEl = document.getElementById('resepPanel');
 
-  const STOK_KAT = ['Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
-  const bahanOpts = bahanMaster
-    .filter(m => STOK_KAT.includes(m.kategori))
-    .map(m => `<option value="${m.id_item}" data-nama="${m.nama_item}" data-sat="${m.satuan}">${m.nama_item}</option>`)
-    .join('');
-
-  // Baris bahan (1 baris kosong untuk input baru)
-  function buatBahanRows(rows) {
-    if (!rows.length) return '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0;">Klik "+ Tambah Bahan" untuk mulai</div>';
-    return rows.map((b,i) => `
-      <div class="bahan-row" id="br${i}">
-        <select onchange="onBahanChange(${i},this)">
-          <option value="">— Pilih Bahan Baku —</option>${bahanOpts.replace(`value="${b.id_bahan}"`,`value="${b.id_bahan}" selected`)}
-        </select>
-        <input type="number" min="0" step="0.001" placeholder="0"
-          value="${b.jumlah||''}"
-          onchange="window._brows[${i}].jumlah=parseFloat(this.value)||0">
-        <input type="text" placeholder="satuan"
-          value="${b.satuan||''}"
-          onchange="window._brows[${i}].satuan=this.value">
-        <button class="btn-del-row" onclick="hapusBaris(${i})">✕</button>
-      </div>`).join('');
-  }
-
-  // State bahan rows di window._brows agar tidak hilang saat re-render partial
-  if (!window._brows) window._brows = [];
-
-  const showForm = !resep.length; // form langsung terbuka jika belum ada resep
-
-  document.getElementById('resepPanel').innerHTML = `
+  let html = `
     <div class="rp-title">📖 ${nama}</div>
     <div class="rp-sub">Bahan baku utama per 1 porsi — untuk hitung stok keluar otomatis</div>
-
-    <!-- FORM TAMBAH/EDIT -->
-    <div class="form-bahan-box" id="formBox" style="display:${showForm?'block':'none'}">
-      <div class="form-bahan-title" id="formTitle">${showForm?'➕ Tambah Bahan Baku':'✏️ Edit Resep'}</div>
-      <div class="bahan-header">
-        <span>Bahan Baku</span><span>Qty/Porsi</span><span>Satuan</span><span></span>
+    <div class="form-bahan-box" id="fBox" style="display:${resep.length?'none':'block'}">
+      <div class="form-bahan-title" id="fTitle">${resep.length?'✏️ Edit Resep':'➕ Tambah Bahan Baku'}</div>
+      <div style="display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;margin-bottom:4px;">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Bahan Baku</span>
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Qty/Porsi</span>
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Satuan</span>
+        <span></span>
       </div>
-      <div class="bahan-row-wrap" id="bahanRowWrap"></div>
+      <div id="bahanList"></div>
       <div style="display:flex;gap:8px;margin-top:8px;">
         <button class="btn-secondary" onclick="tambahBaris()">+ Tambah Bahan</button>
-        <button class="btn-secondary" id="btnBatalForm" onclick="tutupForm()" style="display:${showForm?'none':''}">✕ Batal</button>
+        <button class="btn-secondary" id="btnBatal" onclick="tutupForm()" style="${resep.length?'':'display:none'}">✕ Batal</button>
       </div>
     </div>
-    <div id="formAksi" style="display:${showForm?'flex':'none'};gap:10px;margin-bottom:16px;margin-top:10px;">
+    <div id="fAksi" style="display:${resep.length?'none':'flex'};gap:10px;margin:10px 0 12px;">
       <button class="btn-primary" onclick="simpanResep()">💾 Simpan Resep</button>
     </div>
-    <div id="formStatus" style="font-size:13px;margin-bottom:10px;"></div>
-
-    <hr class="rp-divider">
-    <div class="rp-section-title">
+    <div id="formStatus"></div>
+    <div class="sec-label">
       <span>Resep Tersimpan (${resep.length} bahan)</span>
-      ${resep.length ? '<button class="btn-edit" onclick="bukaEditForm()">✏️ Edit</button>' : ''}
-    </div>
-    ${resep.length ? `
-      <table class="resep-tbl"><thead><tr>
-        <th>Bahan Baku</th><th>Qty/Porsi</th><th>Satuan</th><th></th>
-      </tr></thead><tbody>
-        ${resep.map(r=>`<tr>
-          <td style="font-weight:500;">${r.nama_bahan}</td>
-          <td>${r.jumlah_per_porsi}</td>
-          <td style="color:var(--teks-abu);">${r.satuan}</td>
-          <td><button class="btn-del" onclick="hapusBahan('${r.id_resep}','${nama.replace(/'/g,"\\'")}')">🗑</button></td>
-        </tr>`).join('')}
-      </tbody></table>` :
-      '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0;">Belum ada resep.</div>'
-    }`;
-
-  // Init baris
-  if (showForm) {
-    window._brows = [{id_bahan:'', nama_bahan:'', jumlah:'', satuan:''}];
-    refreshBahanWrap();
-  }
-}
-
-function refreshBahanWrap() {
-  const STOK_KAT = ['Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
-  const bahanOpts = bahanMaster
-    .filter(m => STOK_KAT.includes(m.kategori))
-    .map(m => `<option value="${m.id_item}" data-nama="${m.nama_item}" data-sat="${m.satuan}">${m.nama_item}</option>`)
-    .join('');
-
-  const wrap = document.getElementById('bahanRowWrap');
-  if (!wrap) return;
-
-  if (!window._brows.length) {
-    wrap.innerHTML = '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0;">Klik "+ Tambah Bahan"</div>';
-    return;
-  }
-
-  wrap.innerHTML = window._brows.map((b,i) => {
-    const selectedOpt = bahanOpts.replace(`value="${b.id_bahan}"`, `value="${b.id_bahan}" selected`);
-    return `<div class="bahan-row">
-      <select onchange="onBahanChange(${i},this)">
-        <option value="">— Pilih Bahan Baku —</option>${selectedOpt}
-      </select>
-      <input type="number" min="0" step="0.001" placeholder="0"
-        value="${b.jumlah||''}"
-        oninput="window._brows[${i}].jumlah=parseFloat(this.value)||0">
-      <input type="text" placeholder="satuan"
-        value="${b.satuan||''}"
-        oninput="window._brows[${i}].satuan=this.value">
-      <button class="btn-del-row" onclick="hapusBaris(${i})">✕</button>
+      ${resep.length?'<button class="btn-edit" onclick="bukaForm()">✏️ Edit</button>':''}
     </div>`;
-  }).join('');
-}
 
-function onBahanChange(i, sel) {
-  const opt = sel.options[sel.selectedIndex];
-  window._brows[i].id_bahan   = sel.value;
-  window._brows[i].nama_bahan = opt.dataset.nama || '';
-  window._brows[i].satuan     = opt.dataset.sat  || '';
-  // Update satuan input tanpa re-render seluruhnya
-  const rows = document.querySelectorAll('.bahan-row');
-  if (rows[i]) {
-    const inputs = rows[i].querySelectorAll('input');
-    if (inputs[1]) inputs[1].value = window._brows[i].satuan;
+  if (!resep.length) {
+    html += '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0;">Belum ada resep — isi form di atas.</div>';
+  } else {
+    html += `<table class="resep-tbl"><thead><tr>
+      <th>Bahan Baku</th><th>Qty/Porsi</th><th>Satuan</th><th></th>
+    </tr></thead><tbody>
+      ${resep.map(r=>`<tr>
+        <td style="font-weight:500;">${r.nama_bahan}</td>
+        <td>${r.jumlah_per_porsi}</td>
+        <td style="color:var(--teks-abu);">${r.satuan}</td>
+        <td><button class="btn-del" onclick="hapusSatuBahan('${r.id_resep}')">🗑</button></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  }
+
+  panelEl.innerHTML = html;
+
+  // Init baris jika form terbuka
+  if (!resep.length) {
+    _rows = [{id_bahan:'', nama_bahan:'', jumlah:'', satuan:''}];
+    renderBahanList();
   }
 }
 
-function tambahBaris() {
-  window._brows.push({id_bahan:'', nama_bahan:'', jumlah:'', satuan:''});
-  refreshBahanWrap();
-}
-
-function hapusBaris(i) {
-  window._brows.splice(i,1);
-  refreshBahanWrap();
-}
-
-function bukaEditForm() {
+// ── Form buka/tutup ───────────────────────────
+function bukaForm() {
   const resep = resepCache[activeMenu] || [];
-  window._brows = resep.map(r => ({
+  _rows = resep.map(r => ({
     id_bahan   : r.id_bahan,
     nama_bahan : r.nama_bahan,
-    jumlah     : r.jumlah_per_porsi,
+    jumlah     : r.jumlah_per_porsi || r.jumlah || '',
     satuan     : r.satuan
   }));
-  const fb = document.getElementById('formBox');
-  const fa = document.getElementById('formAksi');
-  const ft = document.getElementById('formTitle');
-  const bb = document.getElementById('btnBatalForm');
-  if (fb) fb.style.display = 'block';
-  if (fa) fa.style.display = 'flex';
-  if (ft) ft.textContent  = '✏️ Edit Resep';
-  if (bb) bb.style.display = '';
-  refreshBahanWrap();
+  // Jika kosong, tambah 1 baris default
+  if (!_rows.length) _rows = [{id_bahan:'', nama_bahan:'', jumlah:'', satuan:''}];
+  document.getElementById('fBox').style.display  = 'block';
+  document.getElementById('fAksi').style.display = 'flex';
+  document.getElementById('fTitle').textContent  = '✏️ Edit Resep';
+  document.getElementById('btnBatal').style.display = '';
+  renderBahanList();
 }
 
 function tutupForm() {
-  window._brows = [];
-  const fb = document.getElementById('formBox');
-  const fa = document.getElementById('formAksi');
-  if (fb) fb.style.display = 'none';
-  if (fa) fa.style.display = 'none';
+  _rows = [];
+  document.getElementById('fBox').style.display  = 'none';
+  document.getElementById('fAksi').style.display = 'none';
 }
 
+// ── Render baris bahan (DOM createElement) ────
+function renderBahanList() {
+  const container = document.getElementById('bahanList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!_rows.length) {
+    container.innerHTML = '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0;">Klik "+ Tambah Bahan"</div>';
+    return;
+  }
+
+  _rows.forEach((b, i) => {
+    const row = document.createElement('div');
+    row.className = 'bahan-row';
+
+    // Select bahan
+    const sel = document.createElement('select');
+    const optDef = document.createElement('option');
+    optDef.value = ''; optDef.textContent = '— Pilih Bahan Baku —';
+    sel.appendChild(optDef);
+    bahanList.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id_item;
+      opt.dataset.nama = m.nama_item;
+      opt.dataset.sat  = m.satuan;
+      opt.textContent  = m.nama_item;
+      if (m.id_item === b.id_bahan) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', function() {
+      const opt = this.options[this.selectedIndex];
+      _rows[i].id_bahan   = this.value;
+      _rows[i].nama_bahan = opt.dataset.nama || '';
+      _rows[i].satuan     = opt.dataset.sat  || '';
+      // Update satuan field
+      const inputs = row.querySelectorAll('input');
+      if (inputs[1]) inputs[1].value = _rows[i].satuan;
+    });
+
+    // Input qty
+    const inpQty = document.createElement('input');
+    inpQty.type = 'number'; inpQty.min = '0'; inpQty.step = '0.001';
+    inpQty.placeholder = '0'; inpQty.value = b.jumlah || '';
+    inpQty.addEventListener('input', function() { _rows[i].jumlah = parseFloat(this.value)||0; });
+
+    // Input satuan
+    const inpSat = document.createElement('input');
+    inpSat.type = 'text'; inpSat.placeholder = 'satuan';
+    inpSat.value = b.satuan || '';
+    inpSat.addEventListener('input', function() { _rows[i].satuan = this.value; });
+
+    // Tombol hapus
+    const btnDel = document.createElement('button');
+    btnDel.className = 'btn-del-row'; btnDel.textContent = '✕';
+    btnDel.addEventListener('click', function() { hapusBaris(i); });
+
+    row.appendChild(sel); row.appendChild(inpQty);
+    row.appendChild(inpSat); row.appendChild(btnDel);
+    container.appendChild(row);
+  });
+}
+
+function tambahBaris() {
+  _rows.push({id_bahan:'', nama_bahan:'', jumlah:'', satuan:''});
+  renderBahanList();
+}
+
+function hapusBaris(i) {
+  _rows.splice(i, 1);
+  renderBahanList();
+}
+
+// ── Simpan resep ──────────────────────────────
 async function simpanResep() {
-  const valid = (window._brows||[]).filter(b => b.id_bahan && Number(b.jumlah)>0);
+  const valid = _rows.filter(b => b.id_bahan && Number(b.jumlah) > 0);
   if (!valid.length) { alert('Tambahkan minimal 1 bahan dengan qty > 0'); return; }
   const st = document.getElementById('formStatus');
   if (st) st.innerHTML = '⏳ Menyimpan...';
   try {
     const d = await apiPost({action:'simpanResep', nama_menu:activeMenu, bahan:valid});
     if (d.status==='ok') {
-      window._brows = [];
+      _rows = [];
       resepCache[activeMenu] = null;
       await pilihMenu(activeMenu);
     } else if (st) st.innerHTML = `<span style="color:var(--merah);">❌ ${d.message}</span>`;
-  } catch(e) {
-    if (st) st.innerHTML = `<span style="color:var(--merah);">❌ Gagal konek ke server</span>`;
-  }
+  } catch(e) { if (st) st.innerHTML = '<span style="color:var(--merah);">❌ Gagal konek ke server</span>'; }
 }
 
-async function hapusBahan(id, nama) {
+// ── Hapus satu bahan dari resep tersimpan ─────
+async function hapusSatuBahan(idResep) {
   if (!confirm('Hapus bahan ini dari resep?')) return;
   try {
-    await apiPost({action:'hapusResep', id_resep:id});
-    resepCache[nama] = null;
-    await pilihMenu(nama);
+    await apiPost({action:'hapusResep', id_resep:idResep});
+    resepCache[activeMenu] = null;
+    await pilihMenu(activeMenu);
   } catch(e) {}
 }
 </script>
