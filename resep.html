@@ -175,13 +175,14 @@ async function hapusMenuItem(e, idMenu, nama) {
   e.stopPropagation();
   if (!confirm(`Hapus menu "${nama}"?`)) return;
   try {
-    await apiPost({action:'hapusMenu', id_menu:idMenu, nama_menu:nama});
-    menuList = menuList.filter(m => m.id_menu !== idMenu && m.nama_menu !== nama);
+    const d = await apiPost({action:'hapusMenu', id_menu:idMenu, nama_menu:nama});
+    if (d.status !== 'ok') { alert('Gagal hapus: ' + d.message); return; }
+    menuList = menuList.filter(m => !(m.id_menu === idMenu || m.nama_menu === nama));
     delete resepCache[nama];
     document.getElementById('menuCount').textContent = menuList.length;
     if (activeMenu === nama) { activeMenu=null; tampilEmpty(); }
     renderMenuList();
-  } catch(e) {}
+  } catch(e) { alert('Gagal konek: ' + e.message); }
 }
 
 // ── Pilih Menu ────────────────────────────────
@@ -209,7 +210,7 @@ function renderPanel(nama) {
 
   let html = `
     <div class="rp-title">📖 ${nama}</div>
-    <div class="rp-sub">Bahan baku utama per 1 porsi — untuk hitung stok keluar otomatis</div>
+    <div class="rp-sub">Bahan baku utama per 1 porsi — untuk hitung stok keluar otomatis${resep.length ? " | Klik ✏️ Edit untuk ubah resep" : ""}</div>
     <div class="form-bahan-box" id="fBox" style="display:${resep.length?'none':'block'}">
       <div class="form-bahan-title" id="fTitle">${resep.length?'✏️ Edit Resep':'➕ Tambah Bahan Baku'}</div>
       <div style="display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;margin-bottom:4px;">
@@ -292,6 +293,18 @@ function renderBahanList() {
     return;
   }
 
+  // Jika bahanList belum terisi, load dulu lalu retry
+  if (!bahanList.length) {
+    container.innerHTML = '<div style="color:var(--teks-abu);font-size:13px;">⏳ Memuat daftar bahan...</div>';
+    apiGet({action:'getMasterBelanja'}).then(d => {
+      if (d.status==='ok') {
+        bahanList = d.data.filter(m => STOK_KAT.includes(m.kategori));
+        renderBahanList();
+      }
+    });
+    return;
+  }
+
   _rows.forEach((b, i) => {
     const row = document.createElement('div');
     row.className = 'bahan-row';
@@ -355,7 +368,11 @@ function hapusBaris(i) {
 
 // ── Simpan resep ──────────────────────────────
 async function simpanResep() {
-  const valid = _rows.filter(b => b.id_bahan && Number(b.jumlah) > 0);
+  const filtered = _rows.filter(b => b.id_bahan && Number(b.jumlah) > 0);
+  // Hapus duplikat id_bahan - ambil yang terakhir
+  const seen = {};
+  filtered.forEach(b => { seen[b.id_bahan] = b; });
+  const valid = Object.values(seen);
   if (!valid.length) { alert('Tambahkan minimal 1 bahan dengan qty > 0'); return; }
   const st = document.getElementById('formStatus');
   if (st) st.innerHTML = '⏳ Menyimpan...';
