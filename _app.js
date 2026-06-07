@@ -50,33 +50,6 @@ function initPage(activeId) {
 
   if (sidebar) sidebar.innerHTML = html;
 
-  // Tambah tombol logout ⏻ di topbar kanan
-  const topbarRight = document.querySelector('.topbar-right');
-  if (topbarRight) {
-    // Hindari duplikat jika sudah ada
-    if (!topbarRight.querySelector('.btn-logout-top')) {
-      const btn = document.createElement('button');
-      btn.className  = 'btn-logout-top';
-      btn.innerHTML  = '⏻';
-      btn.title      = 'Keluar';
-      btn.onclick    = doLogout;
-      btn.style.cssText = [
-        'background:rgba(192,57,43,0.1)',
-        'border:1.5px solid rgba(192,57,43,0.3)',
-        'border-radius:8px',
-        'padding:7px 12px',
-        'font-size:17px',
-        'cursor:pointer',
-        'color:#c0392b',
-        'transition:all 0.2s',
-        'line-height:1',
-        'flex-shrink:0',
-      ].join(';');
-      btn.onmouseover = () => { btn.style.background = 'rgba(192,57,43,0.22)'; };
-      btn.onmouseout  = () => { btn.style.background = 'rgba(192,57,43,0.1)'; };
-      topbarRight.appendChild(btn);
-    }
-  }
 }
 
 // ── Format rupiah ────────────────────────────
