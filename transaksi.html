@@ -77,7 +77,6 @@
     </div>
     <div class="topbar-right">
       <button class="btn-action" onclick="loadTransaksi()">↻ Refresh</button>
-      <button onclick="doLogout()" title="Keluar" style="background:rgba(192,57,43,0.1);border:1.5px solid rgba(192,57,43,0.3);border-radius:8px;padding:7px 12px;font-size:17px;cursor:pointer;color:#c0392b;transition:all 0.2s;line-height:1;" onmouseover="this.style.background='rgba(192,57,43,0.22)'" onmouseout="this.style.background='rgba(192,57,43,0.1)'">⏻</button>
     </div>
   </div>
 
@@ -102,10 +101,7 @@
 
       <div id="importStatus" style="margin-bottom:12px;font-size:13px;color:var(--teks-abu);"></div>
 
-      <div class="import-actions" id="importActions" style="display:none;">
-        <button class="btn-primary" onclick="konfirmasiImport()">✅ Import Sekarang</button>
-        <button class="btn-secondary" onclick="batalImport()">✕ Batal</button>
-      </div>
+      <div class="import-actions" id="importActions" style="display:none;"></div>
     </div>
 
     <!-- Filter & Tabel -->
@@ -228,11 +224,31 @@ function handleFile(e) { const f = e.target.files[0]; if (f) prosesFile(f); }
 
 async function prosesFile(file) {
   setStatus('⏳ Membaca file...');
+  document.getElementById('importActions').style.display = 'none';
   try {
     const trxList = await parseKaspos(file);
+    if (!trxList.length) { setStatus('⚠️ Tidak ada transaksi ditemukan di file ini'); return; }
+
+    // Tampil preview ringkas
+    const pb = document.getElementById('previewBox');
+    pb.style.display = 'block';
+    document.getElementById('previewTitle').textContent = `📦 ${trxList.length} faktur ditemukan — mengimport...`;
+    document.getElementById('previewList').innerHTML = '';
     previewData = trxList;
-    tampilPreview(trxList);
-  } catch(e) { setStatus('❌ Gagal membaca file: ' + e.message); }
+
+    // Langsung import tanpa tombol konfirmasi
+    setStatus('⏳ Mengimport ke database...');
+    const data = await apiPost({ action:'importTransaksi', transaksi:trxList });
+    setStatus(`✅ ${data.message}`);
+    document.getElementById('previewTitle').textContent = `✅ ${data.message}`;
+    previewData = [];
+    document.getElementById('fileInput').value = '';
+    loadTransaksi();
+
+    // Sembunyikan preview setelah 3 detik
+    setTimeout(() => { pb.style.display = 'none'; }, 3000);
+
+  } catch(e) { setStatus('❌ Gagal: ' + e.message); }
 }
 
 async function parseKaspos(file) {
@@ -292,18 +308,18 @@ function tampilPreview(list) {
 async function konfirmasiImport() {
   if (!previewData.length) return;
   setStatus('⏳ Mengimport ke database...');
-  document.getElementById('importActions').style.display = 'none';
   try {
-    const res  = await fetch(API_URL, { method:'POST', body: JSON.stringify({ action:'importTransaksi', transaksi:previewData }) });
-    const data = await res.json();
-    if (data.status === 'ok') {
-      setStatus(`✅ ${data.message}`);
-      document.getElementById('previewBox').style.display = 'none';
-      previewData = [];
-      document.getElementById('fileInput').value = '';
-      loadTransaksi();
-    } else { setStatus('❌ ' + data.message); document.getElementById('importActions').style.display='flex'; }
-  } catch(e) { setStatus('❌ Gagal konek ke server'); document.getElementById('importActions').style.display='flex'; }
+    const data = await apiPost({ action:'importTransaksi', transaksi:previewData });
+    setStatus(`✅ ${data.message}`);
+    document.getElementById('previewBox').style.display = 'none';
+    document.getElementById('importActions').style.display = 'none';
+    previewData = [];
+    document.getElementById('fileInput').value = '';
+    loadTransaksi();
+  } catch(e) {
+    setStatus('❌ Gagal konek ke server: ' + e.message);
+    document.getElementById('importActions').style.display = 'flex';
+  }
 }
 
 function batalImport() {
