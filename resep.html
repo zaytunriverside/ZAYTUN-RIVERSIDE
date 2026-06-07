@@ -3,54 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resep Menu — Zaytun Riverside</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Resep Menu - Zaytun Riverside</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="_layout.css">
 <style>
-  body{font-family:'Inter',sans-serif;}
-  .resep-layout{display:grid;grid-template-columns:260px 1fr;gap:20px;}
-  @media(max-width:768px){.resep-layout{grid-template-columns:1fr;}}
-  .menu-panel{background:var(--putih);border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04);position:sticky;top:80px;max-height:calc(100vh - 100px);display:flex;flex-direction:column;}
-  .mp-title{font-size:13px;font-weight:700;color:var(--hijau-tua);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--krem-gelap);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
-  .mp-search{width:100%;padding:8px 12px;border:1.5px solid var(--krem-gelap);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:8px;flex-shrink:0;}
-  .mp-search:focus{border-color:var(--hijau-mid);}
-  .mp-scroll{flex:1;overflow-y:auto;}
-  .mp-kat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--teks-abu);padding:6px 4px 2px;}
-  .mp-item{padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--teks);transition:all 0.15s;display:flex;align-items:center;gap:6px;}
-  .mp-item:hover{background:var(--krem);}
-  .mp-item.active{background:var(--hijau-pale);color:var(--hijau);font-weight:600;}
-  .mp-badge{font-size:10px;background:var(--hijau-pale);color:var(--hijau);padding:1px 7px;border-radius:10px;font-weight:700;flex-shrink:0;}
-  .mp-del{background:none;border:none;color:var(--merah);cursor:pointer;font-size:13px;opacity:0;padding:2px 4px;flex-shrink:0;}
-  .mp-item:hover .mp-del{opacity:1;}
-  .btn-add-menu{font-size:11px;background:var(--hijau-pale);color:var(--hijau);border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;}
-  .btn-add-menu:hover{background:var(--hijau);color:white;}
-  .form-new-menu{background:var(--krem);border-radius:10px;padding:12px;margin-bottom:8px;display:none;flex-shrink:0;}
-  .form-new-menu.open{display:block;}
-  .form-new-menu input,.form-new-menu select{width:100%;padding:8px 10px;border:1.5px solid var(--krem-gelap);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:8px;}
-  .resep-panel{background:var(--putih);border-radius:16px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.04);}
-  .rp-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--hijau-tua);margin-bottom:4px;}
-  .rp-sub{font-size:12px;color:var(--teks-abu);margin-bottom:20px;}
-  .form-bahan-box{background:var(--krem);border-radius:12px;padding:16px;margin-bottom:16px;}
-  .form-bahan-title{font-size:13px;font-weight:600;color:var(--hijau-tua);margin-bottom:12px;}
-  #bahanList{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
-  .bahan-row{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;align-items:center;}
-  .bahan-row select,.bahan-row input{padding:8px 10px;border:1.5px solid var(--krem-gelap);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;width:100%;background:var(--putih);}
-  .bahan-row select:focus,.bahan-row input:focus{border-color:var(--hijau-mid);}
-  .btn-del-row{background:var(--merah-pale);border:none;border-radius:8px;color:var(--merah);font-size:13px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .btn-del-row:hover{background:var(--merah);color:white;}
-  .resep-tbl{width:100%;border-collapse:collapse;}
-  .resep-tbl th{text-align:left;font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--teks-abu);padding:0 10px 8px;border-bottom:1px solid var(--krem-gelap);}
-  .resep-tbl td{padding:10px;border-bottom:1px solid var(--krem);font-size:13px;vertical-align:middle;}
-  .resep-tbl tr:last-child td{border-bottom:none;}
-  .resep-tbl tr:hover td{background:var(--krem);}
-  .btn-edit{background:var(--emas-pale);border:none;border-radius:6px;color:#8a6914;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;font-family:'Inter',sans-serif;}
-  .btn-edit:hover{background:var(--emas);color:white;}
-  .btn-del{background:var(--merah-pale);border:none;border-radius:6px;color:var(--merah);font-size:12px;cursor:pointer;padding:4px 8px;}
-  .btn-del:hover{background:var(--merah);color:white;}
-  .sec-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--teks-abu);display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--krem-gelap);padding-top:14px;margin-top:14px;margin-bottom:10px;}
-  .empty-panel{text-align:center;padding:48px 16px;color:var(--teks-abu);}
-  .empty-panel .ei{font-size:40px;margin-bottom:12px;}
-  #formStatus{font-size:13px;margin:8px 0;}
+body{font-family:'Inter',sans-serif}
+.wrap{display:grid;grid-template-columns:260px 1fr;gap:20px}
+@media(max-width:768px){.wrap{grid-template-columns:1fr}}
+.left{background:#fff;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:sticky;top:80px;max-height:calc(100vh - 100px);display:flex;flex-direction:column}
+.left-top{font-size:13px;font-weight:700;color:#1B4332;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #EDE8D8;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.msearch{width:100%;padding:8px 12px;border:1.5px solid #EDE8D8;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:8px;flex-shrink:0}
+.msearch:focus{border-color:#40916C}
+.mscroll{flex:1;overflow-y:auto}
+.mkat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6b7280;padding:6px 4px 2px}
+.mitem{padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;position:relative}
+.mitem:hover{background:#F8F3E8}
+.mitem.active{background:#D8F3DC;color:#2D6A4F;font-weight:600}
+.mbadge{font-size:10px;background:#D8F3DC;color:#2D6A4F;padding:1px 7px;border-radius:10px;font-weight:700}
+.mdel{display:none;position:absolute;right:8px;background:none;border:none;color:#C0392B;cursor:pointer;font-size:14px;padding:2px 4px}
+.mitem:hover .mdel{display:block}
+.btn-add{font-size:11px;background:#D8F3DC;color:#2D6A4F;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600}
+.btn-add:hover{background:#2D6A4F;color:#fff}
+.fnew{background:#F8F3E8;border-radius:10px;padding:12px;margin-bottom:8px;display:none;flex-shrink:0}
+.fnew.open{display:block}
+.fnew input,.fnew select{width:100%;padding:8px 10px;border:1.5px solid #EDE8D8;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;margin-bottom:8px}
+.right{background:#fff;border-radius:16px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.rtitle{font-size:17px;font-weight:700;color:#1B4332;margin-bottom:4px}
+.rsub{font-size:12px;color:#6b7280;margin-bottom:20px}
+.fbox{background:#F8F3E8;border-radius:12px;padding:16px;margin-bottom:16px}
+.fbtitle{font-size:13px;font-weight:600;color:#1B4332;margin-bottom:12px}
+.bhead{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;margin-bottom:4px}
+.bhead span{font-size:10px;font-weight:700;text-transform:uppercase;color:#6b7280}
+.brows{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.brow{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;align-items:center}
+.brow select,.brow input{padding:8px 10px;border:1.5px solid #EDE8D8;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;width:100%;background:#fff}
+.brow select:focus,.brow input:focus{border-color:#40916C}
+.bdel{background:#FDECEA;border:none;border-radius:8px;color:#C0392B;font-size:13px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
+.bdel:hover{background:#C0392B;color:#fff}
+.rtbl{width:100%;border-collapse:collapse}
+.rtbl th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#6b7280;padding:0 10px 8px;border-bottom:1px solid #F8F3E8}
+.rtbl td{padding:10px;border-bottom:1px solid #F8F3E8;font-size:13px;vertical-align:middle}
+.rtbl tr:last-child td{border-bottom:none}
+.rtbl tr:hover td{background:#F8F3E8}
+.bedit{background:#FDF3DC;border:none;border-radius:6px;color:#8a6914;font-size:12px;font-weight:600;cursor:pointer;padding:4px 10px;font-family:'Inter',sans-serif}
+.bedit:hover{background:#C9A84C;color:#fff}
+.bdel2{background:#FDECEA;border:none;border-radius:6px;color:#C0392B;font-size:12px;cursor:pointer;padding:4px 8px}
+.bdel2:hover{background:#C0392B;color:#fff}
+.seclabel{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #EDE8D8;padding-top:14px;margin-top:14px;margin-bottom:10px}
+.empty{text-align:center;padding:48px 16px;color:#6b7280}
+.empty .ei{font-size:40px;margin-bottom:12px}
+#fstatus{font-size:13px;margin:8px 0}
 </style>
 </head>
 <body>
@@ -58,353 +60,301 @@
 <aside class="sidebar" id="sidebar"></aside>
 <main class="main">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="menu-toggle" onclick="toggleSidebar()">&#9776;</button>
       <div class="topbar-left"><h1>Resep Menu</h1><div class="breadcrumb">Mapping bahan baku per menu</div></div>
     </div>
     <div class="topbar-right">
-      <button class="btn-action" onclick="init()">↻ Refresh</button>
+      <button class="btn-action" onclick="init()">&#8635; Refresh</button>
     </div>
   </div>
   <div class="page-content">
-    <div class="resep-layout">
-      <!-- Panel Kiri -->
-      <div class="menu-panel">
-        <div class="mp-title">
-          <span>📋 Menu (<span id="menuCount">0</span>)</span>
-          <button class="btn-add-menu" onclick="toggleFormMenu()">+ Tambah</button>
+    <div class="wrap">
+      <div class="left">
+        <div class="left-top">
+          <span>Menu (<span id="mcount">0</span>)</span>
+          <button class="btn-add" onclick="toggleNew()">+ Tambah</button>
         </div>
-        <div class="form-new-menu" id="formNewMenu">
-          <input type="text" id="inpNamaMenu" placeholder="Nama menu baru...">
-          <select id="inpKatMenu">
-            <option value="Ayam Kota">Ayam Kota</option><option value="Ayam Kp">Ayam Kp</option>
-            <option value="Ikan">Ikan</option><option value="Olahan Nasi">Olahan Nasi</option>
-            <option value="Sayuran">Sayuran</option><option value="Seblak & Mie">Seblak & Mie</option>
-            <option value="Cemilan">Cemilan</option><option value="Minum">Minum</option>
-            <option value="Tambahan">Tambahan</option><option value="Manual">Lainnya</option>
+        <div class="fnew" id="fnew">
+          <input type="text" id="inpnama" placeholder="Nama menu baru...">
+          <select id="inpkat">
+            <option value="Ayam Kota">Ayam Kota</option>
+            <option value="Ayam Kp">Ayam Kp</option>
+            <option value="Ikan">Ikan</option>
+            <option value="Olahan Nasi">Olahan Nasi</option>
+            <option value="Sayuran">Sayuran</option>
+            <option value="Seblak & Mie">Seblak &amp; Mie</option>
+            <option value="Cemilan">Cemilan</option>
+            <option value="Minum">Minum</option>
+            <option value="Tambahan">Tambahan</option>
+            <option value="Manual">Lainnya</option>
           </select>
-          <div style="display:flex;gap:8px;">
-            <button class="btn-primary" style="flex:1;" onclick="tambahMenuBaru()">Tambah</button>
-            <button class="btn-secondary" onclick="toggleFormMenu()">Batal</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn-primary" style="flex:1" onclick="addMenu()">Tambah</button>
+            <button class="btn-secondary" onclick="toggleNew()">Batal</button>
           </div>
         </div>
-        <input class="mp-search" id="menuSearch" placeholder="Cari menu..." oninput="renderMenuList()">
-        <div class="mp-scroll" id="menuScroll">
-          <div class="loading-state"><div class="loading-spinner"></div></div>
-        </div>
+        <input class="msearch" id="msearch" placeholder="Cari menu..." oninput="renderList()">
+        <div class="mscroll" id="mscroll"><div class="loading-state"><div class="loading-spinner"></div></div></div>
       </div>
-      <!-- Panel Kanan -->
-      <div class="resep-panel" id="resepPanel">
-        <div class="empty-panel"><div class="ei">📖</div>
-          <div style="font-size:14px;font-weight:600;">Pilih menu di sebelah kiri</div>
-          <div style="font-size:13px;margin-top:4px;">untuk input atau edit resep</div>
-        </div>
+      <div class="right" id="right">
+        <div class="empty"><div class="ei">&#128214;</div><div style="font-size:14px;font-weight:600">Pilih menu di sebelah kiri</div></div>
       </div>
     </div>
   </div>
 </main>
 <script src="_app.js"></script>
 <script>
-const API_URL   = getApiUrl();
-let menuList    = [];
-let bahanList   = [];   // hanya kategori stok
-let resepCache  = {};
-let activeMenu  = null;
-// bahan rows: array of {id_bahan, nama_bahan, jumlah, satuan}
-let _rows       = [];
-
-const STOK_KAT = ['Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
+var API = getApiUrl();
+var menus = [];
+var bahans = [];
+var cache = {};
+var active = null;
+var rows = [];
+var SKAT = ['Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
 
 initPage('resep');
 init();
 
 async function init() {
   try {
-    const [mR, bR] = await Promise.all([apiGet({action:'getMenuList'}), apiGet({action:'getMasterBelanja'})]);
-    console.log('getMenuList:', mR);
-    console.log('getMasterBelanja:', bR);
-    if (mR.status==='ok') menuList  = mR.data;
-    if (bR.status==='ok') bahanList = bR.data.filter(m => STOK_KAT.includes(m.kategori));
-    console.log('menuList length:', menuList.length, 'sample:', menuList[0]);
-    console.log('bahanList length:', bahanList.length);
-    document.getElementById('menuCount').textContent = menuList.length;
-    renderMenuList();
+    var r1 = await apiGet({action:'getMenuList'});
+    var r2 = await apiGet({action:'getMasterBelanja'});
+    if (r1.status === 'ok') menus = r1.data || [];
+    if (r2.status === 'ok') bahans = (r2.data || []).filter(function(m){ return SKAT.indexOf(m.kategori) >= 0; });
+    document.getElementById('mcount').textContent = menus.length;
+    renderList();
   } catch(e) {
-    console.error('init error:', e);
-    document.getElementById('menuScroll').innerHTML = '<div style="padding:12px;color:var(--merah);font-size:13px;">⚠️ Gagal memuat: '+e.message+'</div>';
+    document.getElementById('mscroll').innerHTML = '<div style="padding:12px;color:#C0392B;font-size:13px">Gagal memuat: ' + e.message + '</div>';
   }
 }
 
-function renderMenuList() {
-  const q = document.getElementById('menuSearch').value.toLowerCase();
-  const list = q ? menuList.filter(m => m.nama_menu.toLowerCase().includes(q)) : menuList;
-  if (!list.length) { document.getElementById('menuScroll').innerHTML = '<div style="padding:12px;color:var(--teks-abu);font-size:13px;">Tidak ada menu</div>'; return; }
-  const grouped = {};
-  list.forEach(m => { const k=m.kategori||'Lainnya'; if(!grouped[k]) grouped[k]=[]; grouped[k].push(m); });
-  let html = '';
-  Object.entries(grouped).forEach(([kat, items]) => {
-    html += `<div class="mp-kat">${kat}</div>`;
-    items.forEach(m => {
-      const r = resepCache[m.nama_menu]; const jml = r?r.length:0;
-      html += `<div class="mp-item${activeMenu===m.nama_menu?' active':''}" onclick="pilihMenu(${JSON.stringify(m.nama_menu)})">
-        <span style="flex:1;">${m.nama_menu}</span>
-        ${jml>0?`<span class="mp-badge">${jml}</span>`:''}
-        <button class="mp-del" onclick="hapusMenuItem(event,${JSON.stringify(m.id_menu||'')},${JSON.stringify(m.nama_menu)})" title="Hapus">🗑</button>
-      </div>`;
+function renderList() {
+  var q = document.getElementById('msearch').value.toLowerCase();
+  var list = q ? menus.filter(function(m){ return m.nama_menu && m.nama_menu.toLowerCase().indexOf(q) >= 0; }) : menus;
+  if (!list.length) { document.getElementById('mscroll').innerHTML = '<div style="padding:12px;color:#6b7280;font-size:13px">Tidak ada menu</div>'; return; }
+  var grouped = {};
+  list.forEach(function(m) {
+    var k = m.kategori || 'Lainnya';
+    if (!grouped[k]) grouped[k] = [];
+    grouped[k].push(m);
+  });
+  var html = '';
+  Object.keys(grouped).forEach(function(kat) {
+    html += '<div class="mkat">' + kat + '</div>';
+    grouped[kat].forEach(function(m) {
+      var r = cache[m.nama_menu];
+      var jml = r ? r.length : 0;
+      var isActive = active === m.nama_menu;
+      html += '<div class="mitem' + (isActive ? ' active' : '') + '" onclick="pick(' + JSON.stringify(m.nama_menu) + ')">';
+      html += '<span style="flex:1">' + m.nama_menu + '</span>';
+      if (jml > 0) html += '<span class="mbadge">' + jml + '</span>';
+      html += '<button class="mdel" onclick="delMenu(event,' + JSON.stringify(m.id_menu || '') + ',' + JSON.stringify(m.nama_menu) + ')">&#128465;</button>';
+      html += '</div>';
     });
   });
-  document.getElementById('menuScroll').innerHTML = html;
+  document.getElementById('mscroll').innerHTML = html;
 }
 
-function toggleFormMenu() { document.getElementById('formNewMenu').classList.toggle('open'); }
+function toggleNew() { document.getElementById('fnew').classList.toggle('open'); }
 
-async function tambahMenuBaru() {
-  const nama = document.getElementById('inpNamaMenu').value.trim();
-  const kat  = document.getElementById('inpKatMenu').value;
+async function addMenu() {
+  var nama = document.getElementById('inpnama').value.trim();
+  var kat  = document.getElementById('inpkat').value;
   if (!nama) { alert('Nama menu wajib diisi'); return; }
-  if (menuList.find(m=>m.nama_menu===nama)) { alert('Menu sudah ada'); return; }
+  if (menus.find(function(m){ return m.nama_menu === nama; })) { alert('Menu sudah ada'); return; }
   try {
-    const d = await apiPost({action:'tambahMenu', nama_menu:nama, kategori:kat});
-    if (d.status==='ok') {
-      menuList.push({id_menu:d.id_menu||('MNU'+Date.now()), nama_menu:nama, kategori:kat, harga:0});
-      document.getElementById('menuCount').textContent = menuList.length;
-      document.getElementById('inpNamaMenu').value = '';
-      document.getElementById('formNewMenu').classList.remove('open');
-      renderMenuList();
-      pilihMenu(nama);
-    }
-  } catch(e) { alert('Gagal menambah menu'); }
+    var d = await apiPost({action:'tambahMenu', nama_menu:nama, kategori:kat});
+    if (d.status === 'ok') {
+      menus.push({id_menu: d.id_menu || ('X'+Date.now()), nama_menu:nama, kategori:kat, harga:0});
+      document.getElementById('mcount').textContent = menus.length;
+      document.getElementById('inpnama').value = '';
+      document.getElementById('fnew').classList.remove('open');
+      renderList();
+      pick(nama);
+    } else { alert('Gagal: ' + d.message); }
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
-async function hapusMenuItem(e, idMenu, nama) {
+async function delMenu(e, id, nama) {
   e.stopPropagation();
-  if (!confirm(`Hapus menu "${nama}"?`)) return;
+  if (!confirm('Hapus menu "' + nama + '"?')) return;
   try {
-    console.log('hapusMenu:', {id_menu:idMenu, nama_menu:nama});
-    const d = await apiPost({action:'hapusMenu', id_menu:idMenu, nama_menu:nama});
-    console.log('hapusMenu response:', d);
-    if (d.status !== 'ok') { alert('Gagal hapus: ' + d.message); return; }
-    menuList = menuList.filter(m => !(m.id_menu === idMenu || m.nama_menu === nama));
-    delete resepCache[nama];
-    document.getElementById('menuCount').textContent = menuList.length;
-    if (activeMenu === nama) { activeMenu=null; tampilEmpty(); }
-    renderMenuList();
-  } catch(e) { alert('Gagal konek: ' + e.message); }
+    var d = await apiPost({action:'hapusMenu', id_menu:id, nama_menu:nama});
+    if (d.status === 'ok') {
+      menus = menus.filter(function(m){ return m.nama_menu !== nama; });
+      delete cache[nama];
+      document.getElementById('mcount').textContent = menus.length;
+      if (active === nama) { active = null; document.getElementById('right').innerHTML = '<div class="empty"><div class="ei">&#128214;</div><div style="font-size:14px;font-weight:600">Pilih menu di sebelah kiri</div></div>'; }
+      renderList();
+    } else { alert('Gagal hapus: ' + d.message); }
+  } catch(e) { alert('Error hapus: ' + e.message); }
 }
 
-// ── Pilih Menu ────────────────────────────────
-async function pilihMenu(nama) {
-  activeMenu = nama;
-  _rows      = [];
-  renderMenuList();
-  document.getElementById('resepPanel').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat resep...</div>';
+async function pick(nama) {
+  active = nama;
+  rows = [];
+  renderList();
+  document.getElementById('right').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div></div>';
   try {
-    const d = await apiGet({action:'getResep', nama_menu:nama});
-    console.log('getResep untuk', nama, ':', d);
-    resepCache[nama] = d.status==='ok' ? d.data : [];
-    console.log('resep length:', resepCache[nama].length);
-    renderPanel(nama);
-    renderMenuList();
+    var d = await apiGet({action:'getResep', nama_menu:nama});
+    cache[nama] = (d.status === 'ok') ? d.data : [];
+    renderRight();
+    renderList();
   } catch(e) {
-    console.error('pilihMenu error:', e);
-    document.getElementById('resepPanel').innerHTML = '<div class="empty-panel"><div class="ei">⚠️</div><div>Error: '+e.message+'</div></div>';
+    document.getElementById('right').innerHTML = '<div class="empty"><div class="ei">&#9888;</div><div>Gagal: ' + e.message + '</div></div>';
   }
 }
 
-function tampilEmpty() {
-  document.getElementById('resepPanel').innerHTML = '<div class="empty-panel"><div class="ei">📖</div><div style="font-size:14px;font-weight:600;">Pilih menu di sebelah kiri</div></div>';
-}
+function renderRight() {
+  var nama  = active;
+  var resep = cache[nama] || [];
+  var showForm = resep.length === 0;
 
-// ── Render Panel (HTML statis, form via DOM) ──
-function renderPanel(nama) {
-  const resep = resepCache[nama] || [];
-  const panelEl = document.getElementById('resepPanel');
+  var html = '<div class="rtitle">&#128214; ' + nama + '</div>';
+  html += '<div class="rsub">Bahan baku per 1 porsi &mdash; untuk hitung stok keluar otomatis</div>';
+  html += '<div class="fbox" id="fbox" style="display:' + (showForm ? 'block' : 'none') + '">';
+  html += '<div class="fbtitle" id="fbtitle">' + (showForm ? '&#10133; Tambah Bahan Baku' : '&#9998; Edit Resep') + '</div>';
+  html += '<div class="bhead"><span>Bahan Baku</span><span>Qty/Porsi</span><span>Satuan</span><span></span></div>';
+  html += '<div class="brows" id="brows"></div>';
+  html += '<div style="display:flex;gap:8px;margin-top:8px">';
+  html += '<button class="btn-secondary" onclick="addRow()">+ Tambah Bahan</button>';
+  html += '<button class="btn-secondary" id="bbatal" onclick="closeForm()" style="' + (showForm ? 'display:none' : '') + '">&#10005; Batal</button>';
+  html += '</div></div>';
+  html += '<div id="faksi" style="display:' + (showForm ? 'flex' : 'none') + ';gap:10px;margin:10px 0 12px">';
+  html += '<button class="btn-primary" onclick="saveResep()">&#128190; Simpan Resep</button></div>';
+  html += '<div id="fstatus"></div>';
+  html += '<div class="seclabel"><span>Resep Tersimpan (' + resep.length + ' bahan)</span>';
+  if (resep.length > 0) html += '<button class="bedit" onclick="openEdit()">&#9998; Edit</button>';
+  html += '</div>';
 
-  let html = `
-    <div class="rp-title">📖 ${nama}</div>
-    <div class="rp-sub">Bahan baku utama per 1 porsi — untuk hitung stok keluar otomatis${resep.length ? " | Klik ✏️ Edit untuk ubah resep" : ""}</div>
-    <div class="form-bahan-box" id="fBox" style="display:${resep.length?'none':'block'}">
-      <div class="form-bahan-title" id="fTitle">${resep.length?'✏️ Edit Resep':'➕ Tambah Bahan Baku'}</div>
-      <div style="display:grid;grid-template-columns:1fr 90px 80px 36px;gap:8px;margin-bottom:4px;">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Bahan Baku</span>
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Qty/Porsi</span>
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teks-abu);">Satuan</span>
-        <span></span>
-      </div>
-      <div id="bahanList"></div>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="btn-secondary" onclick="tambahBaris()">+ Tambah Bahan</button>
-        <button class="btn-secondary" id="btnBatal" onclick="tutupForm()" style="${resep.length?'':'display:none'}">✕ Batal</button>
-      </div>
-    </div>
-    <div id="fAksi" style="display:${resep.length?'none':'flex'};gap:10px;margin:10px 0 12px;">
-      <button class="btn-primary" onclick="simpanResep()">💾 Simpan Resep</button>
-    </div>
-    <div id="formStatus"></div>
-    <div class="sec-label">
-      <span>Resep Tersimpan (${resep.length} bahan)</span>
-      ${resep.length?'<button class="btn-edit" onclick="bukaForm()">✏️ Edit</button>':''}
-    </div>`;
-
-  if (!resep.length) {
-    html += '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0;">Belum ada resep — isi form di atas.</div>';
+  if (resep.length === 0) {
+    html += '<div style="color:#6b7280;font-size:13px;padding:4px 0">Belum ada resep &mdash; isi form di atas.</div>';
   } else {
-    html += `<table class="resep-tbl"><thead><tr>
-      <th>Bahan Baku</th><th>Qty/Porsi</th><th>Satuan</th><th></th>
-    </tr></thead><tbody>
-      ${resep.map(r=>`<tr>
-        <td style="font-weight:500;">${r.nama_bahan}</td>
-        <td>${r.jumlah_per_porsi}</td>
-        <td style="color:var(--teks-abu);">${r.satuan}</td>
-        <td><button class="btn-del" onclick="hapusSatuBahan('${r.id_resep}')">🗑</button></td>
-      </tr>`).join('')}
-    </tbody></table>`;
-  }
-
-  panelEl.innerHTML = html;
-
-  // Init baris jika form terbuka
-  if (!resep.length) {
-    _rows = [{id_bahan:'', nama_bahan:'', jumlah:'', satuan:''}];
-    renderBahanList();
-  }
-}
-
-// ── Form buka/tutup ───────────────────────────
-function bukaForm() {
-  const resep = resepCache[activeMenu] || [];
-  _rows = resep.map(r => ({
-    id_bahan   : r.id_bahan,
-    nama_bahan : r.nama_bahan,
-    jumlah     : r.jumlah_per_porsi || r.jumlah || '',
-    satuan     : r.satuan
-  }));
-  // Jika kosong, tambah 1 baris default
-  if (!_rows.length) _rows = [{id_bahan:'', nama_bahan:'', jumlah:'', satuan:''}];
-  document.getElementById('fBox').style.display  = 'block';
-  document.getElementById('fAksi').style.display = 'flex';
-  document.getElementById('fTitle').textContent  = '✏️ Edit Resep';
-  document.getElementById('btnBatal').style.display = '';
-  renderBahanList();
-}
-
-function tutupForm() {
-  _rows = [];
-  document.getElementById('fBox').style.display  = 'none';
-  document.getElementById('fAksi').style.display = 'none';
-}
-
-// ── Render baris bahan (DOM createElement) ────
-function renderBahanList() {
-  const container = document.getElementById('bahanList');
-  if (!container) return;
-  container.innerHTML = '';
-
-  if (!_rows.length) {
-    container.innerHTML = '<div style="color:var(--teks-abu);font-size:13px;padding:4px 0;">Klik "+ Tambah Bahan"</div>';
-    return;
-  }
-
-  // Jika bahanList belum terisi, load dulu lalu retry
-  if (!bahanList.length) {
-    container.innerHTML = '<div style="color:var(--teks-abu);font-size:13px;">⏳ Memuat daftar bahan...</div>';
-    apiGet({action:'getMasterBelanja'}).then(d => {
-      if (d.status==='ok') {
-        bahanList = d.data.filter(m => STOK_KAT.includes(m.kategori));
-        renderBahanList();
-      }
+    html += '<table class="rtbl"><thead><tr><th>Bahan Baku</th><th>Qty/Porsi</th><th>Satuan</th><th></th></tr></thead><tbody>';
+    resep.forEach(function(r) {
+      html += '<tr><td style="font-weight:500">' + r.nama_bahan + '</td>';
+      html += '<td>' + r.jumlah_per_porsi + '</td>';
+      html += '<td style="color:#6b7280">' + r.satuan + '</td>';
+      html += '<td><button class="bdel2" onclick="delBahan(' + JSON.stringify(r.id_resep) + ')">&#128465;</button></td></tr>';
     });
-    return;
+    html += '</tbody></table>';
   }
 
-  _rows.forEach((b, i) => {
-    const row = document.createElement('div');
-    row.className = 'bahan-row';
+  document.getElementById('right').innerHTML = html;
 
-    // Select bahan
-    const sel = document.createElement('select');
-    const optDef = document.createElement('option');
-    optDef.value = ''; optDef.textContent = '— Pilih Bahan Baku —';
-    sel.appendChild(optDef);
-    bahanList.forEach(m => {
-      const opt = document.createElement('option');
+  if (showForm) {
+    rows = [{id_bahan:'', nama_bahan:'', jumlah:'', satuan:''}];
+    renderRows();
+  }
+}
+
+function renderRows() {
+  var cont = document.getElementById('brows');
+  if (!cont) return;
+  cont.innerHTML = '';
+  if (!rows.length) {
+    cont.innerHTML = '<div style="color:#6b7280;font-size:13px;padding:4px 0">Klik "+ Tambah Bahan"</div>';
+    return;
+  }
+  rows.forEach(function(b, i) {
+    var row = document.createElement('div');
+    row.className = 'brow';
+
+    var sel = document.createElement('select');
+    var def = document.createElement('option');
+    def.value = ''; def.textContent = '— Pilih Bahan Baku —';
+    sel.appendChild(def);
+    bahans.forEach(function(m) {
+      var opt = document.createElement('option');
       opt.value = m.id_item;
-      opt.dataset.nama = m.nama_item;
-      opt.dataset.sat  = m.satuan;
-      opt.textContent  = m.nama_item;
+      opt.setAttribute('data-nama', m.nama_item);
+      opt.setAttribute('data-sat', m.satuan);
+      opt.textContent = m.nama_item;
       if (m.id_item === b.id_bahan) opt.selected = true;
       sel.appendChild(opt);
     });
     sel.addEventListener('change', function() {
-      const opt = this.options[this.selectedIndex];
-      _rows[i].id_bahan   = this.value;
-      _rows[i].nama_bahan = opt.dataset.nama || '';
-      _rows[i].satuan     = opt.dataset.sat  || '';
-      // Update satuan field
-      const inputs = row.querySelectorAll('input');
-      if (inputs[1]) inputs[1].value = _rows[i].satuan;
+      var o = sel.options[sel.selectedIndex];
+      rows[i].id_bahan   = sel.value;
+      rows[i].nama_bahan = o.getAttribute('data-nama') || '';
+      rows[i].satuan     = o.getAttribute('data-sat') || '';
+      var inputs = row.querySelectorAll('input');
+      if (inputs[1]) inputs[1].value = rows[i].satuan;
     });
 
-    // Input qty
-    const inpQty = document.createElement('input');
-    inpQty.type = 'number'; inpQty.min = '0'; inpQty.step = '0.001';
-    inpQty.placeholder = '0'; inpQty.value = b.jumlah || '';
-    inpQty.addEventListener('input', function() { _rows[i].jumlah = parseFloat(this.value)||0; });
+    var iq = document.createElement('input');
+    iq.type = 'number'; iq.min = '0'; iq.step = '0.001'; iq.placeholder = '0';
+    iq.value = b.jumlah || '';
+    iq.addEventListener('input', function(){ rows[i].jumlah = parseFloat(iq.value) || 0; });
 
-    // Input satuan
-    const inpSat = document.createElement('input');
-    inpSat.type = 'text'; inpSat.placeholder = 'satuan';
-    inpSat.value = b.satuan || '';
-    inpSat.addEventListener('input', function() { _rows[i].satuan = this.value; });
+    var is = document.createElement('input');
+    is.type = 'text'; is.placeholder = 'satuan';
+    is.value = b.satuan || '';
+    is.addEventListener('input', function(){ rows[i].satuan = is.value; });
 
-    // Tombol hapus
-    const btnDel = document.createElement('button');
-    btnDel.className = 'btn-del-row'; btnDel.textContent = '✕';
-    btnDel.addEventListener('click', function() { hapusBaris(i); });
+    var bd = document.createElement('button');
+    bd.className = 'bdel'; bd.textContent = '\u2715';
+    bd.addEventListener('click', function(){ rows.splice(i,1); renderRows(); });
 
-    row.appendChild(sel); row.appendChild(inpQty);
-    row.appendChild(inpSat); row.appendChild(btnDel);
-    container.appendChild(row);
+    row.appendChild(sel); row.appendChild(iq); row.appendChild(is); row.appendChild(bd);
+    cont.appendChild(row);
   });
 }
 
-function tambahBaris() {
-  _rows.push({id_bahan:'', nama_bahan:'', jumlah:'', satuan:''});
-  renderBahanList();
+function addRow() { rows.push({id_bahan:'',nama_bahan:'',jumlah:'',satuan:''}); renderRows(); }
+
+function openEdit() {
+  var resep = cache[active] || [];
+  rows = resep.map(function(r){ return {id_bahan:r.id_bahan, nama_bahan:r.nama_bahan, jumlah:r.jumlah_per_porsi||r.jumlah||'', satuan:r.satuan}; });
+  if (!rows.length) rows = [{id_bahan:'',nama_bahan:'',jumlah:'',satuan:''}];
+  var fb = document.getElementById('fbox');
+  var fa = document.getElementById('faksi');
+  var ft = document.getElementById('fbtitle');
+  var bb = document.getElementById('bbatal');
+  if (fb) fb.style.display = 'block';
+  if (fa) fa.style.display = 'flex';
+  if (ft) ft.textContent  = '\u270E Edit Resep';
+  if (bb) bb.style.display = '';
+  renderRows();
 }
 
-function hapusBaris(i) {
-  _rows.splice(i, 1);
-  renderBahanList();
+function closeForm() {
+  rows = [];
+  var fb = document.getElementById('fbox');
+  var fa = document.getElementById('faksi');
+  if (fb) fb.style.display = 'none';
+  if (fa) fa.style.display = 'none';
 }
 
-// ── Simpan resep ──────────────────────────────
-async function simpanResep() {
-  const filtered = _rows.filter(b => b.id_bahan && Number(b.jumlah) > 0);
-  // Hapus duplikat id_bahan - ambil yang terakhir
-  const seen = {};
-  filtered.forEach(b => { seen[b.id_bahan] = b; });
-  const valid = Object.values(seen);
+async function saveResep() {
+  var seen = {};
+  rows.filter(function(b){ return b.id_bahan && Number(b.jumlah) > 0; })
+      .forEach(function(b){ seen[b.id_bahan] = b; });
+  var valid = Object.values(seen);
   if (!valid.length) { alert('Tambahkan minimal 1 bahan dengan qty > 0'); return; }
-  const st = document.getElementById('formStatus');
-  if (st) st.innerHTML = '⏳ Menyimpan...';
+  var st = document.getElementById('fstatus');
+  if (st) st.innerHTML = '&#9203; Menyimpan...';
   try {
-    const d = await apiPost({action:'simpanResep', nama_menu:activeMenu, bahan:valid});
-    if (d.status==='ok') {
-      _rows = [];
-      resepCache[activeMenu] = null;
-      await pilihMenu(activeMenu);
-    } else if (st) st.innerHTML = `<span style="color:var(--merah);">❌ ${d.message}</span>`;
-  } catch(e) { if (st) st.innerHTML = '<span style="color:var(--merah);">❌ Gagal konek ke server</span>'; }
+    var d = await apiPost({action:'simpanResep', nama_menu:active, bahan:valid});
+    if (d.status === 'ok') {
+      rows = [];
+      cache[active] = null;
+      await pick(active);
+    } else {
+      if (st) st.innerHTML = '<span style="color:#C0392B">&#10060; ' + d.message + '</span>';
+    }
+  } catch(e) {
+    if (st) st.innerHTML = '<span style="color:#C0392B">&#10060; Gagal konek</span>';
+  }
 }
 
-// ── Hapus satu bahan dari resep tersimpan ─────
-async function hapusSatuBahan(idResep) {
+async function delBahan(id) {
   if (!confirm('Hapus bahan ini dari resep?')) return;
   try {
-    await apiPost({action:'hapusResep', id_resep:idResep});
-    resepCache[activeMenu] = null;
-    await pilihMenu(activeMenu);
+    await apiPost({action:'hapusResep', id_resep:id});
+    cache[active] = null;
+    await pick(active);
   } catch(e) {}
 }
 </script>
