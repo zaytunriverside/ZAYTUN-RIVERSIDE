@@ -146,10 +146,13 @@ function renderList() {
       var r = cache[m.nama_menu];
       var jml = r ? r.length : 0;
       var isActive = active === m.nama_menu;
-      html += '<div class="mitem' + (isActive ? ' active' : '') + '" onclick="pick(' + JSON.stringify(m.nama_menu) + ')">';
+      // Encode nama dan id ke base64 agar aman di HTML attribute
+      var encId   = btoa(unescape(encodeURIComponent(m.id_menu || '')));
+      var encNama = btoa(unescape(encodeURIComponent(m.nama_menu || '')));
+      html += '<div class="mitem' + (isActive ? ' active' : '') + '" data-nama="' + encNama + '" onclick="pickEnc(this)">';
       html += '<span style="flex:1">' + m.nama_menu + '</span>';
       if (jml > 0) html += '<span class="mbadge">' + jml + '</span>';
-      html += '<button class="mdel" onclick="delMenu(event,' + JSON.stringify(m.id_menu || '') + ',' + JSON.stringify(m.nama_menu) + ')">&#128465;</button>';
+      html += '<button class="mdel" data-id="' + encId + '" data-nama="' + encNama + '" onclick="delMenuEnc(event,this)">&#128465;</button>';
       html += '</div>';
     });
   });
@@ -177,7 +180,6 @@ async function addMenu() {
 }
 
 async function delMenu(e, id, nama) {
-  e.stopPropagation();
   if (!confirm('Hapus menu "' + nama + '"?')) return;
   try {
     var d = await apiPost({action:'hapusMenu', id_menu:id, nama_menu:nama});
@@ -189,6 +191,21 @@ async function delMenu(e, id, nama) {
       renderList();
     } else { alert('Gagal hapus: ' + d.message); }
   } catch(e) { alert('Error hapus: ' + e.message); }
+}
+
+function pickEnc(el) {
+  var enc = el.getAttribute('data-nama');
+  var nama = decodeURIComponent(escape(atob(enc)));
+  pick(nama);
+}
+
+function delMenuEnc(e, btn) {
+  e.stopPropagation();
+  var encId   = btn.getAttribute('data-id');
+  var encNama = btn.getAttribute('data-nama');
+  var id   = decodeURIComponent(escape(atob(encId)));
+  var nama = decodeURIComponent(escape(atob(encNama)));
+  delMenu(e, id, nama);
 }
 
 async function pick(nama) {
