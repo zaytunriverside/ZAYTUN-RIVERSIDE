@@ -39,10 +39,30 @@ function initPage(activeId) {
         <span class="nav-icon">${n.icon}</span><span>${n.label}</span></a>`;
     });
   });
-  html += `</nav><div class="sidebar-bottom">
-    <button class="btn-logout" onclick="doLogout()">🚪 Keluar</button>
-  </div>`;
+  html += `</nav>`;
   sidebar.innerHTML = html;
+
+  // Tambah tombol logout di topbar kanan (semua halaman)
+  const topbarRight = document.querySelector('.topbar-right');
+  if (topbarRight) {
+    const btnLogout = document.createElement('button');
+    btnLogout.innerHTML = '⏻';
+    btnLogout.title = 'Keluar';
+    btnLogout.onclick = doLogout;
+    btnLogout.style.cssText = 'background:rgba(192,57,43,0.1);border:1.5px solid rgba(192,57,43,0.3);border-radius:8px;padding:7px 12px;font-size:16px;cursor:pointer;color:#c0392b;transition:all 0.2s;line-height:1;';
+    btnLogout.onmouseover = () => btnLogout.style.background = 'rgba(192,57,43,0.25)';
+    btnLogout.onmouseout  = () => btnLogout.style.background = 'rgba(192,57,43,0.1)';
+    topbarRight.appendChild(btnLogout);
+  }
+
+  // Tampilkan info user di topbar
+  const topbarLeft = document.querySelector('.topbar-left');
+  if (topbarLeft) {
+    const userBadge = document.createElement('div');
+    userBadge.style.cssText = 'font-size:11px;color:var(--teks-abu);margin-top:2px;';
+    userBadge.textContent = `👤 ${user.username}`;
+    topbarLeft.appendChild(userBadge);
+  }
 }
 
 // ── Format rupiah ────────────────────────────
