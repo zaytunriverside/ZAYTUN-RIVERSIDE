@@ -109,7 +109,6 @@
     <div class="topbar-right">
       <button class="btn-unduh-form" onclick="unduhFormStok()">📋 Unduh Form Stok Opname</button>
       <button class="btn-unduh-rekap" id="btnUnduhRekap" onclick="unduhRekapTersimpan()">📥 Unduh Rekap Tersimpan</button>
-      <button class="btn-action" onclick="loadStok()">↻ Refresh</button>
     </div>
   </div>
 
@@ -156,7 +155,7 @@
           <div style="text-align:center;border-bottom:2px solid #1B4332;padding-bottom:6px;margin-bottom:8px;">
             <div style="font-size:14px;font-weight:700;color:#1B4332;letter-spacing:1px;">ZAYTUN RIVERSIDE</div>
             <div style="font-size:12px;font-weight:600;letter-spacing:2px;">REKAP STOK OPNAME TERSIMPAN</div>
-            <div style="font-size:11px;margin-top:4px;" id="printRekapTgl"></div>
+            <div id="printRekapTgl" style="display:none"></div>
           </div>
         </div>
         <div class="print-only" id="printRekapContent" style="display:none;"></div>
@@ -280,8 +279,7 @@ function renderStokTable() {
     <th class="num" style="width:75px;">Stok Real</th>
     <th style="width:85px;">Stok Opname</th>
     <th style="width:80px;">Residu</th>
-    <th style="width:85px;">Mode</th>
-  </tr></thead><tbody>`;
+      </tr></thead><tbody>`;
 
   Object.entries(grouped).forEach(([kat, items]) => {
     html += `<tr><td class="kat-head" colspan="10">${kat}</td></tr>`;
@@ -327,12 +325,6 @@ function renderStokTable() {
         <td class="stok-real">${stokReal||'—'}</td>
         <td>${opnameInput}</td>
         <td>${residuHtml}</td>
-        <td>
-          <select class="mode-sel" id="mode-${item.id_item}" onchange="updateMode('${item.id_item}',this.value)">
-            <option value="manual"   ${modeKeluar==='manual'   ?'selected':''}>✏ Manual</option>
-            <option value="otomatis" ${modeKeluar==='otomatis' ?'selected':''}>⚙ Otomatis</option>
-          </select>
-        </td>
       </tr>`;
     });
   });
@@ -340,8 +332,6 @@ function renderStokTable() {
   document.getElementById('stokContainer').innerHTML = html;
 }
 
-async function updateMode(idItem, mode) {
-  try { await apiPost({ action:'updateModeKeluar', id_item:idItem, mode }); }
   catch(e) {}
 }
 
@@ -427,9 +417,9 @@ function unduhFormStok() {
   // TTD section - di dalam tabel kolom 2 (di bawah tabel)
   const ttd = `<div style="margin-top:16px;font-size:9px;">
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
-      <div><div style="font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:24px;">Diisi Oleh</div><div style="border-top:1px solid #333;padding-top:4px;">( _________________________ )</div></div>
-      <div><div style="font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:24px;">Diperiksa Oleh</div><div style="border-top:1px solid #333;padding-top:4px;">( _________________________ )</div></div>
-      <div><div style="font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:24px;">Diketahui Oleh</div><div style="border-top:1px solid #333;padding-top:4px;">( _________________________ )</div></div>
+      <div><div style="font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Diisi Oleh</div><br><br><br><br><br><br><div style="border-top:1px solid #333;padding-top:4px;">( _________________________ )</div></div>
+      <div><div style="font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Diperiksa Oleh</div><br><br><br><br><br><br><div style="border-top:1px solid #333;padding-top:4px;">( _________________________ )</div></div>
+      <div><div style="font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Diketahui Oleh</div><br><br><br><br><br><br><div style="border-top:1px solid #333;padding-top:4px;">( _________________________ )</div></div>
     </div>
   </div>`;
 
@@ -456,7 +446,7 @@ function unduhFormStok() {
 function unduhRekapTersimpan() {
   if (!lastSavedItems.length) { alert('Belum ada data tersimpan'); return; }
 
-  document.getElementById('printRekapTgl').textContent = `Periode: ${jumatBaru}`;
+  
 
   let html = `<table class="rekap-print-table">
     <thead><tr>
@@ -548,8 +538,7 @@ function renderRiwayat(data) {
     <th>No.</th><th>Nama Item</th><th>Satuan</th>
     <th class="num">Stok Jumat</th><th class="num">+Belanja</th>
     <th class="num">Keluar</th><th class="num">Stok Real</th>
-    <th class="num">Stok Opname</th><th>Residu</th><th>Mode</th>
-  </tr></thead><tbody>`;
+    <th class="num">Stok Opname</th><th>Residu</th></tr></thead><tbody>`;
   data.forEach(d => {
     const m         = masterStokItems.find(x => x.id_item===d.id_item);
     const noUrut    = m ? m.no_urut : '—';
@@ -571,7 +560,6 @@ function renderRiwayat(data) {
       <td class="stok-real">${d.stok_real||'—'}</td>
       <td class="num">${d.stok_opname||'—'}</td>
       <td>${residuHtml}</td>
-      <td><span style="font-size:11px;font-weight:600;color:${d.mode_keluar==='otomatis'?'var(--hijau)':'var(--emas)'};">${d.mode_keluar==='otomatis'?'⚙ Oto':'✏ Man'}</span></td>
     </tr>`;
   });
   html += `</tbody></table></div>`;
