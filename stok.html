@@ -8,59 +8,60 @@
 <link rel="stylesheet" href="_layout.css">
 <style>
   body { font-family:'Inter',sans-serif; }
-  .periode-bar { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; }
-  .periode-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
-  .periode-bar input { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); outline:none; }
-  .periode-bar input:focus { border-color:var(--hijau-mid); }
-
   .mode-tabs { display:flex; gap:0; margin-bottom:20px; border:1.5px solid var(--krem-gelap); border-radius:12px; overflow:hidden; width:fit-content; }
   .mode-tab { padding:9px 20px; font-size:13px; font-weight:500; cursor:pointer; background:var(--putih); color:var(--teks-abu); border:none; font-family:'Inter',sans-serif; transition:all 0.2s; }
   .mode-tab.active { background:var(--hijau); color:var(--putih); font-weight:600; }
 
-  .stok-table { width:100%; border-collapse:collapse; }
-  .stok-table th { text-align:left; font-size:11px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 10px 10px; border-bottom:1px solid var(--krem-gelap); white-space:nowrap; }
-  .stok-table td { padding:8px 10px; border-bottom:1px solid var(--krem); vertical-align:middle; font-size:13px; font-family:'Inter',sans-serif; }
+  .periode-info { background:var(--hijau-pale); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--hijau-tua); margin-bottom:16px; border-left:3px solid var(--hijau-mid); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  .periode-info strong { font-size:15px; }
+  .periode-nav { display:flex; gap:8px; }
+  .btn-periode { padding:6px 12px; border-radius:8px; border:1.5px solid var(--hijau-mid); background:var(--putih); color:var(--hijau); font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; }
+  .btn-periode:hover { background:var(--hijau); color:var(--putih); }
+  .btn-periode.active { background:var(--hijau); color:var(--putih); }
+
+  .stok-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .stok-table th { text-align:left; font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 8px 10px; border-bottom:1px solid var(--krem-gelap); white-space:nowrap; }
+  .stok-table td { padding:7px 8px; border-bottom:1px solid var(--krem); vertical-align:middle; font-family:'Inter',sans-serif; }
   .stok-table tr:last-child td { border-bottom:none; }
-  .stok-table input[type=number], .stok-table select { padding:7px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; outline:none; width:100%; background:var(--putih); }
+  .stok-table .kat-head { background:var(--krem); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); padding:5px 8px; }
+  .stok-table input[type=number] { width:100%; padding:5px 8px; border:1.5px solid var(--krem-gelap); border-radius:6px; font-size:12px; font-family:'Inter',sans-serif; outline:none; text-align:right; background:var(--putih); }
   .stok-table input[type=number]:focus { border-color:var(--hijau-mid); }
-  .no-urut { font-size:11px; font-weight:700; color:var(--putih); background:var(--hijau-mid); border-radius:6px; padding:2px 7px; display:inline-block; min-width:28px; text-align:center; }
-  .kat-badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; background:var(--krem-gelap); color:var(--teks-abu); }
+  .stok-table select.mode-sel { padding:4px 6px; border:1.5px solid var(--krem-gelap); border-radius:6px; font-size:11px; font-family:'Inter',sans-serif; outline:none; background:var(--putih); cursor:pointer; }
+  .stok-table select.mode-sel:focus { border-color:var(--hijau-mid); }
+  .mode-oto { color:var(--hijau); } .mode-man { color:var(--emas); }
+
+  .no-urut { font-size:10px; font-weight:700; color:var(--putih); background:var(--hijau-mid); border-radius:5px; padding:1px 6px; display:inline-block; min-width:24px; text-align:center; }
+  .kat-badge { display:inline-block; padding:1px 6px; border-radius:5px; font-size:9px; font-weight:600; background:var(--krem-gelap); color:var(--teks-abu); }
   .num { text-align:right; font-variant-numeric:tabular-nums; }
-  .tercatat { font-weight:700; color:var(--hijau-tua); text-align:right; }
-  .residu-pos { color:var(--hijau); font-weight:600; text-align:right; }
-  .residu-neg { color:var(--merah); font-weight:600; text-align:right; }
+  .stok-real { font-weight:700; color:var(--hijau-tua); text-align:right; }
+  .residu-pos { color:var(--hijau); font-weight:700; text-align:right; }
+  .residu-neg { color:var(--merah); font-weight:700; text-align:right; }
   .residu-zero { color:var(--teks-abu); text-align:right; }
-  .info-box { background:var(--hijau-pale); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--hijau-tua); margin-bottom:16px; border-left:3px solid var(--hijau-mid); }
+  .residu-ind { font-size:10px; margin-left:2px; }
 
   .residu-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
   .rs-card { background:var(--putih); border-radius:12px; padding:16px; border:1px solid var(--krem-gelap); }
   .rs-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--teks-abu); margin-bottom:6px; }
-  .rs-val { font-size:20px; font-weight:700; font-family:'Inter',sans-serif; }
+  .rs-val { font-size:20px; font-weight:700; }
   .rs-val.ok { color:var(--hijau); } .rs-val.warn { color:var(--emas); } .rs-val.bad { color:var(--merah); }
 
-  /* ── PRINT STYLES ── */
   @media print {
-    * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    body { font-family:'Inter',sans-serif; background:white; margin:0; }
-    .sidebar, .topbar, .mode-tabs, .periode-bar, .btn-simpan, .btn-reset,
-    #stokStatus, .info-box, .btn-action, .card-header .card-badge,
-    .topbar-right, .menu-toggle { display:none !important; }
+    body { font-family:'Inter',sans-serif; background:white; }
+    .sidebar,.topbar,.mode-tabs,.periode-nav,.btn-simpan,.btn-reset,#stokStatus,
+    .btn-action,.stok-table select { display:none !important; }
     .main { margin-left:0 !important; }
     .page-content { padding:0 !important; }
     .card { box-shadow:none !important; border:none !important; padding:0 !important; }
-    .modeInput, .modeRiwayat { display:block !important; }
+    .print-header { display:block !important; }
     @page { size:A4 portrait; margin:1cm; }
-
-    /* Tabel print minimalis */
+    .stok-table input[type=number] { border:none; background:transparent; }
     .print-only { display:block !important; }
     .web-only { display:none !important; }
-    .print-stok-table { width:100%; border-collapse:collapse; font-size:11px; font-family:'Inter',sans-serif; }
-    .print-stok-table th { border:1px solid #333; padding:5px 6px; background:#f0f0f0; font-weight:700; text-align:center; font-size:10px; }
-    .print-stok-table td { border:1px solid #999; padding:4px 6px; }
-    .print-stok-table .td-no { text-align:center; width:30px; }
-    .print-stok-table .td-nama { width:200px; }
-    .print-stok-table .td-sat { text-align:center; width:50px; }
-    .print-stok-table .td-isi { width:80px; } /* kolom kosong untuk isi manual */
+    .print-stok-table { width:100%; border-collapse:collapse; font-size:10px; }
+    .print-stok-table th { border:1px solid #333; padding:4px 5px; background:#e0e0e0; font-weight:700; text-align:center; font-size:9px; }
+    .print-stok-table td { border:1px solid #999; padding:3px 5px; }
+    .print-stok-table .td-no { text-align:center; width:24px; }
+    .print-stok-table .td-isi { width:60px; min-height:16px; }
   }
   .print-only { display:none; }
 </style>
@@ -89,21 +90,18 @@
     <!-- MODE INPUT -->
     <div id="modeInput">
       <div class="card" style="margin-bottom:16px;">
-        <div class="card-header"><div class="card-title">📅 Periode Minggu</div></div>
-        <div class="periode-bar">
+        <div class="periode-info">
           <div>
-            <label>Tanggal Jumat Minggu Ini</label>
-            <input type="date" id="tglJumatBaru" onchange="validasiJumat('tglJumatBaru')" placeholder="Pilih Jumat">
+            <div style="font-size:11px;color:var(--hijau);font-weight:600;letter-spacing:1px;text-transform:uppercase;">Periode Aktif</div>
+            <strong id="periodeLabel">Memuat...</strong>
+            <span style="font-size:12px;color:var(--teks-abu);margin-left:8px;" id="periodeRange"></span>
           </div>
-          <div>
-            <label>Tanggal Jumat Minggu Lalu <span style="color:var(--teks-abu);font-weight:400;">(opsional, untuk tutup periode lama)</span></label>
-            <input type="date" id="tglJumatLama" onchange="validasiJumat('tglJumatLama')" placeholder="Pilih Jumat">
+          <div class="periode-nav">
+            <button class="btn-periode" id="btnPeriodeLama" onclick="togglePeriodeLama()">📅 Tutup Periode Lama</button>
           </div>
         </div>
-        <div class="info-box">
-          💡 Isi <strong>Tanggal Jumat Minggu Ini</strong> untuk membuka periode baru.<br>
-          Isi juga <strong>Jumat Minggu Lalu</strong> agar periode lama otomatis ditutup dan residu terhitung.<br>
-          <span style="color:var(--hijau);font-weight:600;">Cukup 1x simpan — sistem handle sisanya otomatis.</span>
+        <div id="periodelamaInfo" style="display:none;background:var(--emas-pale);border-radius:10px;padding:10px 14px;font-size:13px;color:#8a6914;margin-bottom:8px;">
+          ⚠️ Mode tutup periode lama aktif — stok yang diinput akan digunakan sebagai penutupan periode sebelumnya sekaligus pembuka periode baru.
         </div>
       </div>
 
@@ -113,15 +111,15 @@
           <span class="card-badge badge-hijau" id="stokBadge">—</span>
         </div>
 
-        <!-- PRINT ONLY HEADER -->
-        <div class="print-only" id="printHeader" style="margin-bottom:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1B4332;padding-bottom:8px;margin-bottom:12px;">
+        <!-- Print header -->
+        <div class="print-only" id="printHeader" style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1B4332;padding-bottom:8px;margin-bottom:10px;">
             <div>
-              <div style="font-size:16px;font-weight:700;color:#1B4332;">🌿 ZAYTUN RIVERSIDE</div>
-              <div style="font-size:13px;font-weight:600;margin-top:2px;">STOK OPNAME</div>
+              <div style="font-size:15px;font-weight:700;color:#1B4332;">🌿 ZAYTUN RIVERSIDE</div>
+              <div style="font-size:12px;font-weight:600;">STOK OPNAME</div>
             </div>
-            <div style="text-align:right;font-size:12px;">
-              <div style="margin-bottom:6px;">Tanggal : _____ / _____ / 20_____</div>
+            <div style="text-align:right;font-size:11px;">
+              <div style="margin-bottom:4px;">Tanggal : _____ / _____ / 20_____</div>
               <div>Diisi oleh : _______________________</div>
             </div>
           </div>
@@ -130,29 +128,27 @@
         <div class="web-only" id="stokContainer">
           <div class="loading-state"><div class="loading-spinner"></div>Memuat data stok...</div>
         </div>
-
-        <!-- PRINT TABLE (hanya muncul saat print) -->
         <div class="print-only" id="printTableContainer"></div>
 
         <div class="web-only" style="margin-top:16px;display:flex;gap:10px;">
           <button class="btn-simpan" id="btnSimpanStok" onclick="simpanStok()">💾 Simpan Stok Opname</button>
           <button class="btn-reset" onclick="resetStokForm()">↺ Reset</button>
         </div>
-        <div id="stokStatus" class="web-only" style="margin-top:10px;font-size:13px;font-family:'Inter',sans-serif;"></div>
+        <div id="stokStatus" class="web-only" style="margin-top:10px;font-size:13px;"></div>
       </div>
     </div>
 
     <!-- MODE RIWAYAT -->
     <div id="modeRiwayat" style="display:none;">
-      <div class="periode-bar" style="margin-bottom:16px;">
+      <div style="display:flex;gap:12px;margin-bottom:16px;align-items:flex-end;flex-wrap:wrap;">
         <div>
-          <label>Pilih Periode (Tanggal Jumat)</label>
-          <input type="date" id="tglRiwayat" onchange="validasiJumat('tglRiwayat'); loadRiwayat();">
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--teks-abu);display:block;margin-bottom:4px;">Pilih Periode (Tanggal Jumat)</label>
+          <input type="date" id="tglRiwayat" onchange="loadRiwayat()" style="padding:9px 12px;border:1.5px solid var(--krem-gelap);border-radius:10px;font-size:13px;font-family:'Inter',sans-serif;background:var(--putih);outline:none;">
         </div>
       </div>
       <div class="residu-summary" id="residuSummary" style="display:none;">
         <div class="rs-card"><div class="rs-label">Total Item</div><div class="rs-val ok" id="rsTotal">—</div></div>
-        <div class="rs-card"><div class="rs-label">Ada Residu</div><div class="rs-val warn" id="rsResidu">—</div></div>
+        <div class="rs-card"><div class="rs-label">Ada Residu (−)</div><div class="rs-val bad" id="rsResidu">—</div></div>
         <div class="rs-card"><div class="rs-label">Item Aman</div><div class="rs-val ok" id="rsAman">—</div></div>
       </div>
       <div class="card">
@@ -168,54 +164,69 @@
 
 <script src="_app.js"></script>
 <script>
-const API_URL = getApiUrl();
+const API_URL       = getApiUrl();
 let masterStokItems = [];
 let stokMingguIni   = [];
+let jumatBaru       = '';
+let jumatLama       = '';
+let tutupLama       = false;
 const ITEM_STOK_KAT = ['Kemasan','Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
 
 initPage('stok');
 
-// Default: Jumat minggu ini dan Jumat minggu lalu
-const now = new Date();
-function getNearestFriday(d, goBack) {
-  const day  = d.getDay(); // 0=Min,5=Jum
-  const diff = goBack
-    ? (day === 5 ? 0 : (day + 2) % 7 === 0 ? 2 : day < 5 ? day + 2 : day - 5)
-    : (day === 5 ? 0 : 5 - day < 0 ? 5 - day + 7 : 5 - day);
-  const result = new Date(d);
-  result.setDate(d.getDate() - (goBack ? diff : -diff));
-  return result;
+// Hitung Jumat aktif dari tanggal hari ini
+function getJumatFromDate(d) {
+  const day  = d.getDay();
+  const diff = day >= 5 ? day - 5 : day + 2;
+  const f    = new Date(d);
+  f.setDate(d.getDate() - diff);
+  return f;
 }
 
-const jumatIni  = getNearestFriday(now, true);
-const jumatLalu = new Date(jumatIni);
-jumatLalu.setDate(jumatIni.getDate() - 7);
+function formatTgl(d) {
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
 
-document.getElementById('tglJumatBaru').value = jumatIni.toISOString().split('T')[0];
-document.getElementById('tglJumatLama').value = jumatLalu.toISOString().split('T')[0];
+function toInputDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+const now      = new Date();
+const jumatObj = getJumatFromDate(now);
+const jumatLamaObj = new Date(jumatObj); jumatLamaObj.setDate(jumatObj.getDate()-7);
+
+jumatBaru = formatTgl(jumatObj);
+jumatLama = formatTgl(jumatLamaObj);
+
+// Tampilkan info periode
+document.getElementById('periodeLabel').textContent = `Jumat, ${jumatBaru}`;
+const kamis = new Date(jumatObj); kamis.setDate(jumatObj.getDate()+6);
+document.getElementById('periodeRange').textContent = `(${jumatBaru} — ${formatTgl(kamis)})`;
+
+// Default riwayat
+document.getElementById('tglRiwayat').value = toInputDate(jumatObj);
 
 loadStok();
 
-// Validasi hanya Jumat yang bisa dipilih
-function validasiJumat(id) {
-  const input = document.getElementById(id);
-  const d     = new Date(input.value);
-  if (d.getDay() !== 4) { // getDay() 4 = Jumat (UTC offset)
-    // Koreksi ke Jumat terdekat
-    const nearest = getNearestFriday(d, true);
-    input.value = nearest.toISOString().split('T')[0];
-  }
+function togglePeriodeLama() {
+  tutupLama = !tutupLama;
+  document.getElementById('periodelamaInfo').style.display = tutupLama ? 'block' : 'none';
+  document.getElementById('btnPeriodeLama').classList.toggle('active', tutupLama);
 }
 
 async function loadStok() {
   try {
-    const data = await apiGet({ action:'getMasterBelanja' });
-    if (data.status === 'ok') {
-      masterStokItems = data.data
-        .map((m, i) => ({ ...m, no_urut: i + 1 }))
+    const [masterRes, stokRes] = await Promise.all([
+      apiGet({ action:'getMasterBelanja' }),
+      apiGet({ action:'getStokOpname', tanggal_jumat: jumatBaru })
+    ]);
+    if (masterRes.status==='ok') {
+      masterStokItems = masterRes.data
+        .map((m,i) => ({ ...m, no_urut: i+1 }))
         .filter(m => ITEM_STOK_KAT.includes(m.kategori));
-      document.getElementById('stokBadge').textContent = `${masterStokItems.length} item`;
     }
+    stokMingguIni = stokRes.status==='ok' ? stokRes.data : [];
+    document.getElementById('stokBadge').textContent = `${masterStokItems.length} item`;
     renderStokTable();
     buildPrintTable();
   } catch(e) { document.getElementById('stokContainer').innerHTML='<div class="empty-state">⚠️ Gagal memuat data</div>'; }
@@ -224,115 +235,120 @@ async function loadStok() {
 function renderStokTable() {
   const grouped = {};
   masterStokItems.forEach(item => {
-    if (!grouped[item.kategori]) grouped[item.kategori] = [];
+    if (!grouped[item.kategori]) grouped[item.kategori]=[];
     grouped[item.kategori].push(item);
   });
 
-  let html = `<table class="stok-table"><thead><tr>
-    <th style="width:44px;">No.</th>
+  let html = `<div style="overflow-x:auto;"><table class="stok-table"><thead><tr>
+    <th style="width:30px;">No.</th>
     <th>Nama Item</th>
-    <th style="width:14%;">Kategori</th>
-    <th style="width:8%;">Satuan</th>
-    <th style="width:16%;">Stok Sekarang</th>
+    <th style="width:60px;">Satuan</th>
+    <th class="num" style="width:80px;">Stok Jumat</th>
+    <th class="num" style="width:80px;">+Belanja</th>
+    <th style="width:90px;">Keluar</th>
+    <th class="num" style="width:80px;">Stok Real</th>
+    <th style="width:90px;">Stok Opname</th>
+    <th style="width:80px;">Residu</th>
+    <th style="width:90px;">Mode</th>
   </tr></thead><tbody>`;
 
   Object.entries(grouped).forEach(([kat, items]) => {
-    html += `<tr><td colspan="5" style="background:var(--krem);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--teks-abu);padding:6px 10px;">${kat}</td></tr>`;
+    html += `<tr><td class="kat-head" colspan="10">${kat}</td></tr>`;
     items.forEach(item => {
-      const isKemasan = item.kategori === 'Kemasan';
-      const inputEl   = isKemasan
-        ? `<select id="stok-${item.id_item}">
+      const ex        = stokMingguIni.find(s => s.id_item===item.id_item) || {};
+      const isKemasan = item.kategori==='Kemasan';
+      const modeKeluar= ex.mode_keluar || item.mode_keluar || 'manual';
+      const stokJumat = ex.stok_jumat || 0;
+      const stokTamb  = ex.stok_tambahan || 0;
+      const stokKeluar= ex.stok_keluar || '';
+      const stokReal  = ex.stok_real || '';
+      const stokOpn   = ex.stok_opname || '';
+      const residu    = ex.stok_residu || '';
+
+      // Input stok keluar (hanya jika manual)
+      const keluarInput = isKemasan ? '—' : modeKeluar==='manual'
+        ? `<input type="number" min="0" step="0.01" id="keluar-${item.id_item}" value="${stokKeluar}" placeholder="0">`
+        : `<span style="color:var(--hijau);font-size:11px;">⚙ otomatis</span>`;
+
+      // Input stok opname
+      const opnameInput = isKemasan
+        ? `<select id="opname-${item.id_item}" style="padding:4px 6px;border:1.5px solid var(--krem-gelap);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;outline:none;background:var(--putih);">
             <option value="">—</option>
-            <option>Banyak</option><option>Sedikit</option><option>Habis</option>
+            <option ${stokOpn==='Banyak'?'selected':''}>Banyak</option>
+            <option ${stokOpn==='Sedikit'?'selected':''}>Sedikit</option>
+            <option ${stokOpn==='Habis'?'selected':''}>Habis</option>
           </select>`
-        : `<input type="number" min="0" step="0.1" id="stok-${item.id_item}" placeholder="0">`;
+        : `<input type="number" min="0" step="0.01" id="opname-${item.id_item}" value="${stokOpn}" placeholder="0">`;
+
+      // Residu display
+      let residuHtml = '—';
+      if (!isKemasan && residu !== '') {
+        const r = Number(residu);
+        const cls = r > 0 ? 'residu-pos' : r < 0 ? 'residu-neg' : 'residu-zero';
+        const ind = r > 0 ? '▲' : r < 0 ? '▼' : '=';
+        residuHtml = `<span class="${cls}">${r > 0 ? '+' : ''}${residu} <span class="residu-ind">${ind}</span></span>`;
+      }
+
       html += `<tr>
         <td><span class="no-urut">${item.no_urut}</span></td>
         <td style="font-weight:500;">${item.nama_item}</td>
-        <td><span class="kat-badge">${item.kategori}</span></td>
         <td style="color:var(--teks-abu);">${isKemasan?'BSH':item.satuan}</td>
-        <td>${inputEl}</td>
+        <td class="num">${stokJumat||'—'}</td>
+        <td class="num" style="color:var(--hijau);">${stokTamb>0?'+'+stokTamb:'—'}</td>
+        <td>${keluarInput}</td>
+        <td class="stok-real">${stokReal||'—'}</td>
+        <td>${opnameInput}</td>
+        <td>${residuHtml}</td>
+        <td>
+          <select class="mode-sel" id="mode-${item.id_item}" onchange="updateMode('${item.id_item}',this.value)">
+            <option value="manual" ${modeKeluar==='manual'?'selected':''} class="mode-man">Manual</option>
+            <option value="otomatis" ${modeKeluar==='otomatis'?'selected':''} class="mode-oto">Otomatis</option>
+          </select>
+        </td>
       </tr>`;
     });
   });
-  html += `</tbody></table>`;
+  html += `</tbody></table></div>`;
   document.getElementById('stokContainer').innerHTML = html;
 }
 
-// Build print table — minimalis, kolom kosong untuk isi manual
-function buildPrintTable() {
-  const grouped = {};
-  masterStokItems.forEach(item => {
-    if (!grouped[item.kategori]) grouped[item.kategori] = [];
-    grouped[item.kategori].push(item);
-  });
-
-  let html = `<table class="print-stok-table">
-    <thead><tr>
-      <th class="td-no">No.</th>
-      <th class="td-nama">Nama Item</th>
-      <th class="td-sat">Satuan</th>
-      <th class="td-isi">Stok Awal</th>
-      <th class="td-isi">+ Belanja</th>
-      <th class="td-isi">Stok Akhir</th>
-      <th class="td-isi">Residu</th>
-      <th style="width:80px;">Ket.</th>
-    </tr></thead><tbody>`;
-
-  Object.entries(grouped).forEach(([kat, items]) => {
-    html += `<tr><td colspan="8" style="background:#e8e8e8;font-weight:700;font-size:10px;padding:3px 6px;letter-spacing:1px;text-transform:uppercase;">${kat}</td></tr>`;
-    items.forEach(item => {
-      const isKemasan = item.kategori === 'Kemasan';
-      html += `<tr>
-        <td class="td-no">${item.no_urut}</td>
-        <td class="td-nama">${item.nama_item}</td>
-        <td class="td-sat">${isKemasan?'BSH':item.satuan}</td>
-        <td class="td-isi">&nbsp;</td>
-        <td class="td-isi">&nbsp;</td>
-        <td class="td-isi">&nbsp;</td>
-        <td class="td-isi">&nbsp;</td>
-        <td>&nbsp;</td>
-      </tr>`;
-    });
-  });
-
-  // Baris tanda tangan
-  html += `<tr><td colspan="8" style="border:none;padding-top:20px;">
-    <div style="display:flex;gap:60px;font-size:11px;">
-      <div>Diperiksa oleh : _______________________ <br><br></div>
-      <div>Diketahui oleh : _______________________</div>
-    </div>
-  </td></tr>`;
-
-  html += `</tbody></table>`;
-  document.getElementById('printTableContainer').innerHTML = html;
+async function updateMode(idItem, mode) {
+  try {
+    await apiPost({ action:'updateModeKeluar', id_item:idItem, mode });
+    // Update lokal
+    const item = masterStokItems.find(m => m.id_item===idItem);
+    if (item) item.mode_keluar = mode;
+    // Re-render baris ini saja (efisien)
+    renderStokTable();
+  } catch(e) {}
 }
 
 async function simpanStok() {
-  const tglBaru = document.getElementById('tglJumatBaru').value;
-  const tglLama = document.getElementById('tglJumatLama').value;
-  if (!tglBaru) { alert('Pilih Tanggal Jumat Minggu Ini terlebih dahulu'); return; }
-
   const items = masterStokItems.map(item => ({
-    id_item      : item.id_item,
-    nama_item    : item.nama_item,
-    kategori     : item.kategori,
-    satuan       : item.satuan,
-    stok_sekarang: document.getElementById(`stok-${item.id_item}`)?.value || 0
+    id_item           : item.id_item,
+    nama_item         : item.nama_item,
+    kategori          : item.kategori,
+    satuan            : item.satuan,
+    mode_keluar       : document.getElementById(`mode-${item.id_item}`)?.value || 'manual',
+    stok_opname       : document.getElementById(`opname-${item.id_item}`)?.value || 0,
+    stok_keluar_manual: document.getElementById(`keluar-${item.id_item}`)?.value || 0,
   }));
+
+  const payload = {
+    action             : 'simpanStokMingguan',
+    tanggal_jumat_baru : jumatBaru,
+    tanggal_jumat_lama : tutupLama ? jumatLama : null,
+    items
+  };
 
   const btn = document.getElementById('btnSimpanStok');
   btn.disabled=true; btn.textContent='⏳ Menyimpan...';
   try {
-    const data = await apiPost({
-      action              : 'simpanStokMingguan',
-      tanggal_jumat_baru  : fmtDate(tglBaru),
-      tanggal_jumat_lama  : tglLama ? fmtDate(tglLama) : null,
-      items
-    });
+    const data = await apiPost(payload);
     document.getElementById('stokStatus').innerHTML = data.status==='ok'
       ? `<span style="color:var(--hijau);">✅ ${data.message}</span>`
       : `<span style="color:var(--merah);">❌ ${data.message}</span>`;
+    if (data.status==='ok') loadStok();
   } catch(e) {
     document.getElementById('stokStatus').innerHTML=`<span style="color:var(--merah);">❌ Gagal konek ke server</span>`;
   } finally { btn.disabled=false; btn.textContent='💾 Simpan Stok Opname'; }
@@ -340,8 +356,10 @@ async function simpanStok() {
 
 function resetStokForm() {
   masterStokItems.forEach(item => {
-    const el = document.getElementById(`stok-${item.id_item}`);
-    if (el) el.value = '';
+    ['opname','keluar'].forEach(p => {
+      const el = document.getElementById(`${p}-${item.id_item}`);
+      if (el) el.value='';
+    });
   });
 }
 
@@ -356,8 +374,10 @@ function setMode(m) {
 async function loadRiwayat() {
   const tgl = document.getElementById('tglRiwayat').value;
   if (!tgl) return;
+  const [y,mo,d] = tgl.split('-');
+  const tglFmt   = `${d}/${mo}/${y}`;
   try {
-    const data = await apiGet({ action:'getStokOpname', tanggal_jumat:fmtDate(tgl) });
+    const data = await apiGet({ action:'getStokOpname', tanggal_jumat: tglFmt });
     if (data.status==='ok') renderRiwayat(data.data);
   } catch(e) {}
 }
@@ -368,46 +388,97 @@ function renderRiwayat(data) {
     document.getElementById('residuSummary').style.display='none';
     return;
   }
-  const itemResidu = data.filter(d => d.stok_residu!==''&&d.stok_residu!=='-'&&Number(d.stok_residu)>0).length;
+  const itemNegatif = data.filter(d => !isNaN(Number(d.stok_residu)) && Number(d.stok_residu)<0).length;
+  const itemAman    = data.filter(d => !isNaN(Number(d.stok_residu)) && Number(d.stok_residu)>=0).length;
   document.getElementById('rsTotal').textContent   = data.length;
-  document.getElementById('rsResidu').textContent  = itemResidu;
-  document.getElementById('rsAman').textContent    = data.length - itemResidu;
+  document.getElementById('rsResidu').textContent  = itemNegatif;
+  document.getElementById('rsAman').textContent    = itemAman;
   document.getElementById('residuSummary').style.display='grid';
   document.getElementById('riwayatBadge').textContent = `${data.length} item`;
 
-  let html = `<table class="stok-table"><thead><tr>
-    <th>No.</th><th>Nama Item</th><th>Kategori</th><th>Satuan</th>
-    <th class="num">Stok Awal</th><th class="num">+Tambahan</th>
-    <th class="tercatat">Tercatat</th><th class="num">Jumat Depan</th><th>Residu</th>
+  let html = `<div style="overflow-x:auto;"><table class="stok-table"><thead><tr>
+    <th>No.</th><th>Nama Item</th><th>Satuan</th>
+    <th class="num">Stok Jumat</th><th class="num">+Belanja</th>
+    <th class="num">Keluar</th><th class="num">Stok Real</th>
+    <th class="num">Stok Opname</th><th>Residu</th><th>Mode</th>
   </tr></thead><tbody>`;
 
   data.forEach(d => {
-    const master    = masterStokItems.find(m => m.id_item === d.id_item);
+    const master    = masterStokItems.find(m => m.id_item===d.id_item);
     const noUrut    = master ? master.no_urut : '—';
-    const isKemasan = d.kategori === 'Kemasan';
+    const isKemasan = d.kategori==='Kemasan';
     const r         = Number(d.stok_residu);
-    const rClass    = isKemasan||d.stok_residu==='' ? 'residu-zero' : r>0 ? 'residu-neg' : r===0 ? 'residu-zero' : 'residu-pos';
+    let residuHtml  = '—';
+    if (!isKemasan && d.stok_residu!=='') {
+      const cls = r>0?'residu-pos':r<0?'residu-neg':'residu-zero';
+      const ind = r>0?'▲':r<0?'▼':'=';
+      residuHtml = `<span class="${cls}">${r>0?'+':''}${d.stok_residu} <span class="residu-ind">${ind}</span></span>`;
+    }
     html += `<tr>
       <td><span class="no-urut">${noUrut}</span></td>
       <td style="font-weight:500;">${d.nama_item}</td>
-      <td><span class="kat-badge">${d.kategori}</span></td>
       <td style="color:var(--teks-abu);">${isKemasan?'BSH':d.satuan}</td>
-      <td class="num">${d.stok_awal||'—'}</td>
-      <td class="num" style="color:var(--hijau);">${d.stok_tambahan>0?'+'+d.stok_tambahan:'—'}</td>
-      <td class="tercatat">${d.stok_tercatat||'—'}</td>
-      <td class="num">${d.stok_jumat_depan||'—'}</td>
-      <td class="${rClass}">${isKemasan?'—':(d.stok_residu===''?'—':d.stok_residu)}</td>
+      <td class="num">${d.stok_jumat||'—'}</td>
+      <td class="num" style="color:var(--hijau);">${Number(d.stok_tambahan)>0?'+'+d.stok_tambahan:'—'}</td>
+      <td class="num">${d.stok_keluar||'—'}</td>
+      <td class="stok-real">${d.stok_real||'—'}</td>
+      <td class="num">${d.stok_opname||'—'}</td>
+      <td>${residuHtml}</td>
+      <td><span class="${d.mode_keluar==='otomatis'?'mode-oto':'mode-man'}" style="font-size:11px;font-weight:600;">${d.mode_keluar==='otomatis'?'⚙ Oto':'✏ Manual'}</span></td>
     </tr>`;
   });
-  html += `</tbody></table>`;
+  html += `</tbody></table></div>`;
   document.getElementById('riwayatContainer').innerHTML = html;
 }
 
-// ── Unduh Draft — tabel minimalis untuk isi manual ──
-function unduhDraft() {
-  buildPrintTable(); // rebuild dengan data terkini
-  setTimeout(() => window.print(), 300);
+// ── Print draft minimalis ────────────────────
+function buildPrintTable() {
+  const grouped = {};
+  masterStokItems.forEach(item => {
+    if (!grouped[item.kategori]) grouped[item.kategori]=[];
+    grouped[item.kategori].push(item);
+  });
+  let html = `<table class="print-stok-table">
+    <thead><tr>
+      <th class="td-no">No.</th>
+      <th style="width:180px;">Nama Item</th>
+      <th style="width:40px;">Sat.</th>
+      <th class="td-isi">Stok Jumat</th>
+      <th class="td-isi">+Belanja</th>
+      <th class="td-isi">Keluar</th>
+      <th class="td-isi">Stok Real</th>
+      <th class="td-isi">Stok Opname</th>
+      <th class="td-isi">Residu</th>
+      <th style="width:60px;">Ket.</th>
+    </tr></thead><tbody>`;
+  Object.entries(grouped).forEach(([kat, items]) => {
+    html += `<tr><td colspan="10" style="background:#e0e0e0;font-weight:700;font-size:9px;padding:2px 5px;letter-spacing:1px;text-transform:uppercase;">${kat}</td></tr>`;
+    items.forEach(item => {
+      const ex = stokMingguIni.find(s => s.id_item===item.id_item)||{};
+      html += `<tr>
+        <td class="td-no">${item.no_urut}</td>
+        <td>${item.nama_item}</td>
+        <td style="text-align:center;">${item.kategori==='Kemasan'?'BSH':item.satuan}</td>
+        <td class="td-isi">${ex.stok_jumat||''}</td>
+        <td class="td-isi">${ex.stok_tambahan>0?ex.stok_tambahan:''}</td>
+        <td class="td-isi">&nbsp;</td>
+        <td class="td-isi">&nbsp;</td>
+        <td class="td-isi">&nbsp;</td>
+        <td class="td-isi">&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>`;
+    });
+  });
+  html += `<tr><td colspan="10" style="border:none;padding-top:16px;">
+    <div style="display:flex;gap:60px;font-size:10px;">
+      <div>Diperiksa : _______________________</div>
+      <div>Diketahui : _______________________</div>
+    </div>
+  </td></tr></tbody></table>`;
+  document.getElementById('printTableContainer').innerHTML = html;
 }
+
+function unduhDraft() { buildPrintTable(); setTimeout(() => window.print(), 300); }
 </script>
 </body>
 </html>
