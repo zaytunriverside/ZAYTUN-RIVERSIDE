@@ -97,7 +97,7 @@
 
 <script src="_app.js"></script>
 <script>
-const API_URL = localStorage.getItem('zaytun_api')||'';
+const API_URL = getApiUrl();
 initPage('laporan');
 applyPreset();
 
@@ -134,12 +134,10 @@ async function loadLaporan() {
   document.getElementById('laporanContent').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat laporan...</div>';
 
   try {
-    const [lapRes, trxRes] = await Promise.all([
-      fetch(`${API_URL}?action=getLaporan&dari=${fmtDate(dari)}&sampai=${fmtDate(sampai)}`),
-      fetch(`${API_URL}?action=getTransaksi&dari=${fmtDate(dari)}&sampai=${fmtDate(sampai)}`)
+    const [lap, trx] = await Promise.all([
+      apiGet({ action:'getLaporan', dari:fmtDate(dari), sampai:fmtDate(sampai) }),
+      apiGet({ action:'getTransaksi', dari:fmtDate(dari), sampai:fmtDate(sampai) })
     ]);
-    const lap = await lapRes.json();
-    const trx = await trxRes.json();
     if (lap.status==='ok') renderLaporan(lap.data, trx.data||[]);
   } catch(e) { document.getElementById('laporanContent').innerHTML='<div class="empty-state">⚠️ Gagal memuat laporan</div>'; }
 }
