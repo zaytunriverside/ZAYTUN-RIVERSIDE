@@ -23,6 +23,9 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--teks); 
 
 /* SIDEBAR */
 .sidebar { width:var(--sidebar-w); background:var(--hijau-tua); min-height:100vh; position:fixed; left:0; top:0; display:flex; flex-direction:column; z-index:100; transition:transform 0.3s ease; }
+.sidebar-top { padding:10px 14px 0; display:flex; justify-content:flex-start; }
+.sidebar-logout { background:rgba(192,57,43,0.2); border:1.5px solid rgba(192,57,43,0.4); border-radius:8px; color:#e57373; font-size:16px; cursor:pointer; padding:6px 10px; line-height:1; transition:all 0.2s; }
+.sidebar-logout:hover { background:rgba(192,57,43,0.4); color:#fff; }
 .sidebar-logo { padding:28px 20px 24px; border-bottom:1px solid rgba(116,198,157,0.15); }
 .sidebar-logo .icon { font-size:28px; display:block; margin-bottom:8px; }
 .sidebar-logo .name { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:var(--putih); line-height:1.2; }
