@@ -239,7 +239,7 @@ async function pilihMenu(nama) {
   document.getElementById('resepPanel').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat resep...</div>';
 
   try {
-    const data = await apiGet({ action:'getResep', nama_menu: encodeURIComponent(nama) });
+    const data = await apiGet({ action:'getResep', nama_menu: nama });
     if (data.status==='ok') {
       resepCache[nama] = data.data;
       renderResepPanel(nama);
@@ -309,10 +309,12 @@ function renderResepPanel(nama) {
   if (isEditMode || !resep.length) {
     if (isEditMode && resep.length) {
       bahanRows = resep.map(r => ({ id_bahan:r.id_bahan, nama_bahan:r.nama_bahan, jumlah:r.jumlah_per_porsi, satuan:r.satuan }));
-    } else if (!bahanRows.length) {
+    } else {
+      // Selalu reset ke 1 baris kosong untuk input baru
       bahanRows = [{ id_bahan:'', nama_bahan:'', jumlah:'', satuan:'' }];
     }
-    renderBahanRows();
+    // Delay kecil untuk pastikan DOM sudah ter-render
+    setTimeout(renderBahanRows, 50);
   }
 }
 
