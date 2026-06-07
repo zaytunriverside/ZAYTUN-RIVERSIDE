@@ -11,14 +11,10 @@
   .mode-tabs { display:flex; gap:0; margin-bottom:20px; border:1.5px solid var(--krem-gelap); border-radius:12px; overflow:hidden; width:fit-content; }
   .mode-tab { padding:9px 20px; font-size:13px; font-weight:500; cursor:pointer; background:var(--putih); color:var(--teks-abu); border:none; font-family:'Inter',sans-serif; transition:all 0.2s; }
   .mode-tab.active { background:var(--hijau); color:var(--putih); font-weight:600; }
-
   .periode-info { background:var(--hijau-pale); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--hijau-tua); margin-bottom:16px; border-left:3px solid var(--hijau-mid); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
   .periode-info strong { font-size:15px; }
-  .periode-nav { display:flex; gap:8px; }
   .btn-periode { padding:6px 12px; border-radius:8px; border:1.5px solid var(--hijau-mid); background:var(--putih); color:var(--hijau); font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; }
-  .btn-periode:hover { background:var(--hijau); color:var(--putih); }
-  .btn-periode.active { background:var(--hijau); color:var(--putih); }
-
+  .btn-periode:hover, .btn-periode.active { background:var(--hijau); color:var(--putih); }
   .stok-table { width:100%; border-collapse:collapse; font-size:12px; }
   .stok-table th { text-align:left; font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 8px 10px; border-bottom:1px solid var(--krem-gelap); white-space:nowrap; }
   .stok-table td { padding:7px 8px; border-bottom:1px solid var(--krem); vertical-align:middle; font-family:'Inter',sans-serif; }
@@ -27,43 +23,78 @@
   .stok-table input[type=number] { width:100%; padding:5px 8px; border:1.5px solid var(--krem-gelap); border-radius:6px; font-size:12px; font-family:'Inter',sans-serif; outline:none; text-align:right; background:var(--putih); }
   .stok-table input[type=number]:focus { border-color:var(--hijau-mid); }
   .stok-table select.mode-sel { padding:4px 6px; border:1.5px solid var(--krem-gelap); border-radius:6px; font-size:11px; font-family:'Inter',sans-serif; outline:none; background:var(--putih); cursor:pointer; }
-  .stok-table select.mode-sel:focus { border-color:var(--hijau-mid); }
-  .mode-oto { color:var(--hijau); } .mode-man { color:var(--emas); }
-
   .no-urut { font-size:10px; font-weight:700; color:var(--putih); background:var(--hijau-mid); border-radius:5px; padding:1px 6px; display:inline-block; min-width:24px; text-align:center; }
-  .kat-badge { display:inline-block; padding:1px 6px; border-radius:5px; font-size:9px; font-weight:600; background:var(--krem-gelap); color:var(--teks-abu); }
   .num { text-align:right; font-variant-numeric:tabular-nums; }
   .stok-real { font-weight:700; color:var(--hijau-tua); text-align:right; }
   .residu-pos { color:var(--hijau); font-weight:700; text-align:right; }
   .residu-neg { color:var(--merah); font-weight:700; text-align:right; }
   .residu-zero { color:var(--teks-abu); text-align:right; }
   .residu-ind { font-size:10px; margin-left:2px; }
-
   .residu-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
   .rs-card { background:var(--putih); border-radius:12px; padding:16px; border:1px solid var(--krem-gelap); }
   .rs-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--teks-abu); margin-bottom:6px; }
   .rs-val { font-size:20px; font-weight:700; }
   .rs-val.ok { color:var(--hijau); } .rs-val.warn { color:var(--emas); } .rs-val.bad { color:var(--merah); }
 
+  /* Tombol unduh kontras */
+  .btn-unduh-form {
+    background:linear-gradient(135deg,#e67e22,#f39c12);
+    color:white; border:none; border-radius:8px;
+    padding:8px 16px; font-size:13px; font-weight:600;
+    font-family:'Inter',sans-serif; cursor:pointer;
+    box-shadow:0 3px 10px rgba(230,126,34,0.4);
+    transition:all 0.2s;
+  }
+  .btn-unduh-form:hover { opacity:0.9; transform:translateY(-1px); }
+
+  .btn-unduh-rekap {
+    background:linear-gradient(135deg,#2471a3,#1a5276);
+    color:white; border:none; border-radius:8px;
+    padding:8px 16px; font-size:13px; font-weight:600;
+    font-family:'Inter',sans-serif; cursor:pointer;
+    box-shadow:0 3px 10px rgba(36,113,163,0.4);
+    transition:all 0.2s; display:none;
+  }
+  .btn-unduh-rekap:hover { opacity:0.9; transform:translateY(-1px); }
+  .btn-unduh-rekap.show { display:inline-block; }
+
+  /* Print styles */
   @media print {
-    body { font-family:'Inter',sans-serif; background:white; }
-    .sidebar,.topbar,.mode-tabs,.periode-nav,.btn-simpan,.btn-reset,#stokStatus,
-    .btn-action,.stok-table select { display:none !important; }
+    body { font-family:'Inter',sans-serif; background:white; margin:0; }
+    .sidebar,.topbar,.mode-tabs,.btn-simpan,.btn-reset,#stokStatus,
+    .btn-action,.btn-unduh-form,.btn-unduh-rekap,.periode-info,
+    .stok-table select,.web-only,.card-header .card-badge { display:none !important; }
     .main { margin-left:0 !important; }
     .page-content { padding:0 !important; }
     .card { box-shadow:none !important; border:none !important; padding:0 !important; }
-    .print-header { display:block !important; }
-    @page { size:A4 portrait; margin:1cm; }
-    .stok-table input[type=number] { border:none; background:transparent; }
     .print-only { display:block !important; }
-    .web-only { display:none !important; }
-    .print-stok-table { width:100%; border-collapse:collapse; font-size:10px; }
-    .print-stok-table th { border:1px solid #333; padding:4px 5px; background:#e0e0e0; font-weight:700; text-align:center; font-size:9px; }
-    .print-stok-table td { border:1px solid #999; padding:3px 5px; }
-    .print-stok-table .td-no { text-align:center; width:24px; }
-    .print-stok-table .td-isi { width:60px; min-height:16px; }
+    @page { size:A4 portrait; margin:0.5cm; }
+
+    /* Print table 2 kolom */
+    .print-wrap { display:flex !important; gap:8px; }
+    .print-col { flex:1; }
+    .print-stok-table { width:100%; border-collapse:collapse; font-size:9px; }
+    .print-stok-table th { border:1px solid #333; padding:3px 4px; background:#d0d0d0; font-weight:700; text-align:center; font-size:8px; }
+    .print-stok-table td { border:1px solid #aaa; padding:2px 4px; font-size:9px; }
+    .print-stok-table .td-no { text-align:center; width:20px; }
+    .print-stok-table .td-sat { text-align:center; width:30px; }
+    .print-stok-table .td-stok { width:45px; text-align:center; }
+    .print-footer { font-size:9px; margin-top:10px; }
+    .print-footer-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+    .print-footer-item { border-top:1px solid #333; padding-top:4px; }
+    .print-footer-item .label { font-weight:700; font-size:8px; text-transform:uppercase; letter-spacing:0.5px; }
+    .print-footer-item .space { height:30px; }
+
+    /* Rekap print */
+    .rekap-print-table { width:100%; border-collapse:collapse; font-size:10px; }
+    .rekap-print-table th { border:1px solid #333; padding:4px 6px; background:#d0d0d0; font-weight:700; text-align:left; font-size:9px; }
+    .rekap-print-table td { border:1px solid #aaa; padding:3px 6px; }
+    .rekap-print-table .num { text-align:right; }
+    .rekap-print-table .rp { color:#c0392b; font-weight:600; } 
+    .rekap-print-table .rh { color:#27ae60; font-weight:600; }
   }
   .print-only { display:none; }
+  .print-wrap { display:none; }
 </style>
 </head>
 <body>
@@ -76,7 +107,8 @@
       <div class="topbar-left"><h1>Stok Opname</h1><div class="breadcrumb">Pantau stok mingguan setiap Jumat</div></div>
     </div>
     <div class="topbar-right">
-      <button class="btn-action" onclick="unduhDraft()">⬇ Unduh Draft</button>
+      <button class="btn-unduh-form" onclick="unduhFormStok()">📋 Unduh Form Stok Opname</button>
+      <button class="btn-unduh-rekap" id="btnUnduhRekap" onclick="unduhRekapTersimpan()">📥 Unduh Rekap Tersimpan</button>
       <button class="btn-action" onclick="loadStok()">↻ Refresh</button>
     </div>
   </div>
@@ -96,12 +128,10 @@
             <strong id="periodeLabel">Memuat...</strong>
             <span style="font-size:12px;color:var(--teks-abu);margin-left:8px;" id="periodeRange"></span>
           </div>
-          <div class="periode-nav">
-            <button class="btn-periode" id="btnPeriodeLama" onclick="togglePeriodeLama()">📅 Tutup Periode Lama</button>
-          </div>
+          <button class="btn-periode" id="btnTutupLama" onclick="togglePeriodeLama()">📅 Tutup Periode Lama Sekaligus</button>
         </div>
-        <div id="periodelamaInfo" style="display:none;background:var(--emas-pale);border-radius:10px;padding:10px 14px;font-size:13px;color:#8a6914;margin-bottom:8px;">
-          ⚠️ Mode tutup periode lama aktif — stok yang diinput akan digunakan sebagai penutupan periode sebelumnya sekaligus pembuka periode baru.
+        <div id="periodelamaInfo" style="display:none;background:var(--emas-pale);border-radius:10px;padding:10px 14px;font-size:13px;color:#8a6914;margin-top:8px;">
+          ⚠️ Mode tutup periode lama aktif — stok yang diinput akan menutup periode sebelumnya sekaligus membuka periode baru.
         </div>
       </div>
 
@@ -111,26 +141,31 @@
           <span class="card-badge badge-hijau" id="stokBadge">—</span>
         </div>
 
-        <!-- Print header -->
-        <div class="print-only" id="printHeader" style="margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1B4332;padding-bottom:8px;margin-bottom:10px;">
-            <div>
-              <div style="font-size:15px;font-weight:700;color:#1B4332;">🌿 ZAYTUN RIVERSIDE</div>
-              <div style="font-size:12px;font-weight:600;">STOK OPNAME</div>
-            </div>
-            <div style="text-align:right;font-size:11px;">
-              <div style="margin-bottom:4px;">Tanggal : _____ / _____ / 20_____</div>
-              <div>Diisi oleh : _______________________</div>
-            </div>
+        <!-- PRINT: Form kosong untuk isi manual (2 kolom) -->
+        <div class="print-only" id="printFormHeader" style="margin-bottom:10px;">
+          <div style="text-align:center;border-bottom:2px solid #1B4332;padding-bottom:6px;margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:700;color:#1B4332;letter-spacing:1px;">ZAYTUN RIVERSIDE</div>
+            <div style="font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;">STOK OPNAME JUMAT</div>
+            <div style="font-size:11px;margin-top:4px;" id="printTglJumat"></div>
           </div>
         </div>
+        <div class="print-wrap" id="printFormContent"></div>
+
+        <!-- PRINT: Rekap data tersimpan -->
+        <div class="print-only" id="printRekapHeader" style="display:none;margin-bottom:10px;">
+          <div style="text-align:center;border-bottom:2px solid #1B4332;padding-bottom:6px;margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:700;color:#1B4332;letter-spacing:1px;">ZAYTUN RIVERSIDE</div>
+            <div style="font-size:12px;font-weight:600;letter-spacing:2px;">REKAP STOK OPNAME TERSIMPAN</div>
+            <div style="font-size:11px;margin-top:4px;" id="printRekapTgl"></div>
+          </div>
+        </div>
+        <div class="print-only" id="printRekapContent" style="display:none;"></div>
 
         <div class="web-only" id="stokContainer">
           <div class="loading-state"><div class="loading-spinner"></div>Memuat data stok...</div>
         </div>
-        <div class="print-only" id="printTableContainer"></div>
 
-        <div class="web-only" style="margin-top:16px;display:flex;gap:10px;">
+        <div class="web-only" style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn-simpan" id="btnSimpanStok" onclick="simpanStok()">💾 Simpan Stok Opname</button>
           <button class="btn-reset" onclick="resetStokForm()">↺ Reset</button>
         </div>
@@ -148,7 +183,7 @@
       </div>
       <div class="residu-summary" id="residuSummary" style="display:none;">
         <div class="rs-card"><div class="rs-label">Total Item</div><div class="rs-val ok" id="rsTotal">—</div></div>
-        <div class="rs-card"><div class="rs-label">Ada Residu (−)</div><div class="rs-val bad" id="rsResidu">—</div></div>
+        <div class="rs-card"><div class="rs-label">Residu Negatif</div><div class="rs-val bad" id="rsResidu">—</div></div>
         <div class="rs-card"><div class="rs-label">Item Aman</div><div class="rs-val ok" id="rsAman">—</div></div>
       </div>
       <div class="card">
@@ -170,11 +205,11 @@ let stokMingguIni   = [];
 let jumatBaru       = '';
 let jumatLama       = '';
 let tutupLama       = false;
+let lastSavedItems  = []; // untuk unduh rekap tersimpan
 const ITEM_STOK_KAT = ['Kemasan','Bahan Baku','Bahan Penunjang','Buah-buahan','Bumbu Masak','Frozen Food','Minum Kemasan'];
 
 initPage('stok');
 
-// Hitung Jumat aktif dari tanggal hari ini
 function getJumatFromDate(d) {
   const day  = d.getDay();
   const diff = day >= 5 ? day - 5 : day + 2;
@@ -182,36 +217,31 @@ function getJumatFromDate(d) {
   f.setDate(d.getDate() - diff);
   return f;
 }
-
 function formatTgl(d) {
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
-
 function toInputDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-const now      = new Date();
-const jumatObj = getJumatFromDate(now);
-const jumatLamaObj = new Date(jumatObj); jumatLamaObj.setDate(jumatObj.getDate()-7);
+const now         = new Date();
+const jumatObj    = getJumatFromDate(now);
+const jumatLamaObj= new Date(jumatObj); jumatLamaObj.setDate(jumatObj.getDate()-7);
+jumatBaru         = formatTgl(jumatObj);
+jumatLama         = formatTgl(jumatLamaObj);
 
-jumatBaru = formatTgl(jumatObj);
-jumatLama = formatTgl(jumatLamaObj);
-
-// Tampilkan info periode
 document.getElementById('periodeLabel').textContent = `Jumat, ${jumatBaru}`;
 const kamis = new Date(jumatObj); kamis.setDate(jumatObj.getDate()+6);
 document.getElementById('periodeRange').textContent = `(${jumatBaru} — ${formatTgl(kamis)})`;
-
-// Default riwayat
 document.getElementById('tglRiwayat').value = toInputDate(jumatObj);
+document.getElementById('printTglJumat').textContent = `Tanggal Jumat: ${jumatBaru}`;
 
 loadStok();
 
 function togglePeriodeLama() {
   tutupLama = !tutupLama;
   document.getElementById('periodelamaInfo').style.display = tutupLama ? 'block' : 'none';
-  document.getElementById('btnPeriodeLama').classList.toggle('active', tutupLama);
+  document.getElementById('btnTutupLama').classList.toggle('active', tutupLama);
 }
 
 async function loadStok() {
@@ -228,8 +258,9 @@ async function loadStok() {
     stokMingguIni = stokRes.status==='ok' ? stokRes.data : [];
     document.getElementById('stokBadge').textContent = `${masterStokItems.length} item`;
     renderStokTable();
-    buildPrintTable();
-  } catch(e) { document.getElementById('stokContainer').innerHTML='<div class="empty-state">⚠️ Gagal memuat data</div>'; }
+  } catch(e) {
+    document.getElementById('stokContainer').innerHTML='<div class="empty-state">⚠️ Gagal memuat data</div>';
+  }
 }
 
 function renderStokTable() {
@@ -242,35 +273,33 @@ function renderStokTable() {
   let html = `<div style="overflow-x:auto;"><table class="stok-table"><thead><tr>
     <th style="width:30px;">No.</th>
     <th>Nama Item</th>
-    <th style="width:60px;">Satuan</th>
-    <th class="num" style="width:80px;">Stok Jumat</th>
-    <th class="num" style="width:80px;">+Belanja</th>
-    <th style="width:90px;">Keluar</th>
-    <th class="num" style="width:80px;">Stok Real</th>
-    <th style="width:90px;">Stok Opname</th>
+    <th style="width:55px;">Satuan</th>
+    <th class="num" style="width:75px;">Stok Jumat</th>
+    <th class="num" style="width:75px;">+Belanja</th>
+    <th style="width:85px;">Keluar</th>
+    <th class="num" style="width:75px;">Stok Real</th>
+    <th style="width:85px;">Stok Opname</th>
     <th style="width:80px;">Residu</th>
-    <th style="width:90px;">Mode</th>
+    <th style="width:85px;">Mode</th>
   </tr></thead><tbody>`;
 
   Object.entries(grouped).forEach(([kat, items]) => {
     html += `<tr><td class="kat-head" colspan="10">${kat}</td></tr>`;
     items.forEach(item => {
-      const ex        = stokMingguIni.find(s => s.id_item===item.id_item) || {};
-      const isKemasan = item.kategori==='Kemasan';
-      const modeKeluar= ex.mode_keluar || item.mode_keluar || 'manual';
-      const stokJumat = ex.stok_jumat || 0;
-      const stokTamb  = ex.stok_tambahan || 0;
-      const stokKeluar= ex.stok_keluar || '';
-      const stokReal  = ex.stok_real || '';
-      const stokOpn   = ex.stok_opname || '';
-      const residu    = ex.stok_residu || '';
+      const ex         = stokMingguIni.find(s => s.id_item===item.id_item) || {};
+      const isKemasan  = item.kategori==='Kemasan';
+      const modeKeluar = ex.mode_keluar || item.mode_keluar || 'manual';
+      const stokJumat  = ex.stok_jumat  || 0;
+      const stokTamb   = ex.stok_tambahan || 0;
+      const stokKeluar = ex.stok_keluar  || '';
+      const stokReal   = ex.stok_real    || '';
+      const stokOpn    = ex.stok_opname  || '';
+      const residu     = ex.stok_residu  || '';
 
-      // Input stok keluar (hanya jika manual)
       const keluarInput = isKemasan ? '—' : modeKeluar==='manual'
         ? `<input type="number" min="0" step="0.01" id="keluar-${item.id_item}" value="${stokKeluar}" placeholder="0">`
         : `<span style="color:var(--hijau);font-size:11px;">⚙ otomatis</span>`;
 
-      // Input stok opname
       const opnameInput = isKemasan
         ? `<select id="opname-${item.id_item}" style="padding:4px 6px;border:1.5px solid var(--krem-gelap);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;outline:none;background:var(--putih);">
             <option value="">—</option>
@@ -280,13 +309,12 @@ function renderStokTable() {
           </select>`
         : `<input type="number" min="0" step="0.01" id="opname-${item.id_item}" value="${stokOpn}" placeholder="0">`;
 
-      // Residu display
       let residuHtml = '—';
       if (!isKemasan && residu !== '') {
-        const r = Number(residu);
-        const cls = r > 0 ? 'residu-pos' : r < 0 ? 'residu-neg' : 'residu-zero';
-        const ind = r > 0 ? '▲' : r < 0 ? '▼' : '=';
-        residuHtml = `<span class="${cls}">${r > 0 ? '+' : ''}${residu} <span class="residu-ind">${ind}</span></span>`;
+        const r   = Number(residu);
+        const cls = r>0?'residu-pos':r<0?'residu-neg':'residu-zero';
+        const ind = r>0?'▲':r<0?'▼':'=';
+        residuHtml = `<span class="${cls}">${r>0?'+':''}${residu}<span class="residu-ind">${ind}</span></span>`;
       }
 
       html += `<tr>
@@ -301,8 +329,8 @@ function renderStokTable() {
         <td>${residuHtml}</td>
         <td>
           <select class="mode-sel" id="mode-${item.id_item}" onchange="updateMode('${item.id_item}',this.value)">
-            <option value="manual" ${modeKeluar==='manual'?'selected':''} class="mode-man">Manual</option>
-            <option value="otomatis" ${modeKeluar==='otomatis'?'selected':''} class="mode-oto">Otomatis</option>
+            <option value="manual"   ${modeKeluar==='manual'   ?'selected':''}>✏ Manual</option>
+            <option value="otomatis" ${modeKeluar==='otomatis' ?'selected':''}>⚙ Otomatis</option>
           </select>
         </td>
       </tr>`;
@@ -313,14 +341,8 @@ function renderStokTable() {
 }
 
 async function updateMode(idItem, mode) {
-  try {
-    await apiPost({ action:'updateModeKeluar', id_item:idItem, mode });
-    // Update lokal
-    const item = masterStokItems.find(m => m.id_item===idItem);
-    if (item) item.mode_keluar = mode;
-    // Re-render baris ini saja (efisien)
-    renderStokTable();
-  } catch(e) {}
+  try { await apiPost({ action:'updateModeKeluar', id_item:idItem, mode }); }
+  catch(e) {}
 }
 
 async function simpanStok() {
@@ -330,9 +352,14 @@ async function simpanStok() {
     kategori          : item.kategori,
     satuan            : item.satuan,
     mode_keluar       : document.getElementById(`mode-${item.id_item}`)?.value || 'manual',
-    stok_opname       : document.getElementById(`opname-${item.id_item}`)?.value || 0,
+    stok_opname       : document.getElementById(`opname-${item.id_item}`)?.value || '',
     stok_keluar_manual: document.getElementById(`keluar-${item.id_item}`)?.value || 0,
   }));
+
+  // Hanya item yang diisi stok_opname
+  const itemsTerisi = items.filter(i => i.stok_opname !== '' && i.stok_opname !== null);
+
+  if (!itemsTerisi.length) { alert('Belum ada stok opname yang diisi'); return; }
 
   const payload = {
     action             : 'simpanStokMingguan',
@@ -348,7 +375,13 @@ async function simpanStok() {
     document.getElementById('stokStatus').innerHTML = data.status==='ok'
       ? `<span style="color:var(--hijau);">✅ ${data.message}</span>`
       : `<span style="color:var(--merah);">❌ ${data.message}</span>`;
-    if (data.status==='ok') loadStok();
+
+    if (data.status==='ok') {
+      // Simpan data terisi untuk unduh rekap
+      lastSavedItems = itemsTerisi;
+      document.getElementById('btnUnduhRekap').classList.add('show');
+      loadStok();
+    }
   } catch(e) {
     document.getElementById('stokStatus').innerHTML=`<span style="color:var(--merah);">❌ Gagal konek ke server</span>`;
   } finally { btn.disabled=false; btn.textContent='💾 Simpan Stok Opname'; }
@@ -363,6 +396,133 @@ function resetStokForm() {
   });
 }
 
+// ── Unduh Form Kosong (2 kolom, minimalis) ────
+function unduhFormStok() {
+  // Bagi item jadi 2 kolom
+  const half  = Math.ceil(masterStokItems.length / 2);
+  const col1  = masterStokItems.slice(0, half);
+  const col2  = masterStokItems.slice(half);
+
+  function buildCol(items) {
+    let html = `<table class="print-stok-table">
+      <thead><tr>
+        <th class="td-no">No</th>
+        <th>Nama Item</th>
+        <th class="td-sat">Sat.</th>
+        <th class="td-stok">Stok</th>
+      </tr></thead><tbody>`;
+    items.forEach(item => {
+      const isKemasan = item.kategori==='Kemasan';
+      html += `<tr>
+        <td class="td-no">${item.no_urut}</td>
+        <td>${item.nama_item}</td>
+        <td class="td-sat">${isKemasan?'BSH':item.satuan}</td>
+        <td class="td-stok">&nbsp;</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    return html;
+  }
+
+  document.getElementById('printFormContent').innerHTML =
+    `<div class="print-col">${buildCol(col1)}</div>
+     <div class="print-col">${buildCol(col2)}</div>`;
+
+  document.getElementById('printFormContent').style.display = 'flex';
+
+  // Footer tanda tangan
+  const footer = `<div class="print-footer">
+    <div class="print-footer-grid">
+      <div class="print-footer-item">
+        <div class="label">Diisi Oleh</div>
+        <div class="space"></div>
+        <div>( _________________________ )</div>
+      </div>
+      <div class="print-footer-item">
+        <div class="label">Diperiksa Oleh</div>
+        <div class="space"></div>
+        <div>( _________________________ )</div>
+      </div>
+      <div class="print-footer-item">
+        <div class="label">Diketahui Oleh</div>
+        <div class="space"></div>
+        <div>( _________________________ )</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Sembunyikan rekap, tampilkan form
+  document.getElementById('printRekapHeader').style.display = 'none';
+  document.getElementById('printRekapContent').style.display = 'none';
+  document.getElementById('printFormHeader').style.display = 'block';
+
+  // Append footer ke print area
+  let fa = document.getElementById('printFooterArea');
+  if (!fa) {
+    fa = document.createElement('div');
+    fa.id = 'printFooterArea';
+    fa.className = 'print-only';
+    document.querySelector('.card').appendChild(fa);
+  }
+  fa.innerHTML = footer;
+
+  setTimeout(() => window.print(), 300);
+}
+
+// ── Unduh Rekap Tersimpan (otomatis setelah simpan) ─
+function unduhRekapTersimpan() {
+  if (!lastSavedItems.length) { alert('Belum ada data tersimpan'); return; }
+
+  document.getElementById('printRekapTgl').textContent = `Periode: ${jumatBaru}`;
+
+  let html = `<table class="rekap-print-table">
+    <thead><tr>
+      <th style="width:24px;">No</th>
+      <th>Nama Item</th>
+      <th style="width:35px;">Sat.</th>
+      <th class="num" style="width:55px;">Stok Jumat</th>
+      <th class="num" style="width:50px;">+Belanja</th>
+      <th class="num" style="width:50px;">Keluar</th>
+      <th class="num" style="width:55px;">Stok Real</th>
+      <th class="num" style="width:55px;">Stok Opname</th>
+      <th class="num" style="width:50px;">Residu</th>
+    </tr></thead><tbody>`;
+
+  lastSavedItems.forEach(item => {
+    const ex  = stokMingguIni.find(s => s.id_item===item.id_item) || {};
+    const m   = masterStokItems.find(m => m.id_item===item.id_item) || {};
+    const r   = Number(ex.stok_residu);
+    const rCls= !isNaN(r) ? (r>0?'rh':r<0?'rp':'') : '';
+    const rTxt= !isNaN(r) ? `${r>0?'+':''}${ex.stok_residu}${r>0?'▲':r<0?'▼':''}` : '—';
+
+    html += `<tr>
+      <td style="text-align:center;">${m.no_urut||'—'}</td>
+      <td>${item.nama_item}</td>
+      <td style="text-align:center;">${item.kategori==='Kemasan'?'BSH':item.satuan}</td>
+      <td class="num">${ex.stok_jumat||'—'}</td>
+      <td class="num">${Number(ex.stok_tambahan)>0?'+'+ex.stok_tambahan:'—'}</td>
+      <td class="num">${ex.stok_keluar||'—'}</td>
+      <td class="num">${ex.stok_real||'—'}</td>
+      <td class="num">${item.stok_opname||'—'}</td>
+      <td class="num ${rCls}">${rTxt}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+
+  document.getElementById('printRekapContent').innerHTML = html;
+
+  // Sembunyikan form, tampilkan rekap
+  document.getElementById('printFormContent').style.display = 'none';
+  document.getElementById('printFormHeader').style.display  = 'none';
+  document.getElementById('printRekapHeader').style.display = 'block';
+  document.getElementById('printRekapContent').style.display= 'block';
+
+  const fa = document.getElementById('printFooterArea');
+  if (fa) fa.innerHTML = '';
+
+  setTimeout(() => window.print(), 300);
+}
+
 function setMode(m) {
   document.getElementById('modeInput').style.display   = m==='input'  ?'block':'none';
   document.getElementById('modeRiwayat').style.display = m==='riwayat'?'block':'none';
@@ -375,9 +535,8 @@ async function loadRiwayat() {
   const tgl = document.getElementById('tglRiwayat').value;
   if (!tgl) return;
   const [y,mo,d] = tgl.split('-');
-  const tglFmt   = `${d}/${mo}/${y}`;
   try {
-    const data = await apiGet({ action:'getStokOpname', tanggal_jumat: tglFmt });
+    const data = await apiGet({ action:'getStokOpname', tanggal_jumat:`${d}/${mo}/${y}` });
     if (data.status==='ok') renderRiwayat(data.data);
   } catch(e) {}
 }
@@ -388,11 +547,11 @@ function renderRiwayat(data) {
     document.getElementById('residuSummary').style.display='none';
     return;
   }
-  const itemNegatif = data.filter(d => !isNaN(Number(d.stok_residu)) && Number(d.stok_residu)<0).length;
-  const itemAman    = data.filter(d => !isNaN(Number(d.stok_residu)) && Number(d.stok_residu)>=0).length;
-  document.getElementById('rsTotal').textContent   = data.length;
-  document.getElementById('rsResidu').textContent  = itemNegatif;
-  document.getElementById('rsAman').textContent    = itemAman;
+  const neg  = data.filter(d => !isNaN(Number(d.stok_residu))&&Number(d.stok_residu)<0).length;
+  const aman = data.filter(d => !isNaN(Number(d.stok_residu))&&Number(d.stok_residu)>=0).length;
+  document.getElementById('rsTotal').textContent  = data.length;
+  document.getElementById('rsResidu').textContent = neg;
+  document.getElementById('rsAman').textContent   = aman;
   document.getElementById('residuSummary').style.display='grid';
   document.getElementById('riwayatBadge').textContent = `${data.length} item`;
 
@@ -402,17 +561,16 @@ function renderRiwayat(data) {
     <th class="num">Keluar</th><th class="num">Stok Real</th>
     <th class="num">Stok Opname</th><th>Residu</th><th>Mode</th>
   </tr></thead><tbody>`;
-
   data.forEach(d => {
-    const master    = masterStokItems.find(m => m.id_item===d.id_item);
-    const noUrut    = master ? master.no_urut : '—';
+    const m         = masterStokItems.find(x => x.id_item===d.id_item);
+    const noUrut    = m ? m.no_urut : '—';
     const isKemasan = d.kategori==='Kemasan';
     const r         = Number(d.stok_residu);
     let residuHtml  = '—';
     if (!isKemasan && d.stok_residu!=='') {
       const cls = r>0?'residu-pos':r<0?'residu-neg':'residu-zero';
       const ind = r>0?'▲':r<0?'▼':'=';
-      residuHtml = `<span class="${cls}">${r>0?'+':''}${d.stok_residu} <span class="residu-ind">${ind}</span></span>`;
+      residuHtml = `<span class="${cls}">${r>0?'+':''}${d.stok_residu}<span class="residu-ind">${ind}</span></span>`;
     }
     html += `<tr>
       <td><span class="no-urut">${noUrut}</span></td>
@@ -424,61 +582,12 @@ function renderRiwayat(data) {
       <td class="stok-real">${d.stok_real||'—'}</td>
       <td class="num">${d.stok_opname||'—'}</td>
       <td>${residuHtml}</td>
-      <td><span class="${d.mode_keluar==='otomatis'?'mode-oto':'mode-man'}" style="font-size:11px;font-weight:600;">${d.mode_keluar==='otomatis'?'⚙ Oto':'✏ Manual'}</span></td>
+      <td><span style="font-size:11px;font-weight:600;color:${d.mode_keluar==='otomatis'?'var(--hijau)':'var(--emas)'};">${d.mode_keluar==='otomatis'?'⚙ Oto':'✏ Man'}</span></td>
     </tr>`;
   });
   html += `</tbody></table></div>`;
   document.getElementById('riwayatContainer').innerHTML = html;
 }
-
-// ── Print draft minimalis ────────────────────
-function buildPrintTable() {
-  const grouped = {};
-  masterStokItems.forEach(item => {
-    if (!grouped[item.kategori]) grouped[item.kategori]=[];
-    grouped[item.kategori].push(item);
-  });
-  let html = `<table class="print-stok-table">
-    <thead><tr>
-      <th class="td-no">No.</th>
-      <th style="width:180px;">Nama Item</th>
-      <th style="width:40px;">Sat.</th>
-      <th class="td-isi">Stok Jumat</th>
-      <th class="td-isi">+Belanja</th>
-      <th class="td-isi">Keluar</th>
-      <th class="td-isi">Stok Real</th>
-      <th class="td-isi">Stok Opname</th>
-      <th class="td-isi">Residu</th>
-      <th style="width:60px;">Ket.</th>
-    </tr></thead><tbody>`;
-  Object.entries(grouped).forEach(([kat, items]) => {
-    html += `<tr><td colspan="10" style="background:#e0e0e0;font-weight:700;font-size:9px;padding:2px 5px;letter-spacing:1px;text-transform:uppercase;">${kat}</td></tr>`;
-    items.forEach(item => {
-      const ex = stokMingguIni.find(s => s.id_item===item.id_item)||{};
-      html += `<tr>
-        <td class="td-no">${item.no_urut}</td>
-        <td>${item.nama_item}</td>
-        <td style="text-align:center;">${item.kategori==='Kemasan'?'BSH':item.satuan}</td>
-        <td class="td-isi">${ex.stok_jumat||''}</td>
-        <td class="td-isi">${ex.stok_tambahan>0?ex.stok_tambahan:''}</td>
-        <td class="td-isi">&nbsp;</td>
-        <td class="td-isi">&nbsp;</td>
-        <td class="td-isi">&nbsp;</td>
-        <td class="td-isi">&nbsp;</td>
-        <td>&nbsp;</td>
-      </tr>`;
-    });
-  });
-  html += `<tr><td colspan="10" style="border:none;padding-top:16px;">
-    <div style="display:flex;gap:60px;font-size:10px;">
-      <div>Diperiksa : _______________________</div>
-      <div>Diketahui : _______________________</div>
-    </div>
-  </td></tr></tbody></table>`;
-  document.getElementById('printTableContainer').innerHTML = html;
-}
-
-function unduhDraft() { buildPrintTable(); setTimeout(() => window.print(), 300); }
 </script>
 </body>
 </html>
