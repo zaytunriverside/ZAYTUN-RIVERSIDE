@@ -482,57 +482,7 @@
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <span class="icon">🌿</span>
-    <div class="name">Zaytun Riverside</div>
-    <div class="sub">Pembukuan Cafe</div>
-  </div>
-
-  <div class="sidebar-user">
-    <div class="user-avatar">👤</div>
-    <div class="user-info">
-      <div class="uname" id="sidebarUname">—</div>
-      <div class="urole" id="sidebarUrole">—</div>
-    </div>
-  </div>
-
-  <nav class="sidebar-nav">
-    <div class="nav-section">Menu Utama</div>
-    <a class="nav-item active" href="dashboard.html">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-label">Dashboard</span>
-    </a>
-    <a class="nav-item" href="transaksi.html">
-      <span class="nav-icon">🧾</span>
-      <span class="nav-label">Transaksi</span>
-    </a>
-
-    <div class="nav-section">Operasional</div>
-    <a class="nav-item" href="belanja.html">
-      <span class="nav-icon">🛒</span>
-      <span class="nav-label">Input Belanja</span>
-    </a>
-    <a class="nav-item" href="stok.html">
-      <span class="nav-icon">📦</span>
-      <span class="nav-label">Stok Opname</span>
-    </a>
-
-    <div class="nav-section">Laporan</div>
-    <a class="nav-item" href="rekap.html">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label">Rekap Penjualan</span>
-    </a>
-    <a class="nav-item" href="laporan.html">
-      <span class="nav-icon">📈</span>
-      <span class="nav-label">Laba Rugi</span>
-    </a>
-  </nav>
-
-  <div class="sidebar-bottom">
-    <button class="btn-logout" onclick="doLogout()">🚪 Keluar</button>
-  </div>
-</aside>
+<aside class="sidebar" id="sidebar"></aside>
 
 <!-- MAIN -->
 <main class="main">
@@ -620,14 +570,7 @@
 <script src="_app.js"></script>
 <script>
   const API_URL = getApiUrl();
-
-  // ── Auth check ───────────────────────────────────
-  const userRaw = localStorage.getItem('zaytun_user');
-  if (!userRaw) { window.location.href = 'index.html'; }
-  const user = JSON.parse(userRaw || '{}');
-
-  document.getElementById('sidebarUname').textContent = user.username || '—';
-  document.getElementById('sidebarUrole').textContent = user.role    || '—';
+  initPage('dashboard');
 
   // ── Tanggal & waktu ──────────────────────────────
   function updateClock() {
