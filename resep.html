@@ -121,12 +121,17 @@ init();
 async function init() {
   try {
     const [mR, bR] = await Promise.all([apiGet({action:'getMenuList'}), apiGet({action:'getMasterBelanja'})]);
+    console.log('getMenuList:', mR);
+    console.log('getMasterBelanja:', bR);
     if (mR.status==='ok') menuList  = mR.data;
     if (bR.status==='ok') bahanList = bR.data.filter(m => STOK_KAT.includes(m.kategori));
+    console.log('menuList length:', menuList.length, 'sample:', menuList[0]);
+    console.log('bahanList length:', bahanList.length);
     document.getElementById('menuCount').textContent = menuList.length;
     renderMenuList();
   } catch(e) {
-    document.getElementById('menuScroll').innerHTML = '<div style="padding:12px;color:var(--merah);font-size:13px;">⚠️ Gagal memuat</div>';
+    console.error('init error:', e);
+    document.getElementById('menuScroll').innerHTML = '<div style="padding:12px;color:var(--merah);font-size:13px;">⚠️ Gagal memuat: '+e.message+'</div>';
   }
 }
 
@@ -175,7 +180,9 @@ async function hapusMenuItem(e, idMenu, nama) {
   e.stopPropagation();
   if (!confirm(`Hapus menu "${nama}"?`)) return;
   try {
+    console.log('hapusMenu:', {id_menu:idMenu, nama_menu:nama});
     const d = await apiPost({action:'hapusMenu', id_menu:idMenu, nama_menu:nama});
+    console.log('hapusMenu response:', d);
     if (d.status !== 'ok') { alert('Gagal hapus: ' + d.message); return; }
     menuList = menuList.filter(m => !(m.id_menu === idMenu || m.nama_menu === nama));
     delete resepCache[nama];
@@ -193,10 +200,15 @@ async function pilihMenu(nama) {
   document.getElementById('resepPanel').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat resep...</div>';
   try {
     const d = await apiGet({action:'getResep', nama_menu:nama});
+    console.log('getResep untuk', nama, ':', d);
     resepCache[nama] = d.status==='ok' ? d.data : [];
+    console.log('resep length:', resepCache[nama].length);
     renderPanel(nama);
     renderMenuList();
-  } catch(e) { document.getElementById('resepPanel').innerHTML = '<div class="empty-panel"><div class="ei">⚠️</div><div>Gagal memuat resep</div></div>'; }
+  } catch(e) {
+    console.error('pilihMenu error:', e);
+    document.getElementById('resepPanel').innerHTML = '<div class="empty-panel"><div class="ei">⚠️</div><div>Error: '+e.message+'</div></div>';
+  }
 }
 
 function tampilEmpty() {
