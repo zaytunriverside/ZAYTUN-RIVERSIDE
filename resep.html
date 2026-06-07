@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resep Menu — Zaytun Riverside</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .resep-layout { display:grid; grid-template-columns:280px 1fr; gap:20px; }
+  .menu-list { background:var(--putih); border-radius:16px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04); height:fit-content; position:sticky; top:80px; }
+  .menu-list-title { font-size:13px; font-weight:700; color:var(--hijau-tua); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--krem-gelap); }
+  .menu-search { width:100%; padding:8px 12px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; outline:none; margin-bottom:10px; }
+  .menu-search:focus { border-color:var(--hijau-mid); }
+  .menu-item { padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13px; color:var(--teks); transition:all 0.15s; display:flex; align-items:center; justify-content:space-between; }
+  .menu-item:hover { background:var(--krem); }
+  .menu-item.active { background:var(--hijau-pale); color:var(--hijau); font-weight:600; }
+  .menu-item .has-resep { font-size:10px; background:var(--hijau-pale); color:var(--hijau); padding:1px 6px; border-radius:10px; font-weight:600; }
+  .menu-scroll { max-height:500px; overflow-y:auto; }
+
+  .resep-form { background:var(--putih); border-radius:16px; padding:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04); }
+  .resep-form-title { font-size:16px; font-weight:700; color:var(--hijau-tua); font-family:'Playfair Display',serif; margin-bottom:4px; }
+  .resep-form-sub { font-size:12px; color:var(--teks-abu); margin-bottom:20px; }
+
+  .bahan-row { display:grid; grid-template-columns:1fr 120px 80px 40px; gap:10px; align-items:center; margin-bottom:10px; }
+  .bahan-row select, .bahan-row input { padding:8px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; outline:none; width:100%; background:var(--putih); }
+  .bahan-row select:focus, .bahan-row input:focus { border-color:var(--hijau-mid); }
+  .bahan-row .btn-hapus { background:var(--merah-pale); border:none; border-radius:8px; color:var(--merah); font-size:16px; cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .bahan-row .btn-hapus:hover { background:var(--merah); color:white; }
+
+  .resep-table { width:100%; border-collapse:collapse; margin-top:16px; }
+  .resep-table th { text-align:left; font-size:11px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 10px 10px; border-bottom:1px solid var(--krem-gelap); }
+  .resep-table td { padding:10px; border-bottom:1px solid var(--krem); font-size:13px; vertical-align:middle; }
+  .resep-table tr:last-child td { border-bottom:none; }
+  .btn-hapus-resep { background:none; border:none; color:var(--merah); cursor:pointer; font-size:16px; padding:4px 8px; border-radius:6px; transition:all 0.2s; }
+  .btn-hapus-resep:hover { background:var(--merah-pale); }
+
+  .empty-resep { text-align:center; padding:32px; color:var(--teks-abu); font-size:14px; }
+  .empty-resep .ei { font-size:32px; margin-bottom:8px; }
+
+  .mode-toggle { display:flex; align-items:center; gap:8px; margin-bottom:16px; padding:10px 14px; background:var(--krem); border-radius:10px; }
+  .mode-toggle label { font-size:13px; color:var(--teks); flex:1; }
+  .mode-toggle select { padding:6px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; outline:none; }
+
+  @media (max-width:768px) { .resep-layout { grid-template-columns:1fr; } .menu-list { position:static; } }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Resep Menu</h1><div class="breadcrumb">Mapping bahan baku per menu</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-action" onclick="loadMenuList()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="resep-layout">
+
+      <!-- Daftar Menu -->
+      <div class="menu-list">
+        <div class="menu-list-title">📋 Daftar Menu KasPOS</div>
+        <input class="menu-search" type="text" id="menuSearch" placeholder="Cari menu..." oninput="filterMenu()">
+        <div class="menu-scroll" id="menuScroll">
+          <div class="loading-state"><div class="loading-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- Form Resep -->
+      <div class="resep-form" id="resepForm">
+        <div class="empty-resep">
+          <div class="ei">📖</div>
+          <div>Pilih menu di sebelah kiri untuk mulai input resep</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL  = getApiUrl();
+let menuList   = [];
+let masterBahan = [];
+let activeMenu = null;
+let resepData  = {};  // cache resep per menu
+let bahanRows  = [];  // bahan yang sedang diedit
+
+initPage('resep');
+loadMenuList();
+loadMasterBahan();
+
+async function loadMenuList() {
+  try {
+    const data = await apiGet({ action:'getMenuList' });
+    if (data.status==='ok') { menuList = data.data; renderMenuList(); }
+  } catch(e) {}
+}
+
+async function loadMasterBahan() {
+  try {
+    const data = await apiGet({ action:'getMasterBelanja' });
+    if (data.status==='ok') masterBahan = data.data;
+  } catch(e) {}
+}
+
+function renderMenuList() {
+  const q    = document.getElementById('menuSearch').value.toLowerCase();
+  const list = q ? menuList.filter(m => m.toLowerCase().includes(q)) : menuList;
+  let html   = '';
+  list.forEach(m => {
+    const hasResep = resepData[m] && resepData[m].length > 0;
+    html += `<div class="menu-item${activeMenu===m?' active':''}" onclick="pilihMenu('${m.replace(/'/g,"\\'")}')">
+      <span>${m}</span>
+      ${hasResep?`<span class="has-resep">${resepData[m].length} bahan</span>`:''}
+    </div>`;
+  });
+  document.getElementById('menuScroll').innerHTML = html || '<div style="padding:16px;color:var(--teks-abu);font-size:13px;">Tidak ada menu</div>';
+}
+
+function filterMenu() { renderMenuList(); }
+
+async function pilihMenu(nama) {
+  activeMenu = nama;
+  renderMenuList();
+
+  // Load resep menu ini
+  document.getElementById('resepForm').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div></div>';
+  try {
+    const data = await apiGet({ action:'getResep', nama_menu: nama });
+    if (data.status==='ok') {
+      resepData[nama] = data.data;
+      bahanRows = data.data.map(r => ({ id_bahan:r.id_bahan, nama_bahan:r.nama_bahan, jumlah:r.jumlah_per_porsi, satuan:r.satuan }));
+      renderResepForm(nama);
+      renderMenuList();
+    }
+  } catch(e) { document.getElementById('resepForm').innerHTML = '<div class="empty-resep">⚠️ Gagal memuat resep</div>'; }
+}
+
+function renderResepForm(nama) {
+  // Mode keluar dari master
+  const master = masterBahan.find(m => false); // placeholder
+  let html = `
+    <div class="resep-form-title">📖 Resep: ${nama}</div>
+    <div class="resep-form-sub">Isi bahan baku utama yang digunakan per 1 porsi menu ini.</div>
+
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--teks-abu);margin-bottom:8px;">Tambah Bahan</div>
+      <div id="bahanRows"></div>
+      <button class="btn-secondary" onclick="tambahBahanRow()" style="margin-top:8px;">+ Tambah Bahan</button>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn-primary" onclick="simpanResep()">💾 Simpan Resep</button>
+      <button class="btn-reset" onclick="pilihMenu('${nama.replace(/'/g,"\\'")}')">↺ Reset</button>
+    </div>
+    <div id="resepStatus" style="margin-top:10px;font-size:13px;"></div>
+
+    <div style="margin-top:24px;border-top:1px solid var(--krem-gelap);padding-top:16px;">
+      <div style="font-size:13px;font-weight:600;color:var(--hijau-tua);margin-bottom:10px;">Resep Tersimpan</div>
+      <div id="resepTersimpan"></div>
+    </div>`;
+
+  document.getElementById('resepForm').innerHTML = html;
+  renderBahanRows();
+  renderResepTersimpan(nama);
+}
+
+function renderBahanRows() {
+  let html = '';
+  if (!bahanRows.length) {
+    html = '<div style="color:var(--teks-abu);font-size:13px;padding:8px 0;">Belum ada bahan — klik "+ Tambah Bahan"</div>';
+  }
+  bahanRows.forEach((b, i) => {
+    const options = masterBahan.map(m =>
+      `<option value="${m.id_item}" data-nama="${m.nama_item}" data-satuan="${m.satuan}" ${m.id_item===b.id_bahan?'selected':''}>${m.nama_item}</option>`
+    ).join('');
+    html += `<div class="bahan-row">
+      <select onchange="updateBahan(${i}, this)"><option value="">— Pilih Bahan —</option>${options}</select>
+      <input type="number" min="0" step="0.01" placeholder="Jumlah" value="${b.jumlah||''}" oninput="bahanRows[${i}].jumlah=this.value">
+      <input type="text" placeholder="Satuan" value="${b.satuan||''}" oninput="bahanRows[${i}].satuan=this.value">
+      <button class="btn-hapus" onclick="hapusBahanRow(${i})">✕</button>
+    </div>`;
+  });
+  document.getElementById('bahanRows').innerHTML = html;
+}
+
+function updateBahan(i, sel) {
+  const opt = sel.options[sel.selectedIndex];
+  bahanRows[i].id_bahan   = sel.value;
+  bahanRows[i].nama_bahan = opt.dataset.nama || '';
+  bahanRows[i].satuan     = opt.dataset.satuan || '';
+  renderBahanRows();
+}
+
+function tambahBahanRow() { bahanRows.push({ id_bahan:'', nama_bahan:'', jumlah:0, satuan:'' }); renderBahanRows(); }
+function hapusBahanRow(i) { bahanRows.splice(i,1); renderBahanRows(); }
+
+function renderResepTersimpan(nama) {
+  const resep = resepData[nama] || [];
+  if (!resep.length) {
+    document.getElementById('resepTersimpan').innerHTML = '<div class="empty-resep" style="padding:16px;"><div class="ei" style="font-size:20px;">📭</div><div>Belum ada resep tersimpan</div></div>';
+    return;
+  }
+  let html = `<table class="resep-table"><thead><tr>
+    <th>Bahan</th><th>Jumlah/Porsi</th><th>Satuan</th><th></th>
+  </tr></thead><tbody>`;
+  resep.forEach(r => {
+    html += `<tr>
+      <td style="font-weight:500;">${r.nama_bahan}</td>
+      <td>${r.jumlah_per_porsi}</td>
+      <td style="color:var(--teks-abu);">${r.satuan}</td>
+      <td><button class="btn-hapus-resep" onclick="hapusSatuResep('${r.id_resep}','${nama.replace(/'/g,"\\'")}')">🗑</button></td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('resepTersimpan').innerHTML = html;
+}
+
+async function simpanResep() {
+  if (!activeMenu) return;
+  const valid = bahanRows.filter(b => b.id_bahan && Number(b.jumlah)>0);
+  if (!valid.length) { alert('Tambahkan minimal 1 bahan dengan jumlah > 0'); return; }
+  try {
+    const data = await apiPost({ action:'simpanResep', nama_menu:activeMenu, bahan:valid });
+    document.getElementById('resepStatus').innerHTML = data.status==='ok'
+      ? `<span style="color:var(--hijau);">✅ ${data.message}</span>`
+      : `<span style="color:var(--merah);">❌ ${data.message}</span>`;
+    if (data.status==='ok') pilihMenu(activeMenu);
+  } catch(e) { document.getElementById('resepStatus').innerHTML = `<span style="color:var(--merah);">❌ Gagal konek</span>`; }
+}
+
+async function hapusSatuResep(id, nama) {
+  if (!confirm('Hapus bahan ini dari resep?')) return;
+  try {
+    await apiPost({ action:'hapusResep', id_resep:id });
+    pilihMenu(nama);
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
