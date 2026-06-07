@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modal Awal & Penyesuaian Kas — Zaytun Riverside</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:768px){ .modal-grid{grid-template-columns:1fr;} }
+
+  .form-group { margin-bottom:14px; }
+  .form-group label { display:block; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); margin-bottom:6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%; padding:10px 12px; border:1.5px solid var(--krem-gelap);
+    border-radius:10px; font-size:13px; font-family:'Inter',sans-serif;
+    background:var(--putih); outline:none; color:var(--teks);
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--hijau-mid); box-shadow:0 0 0 3px rgba(64,145,108,0.1); }
+  .form-group textarea { resize:vertical; min-height:70px; }
+
+  .jenis-tabs { display:flex; gap:0; margin-bottom:20px; border-radius:12px; overflow:hidden; border:1.5px solid var(--krem-gelap); width:fit-content; }
+  .jenis-tab { padding:9px 20px; font-size:13px; font-weight:600; cursor:pointer; background:var(--putih); color:var(--teks-abu); border:none; font-family:'Inter',sans-serif; transition:all 0.2s; }
+  .jenis-tab.masuk  { }
+  .jenis-tab.keluar { }
+  .jenis-tab.active.masuk  { background:var(--hijau); color:var(--putih); }
+  .jenis-tab.active.keluar { background:var(--merah);  color:var(--putih); }
+  .jenis-tab:hover:not(.active) { background:var(--krem); }
+
+  .summary-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+  .sum-item { background:var(--putih); border-radius:12px; padding:14px 18px; flex:1; min-width:140px; border:1px solid var(--krem-gelap); }
+  .sum-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--teks-abu); margin-bottom:6px; }
+  .sum-val { font-size:18px; font-weight:700; }
+  .sum-val.hijau { color:var(--hijau); }
+  .sum-val.merah { color:var(--merah); }
+  .sum-val.emas  { color:var(--emas); }
+
+  .modal-table { width:100%; border-collapse:collapse; }
+  .modal-table th { text-align:left; font-size:11px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--teks-abu); padding:0 12px 10px; border-bottom:1px solid var(--krem-gelap); }
+  .modal-table td { padding:11px 12px; font-size:13px; border-bottom:1px solid var(--krem); vertical-align:middle; }
+  .modal-table tr:last-child td { border-bottom:none; }
+  .modal-table tr:hover td { background:var(--krem); }
+
+  .jenis-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+  .jenis-masuk  { background:var(--hijau-pale); color:var(--hijau); }
+  .jenis-keluar { background:var(--merah-pale);  color:var(--merah); }
+  .jenis-modal  { background:var(--emas-pale);   color:#8a6914; }
+
+  .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px; }
+  .filter-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
+  .filter-bar input, .filter-bar select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); outline:none; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color:var(--hijau-mid); }
+
+  .btn-hapus-row { background:none; border:none; color:var(--merah); cursor:pointer; font-size:16px; padding:4px 8px; border-radius:6px; transition:all 0.2s; }
+  .btn-hapus-row:hover { background:var(--merah-pale); }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Modal & Penyesuaian Kas</h1><div class="breadcrumb">Modal awal, penerimaan, dan koreksi kas</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-action" onclick="loadData()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Ringkasan -->
+    <div class="summary-bar" id="summaryBar">
+      <div class="sum-item"><div class="sum-label">Total Modal Masuk</div><div class="sum-val hijau" id="sumMasuk">—</div></div>
+      <div class="sum-item"><div class="sum-label">Total Penyesuaian Keluar</div><div class="sum-val merah" id="sumKeluar">—</div></div>
+      <div class="sum-item"><div class="sum-label">Saldo Bersih</div><div class="sum-val emas" id="sumSaldo">—</div></div>
+    </div>
+
+    <div class="modal-grid">
+
+      <!-- Form Input -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">➕ Tambah Entri</div></div>
+
+        <div class="jenis-tabs">
+          <button class="jenis-tab masuk active" id="tabMasuk" onclick="setJenis('masuk')">💰 Modal / Penerimaan</button>
+          <button class="jenis-tab keluar"        id="tabKeluar" onclick="setJenis('keluar')">📤 Penyesuaian Keluar</button>
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" id="inputTgl">
+        </div>
+
+        <div class="form-group">
+          <label>Kategori</label>
+          <select id="inputKategori">
+            <option value="">— Pilih Kategori —</option>
+            <!-- Masuk -->
+            <optgroup label="Modal / Penerimaan" id="optMasuk">
+              <option value="Modal Awal">Modal Awal</option>
+              <option value="Tambah Modal">Tambah Modal</option>
+              <option value="Penerimaan Lain">Penerimaan Lain</option>
+              <option value="Koreksi Kas Masuk">Koreksi Kas Masuk</option>
+            </optgroup>
+            <!-- Keluar -->
+            <optgroup label="Penyesuaian Keluar" id="optKeluar" style="display:none;">
+              <option value="Koreksi Kas Keluar">Koreksi Kas Keluar</option>
+              <option value="Pengeluaran Tidak Tercatat">Pengeluaran Tidak Tercatat</option>
+              <option value="Selisih Kas">Selisih Kas</option>
+              <option value="Lain-lain">Lain-lain</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Jumlah (Rp)</label>
+          <input type="number" id="inputJumlah" placeholder="0" min="0">
+        </div>
+
+        <div class="form-group">
+          <label>Keterangan</label>
+          <textarea id="inputKeterangan" placeholder="Deskripsi singkat..."></textarea>
+        </div>
+
+        <button class="btn-primary" style="width:100%;padding:12px;" onclick="simpanModal()">💾 Simpan</button>
+        <div id="formStatus" style="margin-top:10px;font-size:13px;"></div>
+      </div>
+
+      <!-- Riwayat -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Riwayat</div>
+          <span class="card-badge badge-hijau" id="riwayatBadge">—</span>
+        </div>
+        <div class="filter-bar">
+          <div><label>Dari</label><input type="date" id="filterDari" onchange="loadData()"></div>
+          <div><label>Sampai</label><input type="date" id="filterSampai" onchange="loadData()"></div>
+          <div><label>Jenis</label>
+            <select id="filterJenis" onchange="renderTabel()">
+              <option value="">Semua</option>
+              <option value="masuk">Masuk</option>
+              <option value="keluar">Keluar</option>
+            </select>
+          </div>
+        </div>
+        <div id="riwayatContainer"><div class="loading-state"><div class="loading-spinner"></div>Memuat...</div></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = getApiUrl();
+let allData   = [];
+let activeJenis = 'masuk';
+
+initPage('modal');
+
+// Default tanggal
+const now = new Date();
+document.getElementById('inputTgl').value    = now.toISOString().split('T')[0];
+document.getElementById('filterDari').value  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+document.getElementById('filterSampai').value = now.toISOString().split('T')[0];
+
+loadData();
+
+function setJenis(jenis) {
+  activeJenis = jenis;
+  document.getElementById('tabMasuk').classList.toggle('active',  jenis==='masuk');
+  document.getElementById('tabKeluar').classList.toggle('active', jenis==='keluar');
+  document.getElementById('optMasuk').style.display  = jenis==='masuk'  ? '' : 'none';
+  document.getElementById('optKeluar').style.display = jenis==='keluar' ? '' : 'none';
+  document.getElementById('inputKategori').value = '';
+}
+
+async function loadData() {
+  const dari   = document.getElementById('filterDari').value;
+  const sampai = document.getElementById('filterSampai').value;
+  if (!dari || !sampai) return;
+  try {
+    const data = await apiGet({ action:'getModal', dari:fmtDate(dari), sampai:fmtDate(sampai) });
+    if (data.status==='ok') { allData = data.data; renderSummary(); renderTabel(); }
+  } catch(e) {
+    document.getElementById('riwayatContainer').innerHTML = '<div class="empty-state">⚠️ Gagal memuat data</div>';
+  }
+}
+
+function renderSummary() {
+  const masuk  = allData.filter(d => d.jenis==='masuk').reduce((s,d)  => s+(Number(d.jumlah)||0), 0);
+  const keluar = allData.filter(d => d.jenis==='keluar').reduce((s,d) => s+(Number(d.jumlah)||0), 0);
+  document.getElementById('sumMasuk').textContent  = rp(masuk);
+  document.getElementById('sumKeluar').textContent = rp(keluar);
+  document.getElementById('sumSaldo').textContent  = rp(masuk - keluar);
+}
+
+function renderTabel() {
+  const jenis  = document.getElementById('filterJenis').value;
+  let data = jenis ? allData.filter(d => d.jenis===jenis) : allData;
+  document.getElementById('riwayatBadge').textContent = `${data.length} entri`;
+
+  if (!data.length) {
+    document.getElementById('riwayatContainer').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>Belum ada data</div>';
+    return;
+  }
+
+  let html = `<table class="modal-table"><thead><tr>
+    <th>Tanggal</th><th>Jenis</th><th>Kategori</th><th>Jumlah</th><th>Keterangan</th><th></th>
+  </tr></thead><tbody>`;
+
+  [...data].reverse().forEach(d => {
+    const bc = d.jenis==='masuk' ? 'jenis-masuk' : 'jenis-keluar';
+    html += `<tr>
+      <td>${d.tanggal}</td>
+      <td><span class="jenis-badge ${bc}">${d.jenis==='masuk'?'Masuk':'Keluar'}</span></td>
+      <td>${d.kategori}</td>
+      <td style="font-weight:700;color:${d.jenis==='masuk'?'var(--hijau)':'var(--merah)'};">${rp(d.jumlah)}</td>
+      <td style="color:var(--teks-abu);font-size:12px;">${d.keterangan||'—'}</td>
+      <td><button class="btn-hapus-row" onclick="hapusModal('${d.id_modal}')">🗑</button></td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('riwayatContainer').innerHTML = html;
+}
+
+async function simpanModal() {
+  const tgl       = document.getElementById('inputTgl').value;
+  const kategori  = document.getElementById('inputKategori').value;
+  const jumlah    = document.getElementById('inputJumlah').value;
+  const ket       = document.getElementById('inputKeterangan').value.trim();
+  const status    = document.getElementById('formStatus');
+  const user      = JSON.parse(localStorage.getItem('zaytun_user')||'{}');
+
+  if (!tgl || !kategori || !jumlah || Number(jumlah)<=0) {
+    status.innerHTML = '<span style="color:var(--merah);">⚠️ Tanggal, kategori, dan jumlah wajib diisi</span>';
+    return;
+  }
+
+  try {
+    const data = await apiPost({
+      action    : 'simpanModal',
+      tanggal   : fmtDate(tgl),
+      jenis     : activeJenis,
+      kategori,
+      jumlah    : Number(jumlah),
+      keterangan: ket,
+      kasir     : user.username || 'admin'
+    });
+
+    if (data.status==='ok') {
+      status.innerHTML = `<span style="color:var(--hijau);">✅ ${data.message}</span>`;
+      document.getElementById('inputJumlah').value    = '';
+      document.getElementById('inputKeterangan').value = '';
+      document.getElementById('inputKategori').value  = '';
+      loadData();
+    } else {
+      status.innerHTML = `<span style="color:var(--merah);">❌ ${data.message}</span>`;
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--merah);">❌ Gagal konek ke server</span>';
+  }
+}
+
+async function hapusModal(id) {
+  if (!confirm('Hapus entri ini?')) return;
+  try {
+    const data = await apiPost({ action:'hapusModal', id_modal:id });
+    if (data.status==='ok') loadData();
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
