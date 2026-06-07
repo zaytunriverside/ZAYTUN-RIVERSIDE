@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { id:'transaksi', href:'transaksi.html', icon:'🧾', label:'Transaksi',       section:'Menu Utama' },
   { id:'belanja',   href:'belanja.html',   icon:'🛒', label:'Input Belanja',   section:'Operasional' },
   { id:'stok',      href:'stok.html',      icon:'📦', label:'Stok Opname',     section:'Operasional' },
+  { id:'resep',     href:'resep.html',     icon:'📖', label:'Resep Menu',      section:'Operasional' },
   { id:'rekap',     href:'rekap.html',     icon:'📊', label:'Rekap Penjualan', section:'Laporan' },
   { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',       section:'Laporan' },
 ];
