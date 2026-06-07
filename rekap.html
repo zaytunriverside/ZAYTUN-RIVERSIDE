@@ -78,7 +78,7 @@
 
 <script src="_app.js"></script>
 <script>
-const API_URL = localStorage.getItem('zaytun_api')||'';
+const API_URL = getApiUrl();
 initPage('rekap');
 
 const now = new Date();
@@ -92,8 +92,7 @@ async function loadRekap() {
   if (!dari || !sampai) return;
   document.getElementById('rekapContainer').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat rekap...</div>';
   try {
-    const res  = await fetch(`${API_URL}?action=getRekap&dari=${fmtDate(dari)}&sampai=${fmtDate(sampai)}`);
-    const data = await res.json();
+    const data = await apiGet({ action:'getRekap', dari:fmtDate(dari), sampai:fmtDate(sampai) });
     if (data.status==='ok') renderRekap(data.data);
   } catch(e) { document.getElementById('rekapContainer').innerHTML='<div class="empty-state">⚠️ Gagal memuat data</div>'; }
 }
