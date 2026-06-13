@@ -26,12 +26,12 @@ function initPage(activeId) {
   let html = `
     <div class="sidebar-logo" onclick="doLogout()" title="Klik untuk keluar" style="cursor:pointer;">
   <div style="display:flex;align-items:center;gap:10px;">
-    <img src="logo.png" class="sidebar-logo-img" alt="Logo">
-    <div>
-      <div class="name">Zaytun Riverside</div>
-      <div class="sub">${user.username||'—'}</div>
-    </div>
+  <img src="icon.png" class="sidebar-logo-img" alt="Logo">
+  <div>
+    <div class="name">Zaytun Riverside</div>
+    <div class="sub">${user.username||'—'}</div>
   </div>
+</div>
 </div>
     <nav class="sidebar-nav">`;
 
