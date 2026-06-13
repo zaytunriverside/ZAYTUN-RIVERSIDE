@@ -31,7 +31,18 @@
   .login-card { position:relative; z-index:10; background:var(--krem); border-radius:24px; padding:48px 44px; width:100%; max-width:420px; margin:16px; box-shadow:0 32px 80px rgba(0,0,0,0.4),0 0 0 1px rgba(201,168,76,0.2),inset 0 1px 0 rgba(255,255,255,0.8); animation:cardIn 0.7s cubic-bezier(0.22,1,0.36,1) both; }
   @keyframes cardIn { from{opacity:0;transform:translateY(32px) scale(0.96)} to{opacity:1;transform:translateY(0) scale(1)} }
   .logo-area { text-align:center; margin-bottom:36px; }
-  .logo-icon { width:64px; height:64px; background:linear-gradient(135deg,var(--hijau) 0%,var(--hijau-mid) 100%); border-radius:18px; display:inline-flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:16px; box-shadow:0 8px 24px rgba(45,106,79,0.35); animation:iconIn 0.8s 0.2s cubic-bezier(0.22,1,0.36,1) both; }
+  .logo-icon {
+  width:80px;
+  height:80px;
+  background:none;
+  border-radius:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 16px;
+  box-shadow:none;
+  animation:iconIn 0.8s 0.2s cubic-bezier(0.22,1,0.36,1) both;
+}
   @keyframes iconIn { from{opacity:0;transform:scale(0.5) rotate(-15deg)} to{opacity:1;transform:scale(1) rotate(0deg)} }
   .logo-title { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--hijau-tua); letter-spacing:-0.3px; line-height:1.2; }
   .logo-sub { font-size:12px; color:var(--teks-abu); letter-spacing:2px; text-transform:uppercase; margin-top:4px; font-weight:500; }
