@@ -10,19 +10,20 @@
 <style>
   body { font-family:'Inter',sans-serif; }
 
-  /* ── FORM ENTRY ── */
+  /* ── ENTRY CARD ── */
   .entry-card {
     background: var(--krem);
     border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 12px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
     border: 1.5px solid var(--krem-gelap);
-    position: relative;
+    transition: border-color 0.2s, background 0.2s;
   }
   .entry-card.filled { border-color: var(--hijau-mid); background: var(--hijau-pale); }
+
   .entry-grid {
     display: grid;
-    grid-template-columns: 160px 1fr 120px 140px 120px 36px;
+    grid-template-columns: 1fr 100px 130px 130px 100px 34px;
     gap: 10px;
     align-items: end;
   }
@@ -31,30 +32,60 @@
     text-transform: uppercase; color: var(--teks-abu);
     display: block; margin-bottom: 4px;
   }
-  .entry-grid select,
-  .entry-grid input[type=number] {
-    width: 100%; padding: 9px 12px;
+  .entry-grid input[type=number],
+  .entry-grid input[type=text] {
+    width: 100%; padding: 9px 12px; box-sizing: border-box;
     border: 1.5px solid var(--krem-gelap); border-radius: 10px;
     font-size: 13px; font-family:'Inter',sans-serif;
-    background: var(--putih); outline: none;
-    transition: border-color 0.2s;
+    background: var(--putih); outline: none; transition: border-color 0.2s;
   }
-  .entry-grid select:focus,
-  .entry-grid input[type=number]:focus { border-color: var(--hijau-mid); }
-  .entry-grid select:disabled { opacity: 0.45; cursor: not-allowed; }
-  .subtotal-val {
-    font-weight: 700; color: var(--hijau);
-    font-size: 14px; font-family:'Inter',sans-serif;
-    padding: 9px 0; white-space: nowrap;
+  .entry-grid input:focus { border-color: var(--hijau-mid); }
+  .entry-grid input[readonly] {
+    background: var(--krem); color: var(--teks-abu);
+    cursor: default;
   }
-  .btn-remove {
-    width: 34px; height: 34px; border-radius: 8px;
-    border: 1.5px solid #e5b3b3; background: #fff5f5;
-    color: #c0392b; font-size: 16px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    line-height: 1; transition: all 0.2s; flex-shrink: 0;
+
+  /* subtotal inline */
+  .baris-subtotal {
+    margin-top: 8px; text-align: right;
+    font-size: 12px; color: var(--teks-abu);
   }
-  .btn-remove:hover { background: #fde8e8; border-color: #c0392b; }
+  .baris-subtotal span { font-weight: 700; color: var(--hijau); font-size: 14px; }
+
+  /* ── SEARCHABLE ITEM PICKER ── */
+  .item-picker-wrap { position: relative; }
+  .item-search-input {
+    width: 100%; padding: 9px 12px; box-sizing: border-box;
+    border: 1.5px solid var(--krem-gelap); border-radius: 10px;
+    font-size: 13px; font-family:'Inter',sans-serif;
+    background: var(--putih); outline: none; transition: border-color 0.2s;
+  }
+  .item-search-input:focus { border-color: var(--hijau-mid); }
+  .item-search-input.selected {
+    border-color: var(--hijau); background: var(--hijau-pale);
+    font-weight: 600; color: var(--hijau-tua);
+  }
+  .item-dropdown {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--putih); border: 1.5px solid var(--hijau-mid);
+    border-radius: 10px; max-height: 220px; overflow-y: auto;
+    z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .item-dropdown.open { display: block; }
+  .item-opt {
+    padding: 9px 14px; cursor: pointer; font-size: 13px;
+    border-bottom: 1px solid var(--krem); transition: background 0.15s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .item-opt:last-child { border-bottom: none; }
+  .item-opt:hover, .item-opt.focused { background: var(--hijau-pale); }
+  .item-opt .opt-nama { font-weight: 500; color: var(--teks); }
+  .item-opt .opt-kat {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    border-radius: 6px; background: var(--krem-gelap); color: var(--teks-abu);
+    white-space: nowrap; margin-left: 8px; flex-shrink: 0;
+  }
+  .item-opt-empty { padding: 14px; text-align: center; color: var(--teks-abu); font-size: 13px; }
 
   /* ── TAMBAH BARIS ── */
   .btn-add-row {
@@ -65,6 +96,16 @@
     transition: all 0.2s; margin-bottom: 16px;
   }
   .btn-add-row:hover { background: var(--hijau-pale); }
+  .btn-add-row:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-remove {
+    width: 34px; height: 34px; border-radius: 8px;
+    border: 1.5px solid #e5b3b3; background: #fff5f5;
+    color: #c0392b; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .btn-remove:hover { background: #fde8e8; border-color: #c0392b; }
 
   /* ── TOTAL BAR ── */
   .total-bar {
@@ -76,7 +117,24 @@
   .total-bar .tr-val { color: var(--putih); font-size: 20px; font-weight: 700; }
   .total-bar .tr-item { color: var(--hijau-muda); font-size: 12px; margin-top: 2px; }
 
-  /* ── MODAL TAMBAH ITEM ── */
+  /* ── TOOLBAR ── */
+  .belanja-toolbar {
+    display: flex; gap: 12px; align-items: flex-end;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .field-wrap label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--teks-abu);
+    display: block; margin-bottom: 4px;
+  }
+  .field-wrap input[type=date] {
+    padding: 9px 12px; border: 1.5px solid var(--krem-gelap);
+    border-radius: 10px; font-size: 13px; font-family:'Inter',sans-serif;
+    background: var(--putih); outline: none;
+  }
+  .field-wrap input[type=date]:focus { border-color: var(--hijau-mid); }
+
+  /* ── MODAL ── */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.45); z-index: 200;
@@ -88,48 +146,26 @@
     padding: 28px; width: 440px; max-width: 95vw;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   }
-  .modal-title {
-    font-size: 15px; font-weight: 700; color: var(--hijau-tua);
-    margin-bottom: 18px;
-  }
+  .modal-title { font-size: 15px; font-weight: 700; color: var(--hijau-tua); margin-bottom: 18px; }
   .modal-field { margin-bottom: 14px; }
   .modal-field label {
     font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
     text-transform: uppercase; color: var(--teks-abu);
     display: block; margin-bottom: 5px;
   }
-  .modal-field input,
-  .modal-field select {
-    width: 100%; padding: 9px 12px;
+  .modal-field input, .modal-field select {
+    width: 100%; padding: 9px 12px; box-sizing: border-box;
     border: 1.5px solid var(--krem-gelap); border-radius: 10px;
     font-size: 13px; font-family:'Inter',sans-serif;
-    background: var(--putih); outline: none; box-sizing: border-box;
+    background: var(--putih); outline: none;
   }
-  .modal-field input:focus,
-  .modal-field select:focus { border-color: var(--hijau-mid); }
+  .modal-field input:focus, .modal-field select:focus { border-color: var(--hijau-mid); }
   .kat-toggle {
     font-size: 11px; color: var(--hijau); cursor: pointer;
-    font-weight: 600; margin-top: 5px; display: inline-block;
+    font-weight: 600; margin-top: 6px; display: inline-block;
   }
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
   .modal-actions button { flex: 1; }
-
-  /* ── TOOLBAR ── */
-  .belanja-toolbar {
-    display: flex; gap: 10px; align-items: center;
-    margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .tgl-wrap label {
-    font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
-    text-transform: uppercase; color: var(--teks-abu);
-    display: block; margin-bottom: 4px;
-  }
-  .tgl-wrap input[type=date] {
-    padding: 9px 12px; border: 1.5px solid var(--krem-gelap);
-    border-radius: 10px; font-size: 13px; font-family:'Inter',sans-serif;
-    background: var(--putih); outline: none;
-  }
-  .tgl-wrap input[type=date]:focus { border-color: var(--hijau-mid); }
 </style>
 </head>
 <body>
@@ -151,18 +187,18 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">🛒 Form Belanja</div>
-        <div class="belanja-toolbar">
-          <div class="tgl-wrap">
-            <label>Tanggal Belanja</label>
-            <input type="date" id="tglBelanja">
-          </div>
-          <div style="margin-top:18px;">
-            <button class="btn-secondary" onclick="bukaModalTambahItem()">+ Tambah Item Baru</button>
-          </div>
-        </div>
       </div>
 
-      <!-- Baris-baris belanja -->
+      <!-- Toolbar: tanggal + tombol tambah item -->
+      <div class="belanja-toolbar">
+        <div class="field-wrap">
+          <label>Tanggal Belanja</label>
+          <input type="date" id="tglBelanja">
+        </div>
+        <button class="btn-secondary" onclick="bukaModalTambahItem()">+ Tambah Item Baru</button>
+      </div>
+
+      <!-- Baris belanja -->
       <div id="belanjaRows"></div>
 
       <!-- Tombol tambah baris -->
@@ -193,31 +229,25 @@
 <div class="modal-overlay" id="modalTambahItem">
   <div class="modal-box">
     <div class="modal-title">➕ Tambah Item Baru ke Master Belanja</div>
-
     <div class="modal-field">
       <label>Nama Item</label>
       <input type="text" id="newNama" placeholder="Contoh: Santan Kara 200ml">
     </div>
-
     <div class="modal-field">
       <label>Kategori</label>
-      <!-- Mode pilih dari yang ada -->
       <div id="katPilihWrap">
         <select id="newKatPilih"></select>
         <span class="kat-toggle" onclick="toggleKatBaru(true)">+ Buat kategori baru</span>
       </div>
-      <!-- Mode ketik baru -->
       <div id="katBaruWrap" style="display:none;">
         <input type="text" id="newKatBaru" placeholder="Nama kategori baru...">
         <span class="kat-toggle" onclick="toggleKatBaru(false)">← Pilih dari yang ada</span>
       </div>
     </div>
-
     <div class="modal-field">
       <label>Satuan</label>
       <input type="text" id="newSatuan" placeholder="kg / pcs / botol / liter">
     </div>
-
     <div class="modal-actions">
       <button class="btn-secondary" onclick="tutupModalTambahItem()">Batal</button>
       <button class="btn-primary" onclick="simpanItemBaru()">Simpan Item</button>
@@ -230,28 +260,38 @@
 // ══════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════
-let masterData = [];   // semua item dari master_belanja
-let kategoriList = []; // distinct kategori
-let barisCount = 0;    // counter id baris
+let masterData   = [];
+let kategoriList = [];
+let barisCount   = 0;
+
+// id_item yang sudah dipilih di baris lain (cegah duplikat)
+function getSelectedIds() {
+  const ids = new Set();
+  document.querySelectorAll('[id^="baris-"]').forEach(card => {
+    const id = card.id.replace('baris-', '');
+    const val = card.dataset.selectedId;
+    if (val) ids.add(val);
+  });
+  return ids;
+}
 
 initPage('belanja');
-
-// Set tanggal hari ini
 const now = new Date();
 document.getElementById('tglBelanja').value = now.toISOString().split('T')[0];
 
 // ══════════════════════════════════════════════
 // LOAD MASTER
 // ══════════════════════════════════════════════
-async function loadMaster() {
+async function loadMaster(keepRows = false) {
   try {
     const data = await apiGet({ action: 'getMasterBelanja' });
     if (data.status === 'ok') {
       masterData   = data.data || [];
       kategoriList = [...new Set(masterData.map(m => m.kategori).filter(Boolean))].sort();
       document.getElementById('btnAddRow').disabled = false;
-      // Tambah baris pertama otomatis
-      if (document.getElementById('belanjaRows').children.length === 0) tambahBaris();
+      if (!keepRows && document.getElementById('belanjaRows').children.length === 0) {
+        tambahBaris();
+      }
     }
   } catch(e) {
     document.getElementById('belanjaRows').innerHTML =
@@ -262,58 +302,63 @@ async function loadMaster() {
 loadMaster();
 
 // ══════════════════════════════════════════════
-// BARIS BELANJA
+// BARIS BELANJA — dengan searchable item picker
 // ══════════════════════════════════════════════
 function tambahBaris() {
   barisCount++;
-  const id = barisCount;
-  const wrap = document.createElement('div');
-  wrap.className = 'entry-card';
-  wrap.id = `baris-${id}`;
+  const id  = barisCount;
+  const card = document.createElement('div');
+  card.className = 'entry-card';
+  card.id = `baris-${id}`;
+  card.dataset.selectedId = '';
 
-  // Build kategori options
-  const katOpts = kategoriList.map(k => `<option value="${k}">${k}</option>`).join('');
-
-  wrap.innerHTML = `
+  card.innerHTML = `
     <div class="entry-grid">
       <div>
-        <label>Kategori</label>
-        <select id="kat-${id}" onchange="onKatChange(${id})">
-          <option value="">— Pilih —</option>
-          ${katOpts}
-        </select>
+        <label>Nama Item</label>
+        <div class="item-picker-wrap" id="picker-${id}">
+          <input class="item-search-input" type="text" id="search-${id}"
+            placeholder="Ketik nama item..."
+            autocomplete="off"
+            oninput="onSearchInput(${id})"
+            onfocus="bukaDropdown(${id})"
+            onkeydown="onSearchKey(event, ${id})">
+          <div class="item-dropdown" id="dropdown-${id}"></div>
+        </div>
       </div>
       <div>
-        <label>Nama Item</label>
-        <select id="item-${id}" onchange="onItemChange(${id})" disabled>
-          <option value="">— Pilih kategori dulu —</option>
-        </select>
+        <label>Kategori</label>
+        <input type="text" id="kat-${id}" readonly placeholder="—">
       </div>
       <div>
         <label>Satuan</label>
-        <input type="text" id="sat-${id}" readonly
-          style="background:var(--krem);color:var(--teks-abu);border-color:var(--krem-gelap);" placeholder="—">
+        <input type="text" id="sat-${id}" readonly placeholder="—">
       </div>
       <div>
         <label>Jumlah Beli</label>
-        <input type="number" min="0" step="0.1" placeholder="0" id="qty-${id}" oninput="hitungBaris(${id})">
+        <input type="number" min="0" step="0.1" placeholder="0"
+          id="qty-${id}" oninput="hitungBaris(${id})">
       </div>
       <div>
         <label>Harga Satuan</label>
-        <input type="number" min="0" placeholder="0" id="harga-${id}" oninput="hitungBaris(${id})">
+        <input type="number" min="0" placeholder="0"
+          id="harga-${id}" oninput="hitungBaris(${id})">
       </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
+      <div style="display:flex;flex-direction:column;">
         <label style="visibility:hidden;">.</label>
         <button class="btn-remove" onclick="hapusBaris(${id})" title="Hapus baris">✕</button>
       </div>
     </div>
-    <div style="margin-top:8px;text-align:right;">
-      <span style="font-size:11px;color:var(--teks-abu);">Total:</span>
-      <span class="subtotal-val" id="sub-${id}">—</span>
-    </div>
+    <div class="baris-subtotal">Total: <span id="sub-${id}">—</span></div>
   `;
 
-  document.getElementById('belanjaRows').appendChild(wrap);
+  document.getElementById('belanjaRows').appendChild(card);
+
+  // Tutup dropdown kalau klik di luar
+  document.addEventListener('click', function handler(e) {
+    const picker = document.getElementById(`picker-${id}`);
+    if (picker && !picker.contains(e.target)) tutupDropdown(id);
+  });
 }
 
 function hapusBaris(id) {
@@ -322,48 +367,125 @@ function hapusBaris(id) {
   hitungGrand();
 }
 
-function onKatChange(id) {
-  const kat    = document.getElementById(`kat-${id}`).value;
-  const itemSel = document.getElementById(`item-${id}`);
-  const satEl  = document.getElementById(`sat-${id}`);
-
-  // Reset
-  itemSel.innerHTML = '<option value="">— Pilih item —</option>';
-  itemSel.disabled  = !kat;
-  satEl.value = '';
-  document.getElementById(`qty-${id}`).value   = '';
+// ── Searchable dropdown ──
+function onSearchInput(id) {
+  const card = document.getElementById(`baris-${id}`);
+  // Kalau user edit ulang teks, reset pilihan
+  if (card) card.dataset.selectedId = '';
+  const searchEl = document.getElementById(`search-${id}`);
+  if (searchEl) searchEl.classList.remove('selected');
+  document.getElementById(`kat-${id}`).value = '';
+  document.getElementById(`sat-${id}`).value = '';
+  document.getElementById(`qty-${id}`).value = '';
   document.getElementById(`harga-${id}`).value = '';
   document.getElementById(`sub-${id}`).textContent = '—';
-  document.getElementById(`baris-${id}`).classList.remove('filled');
+  if (card) card.classList.remove('filled');
+  hitungGrand();
+  bukaDropdown(id);
+}
 
-  if (!kat) return;
+function bukaDropdown(id) {
+  renderDropdown(id);
+  document.getElementById(`dropdown-${id}`).classList.add('open');
+}
 
-  const filtered = masterData.filter(m => m.kategori === kat);
-  filtered.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.id_item;
-    opt.textContent = m.nama_item;
-    opt.dataset.satuan = m.satuan;
-    itemSel.appendChild(opt);
+function tutupDropdown(id) {
+  const dd = document.getElementById(`dropdown-${id}`);
+  if (dd) dd.classList.remove('open');
+}
+
+function renderDropdown(id) {
+  const q          = (document.getElementById(`search-${id}`)?.value || '').toLowerCase().trim();
+  const selectedIds = getSelectedIds();
+  const card        = document.getElementById(`baris-${id}`);
+  const thisSel     = card?.dataset?.selectedId || '';
+
+  let filtered = masterData.filter(m => {
+    // Exclude yang sudah dipilih di baris lain
+    if (selectedIds.has(String(m.id_item)) && String(m.id_item) !== thisSel) return false;
+    if (!q) return true;
+    return m.nama_item.toLowerCase().includes(q) ||
+           m.kategori.toLowerCase().includes(q);
   });
+
+  const dd = document.getElementById(`dropdown-${id}`);
+  if (!filtered.length) {
+    dd.innerHTML = `<div class="item-opt-empty">Tidak ditemukan — <span style="color:var(--hijau);cursor:pointer;font-weight:600;" onclick="bukaModalTambahItem()">+ Tambah item baru</span></div>`;
+    return;
+  }
+
+  dd.innerHTML = filtered.map((m, idx) => `
+    <div class="item-opt" data-idx="${idx}" data-id="${m.id_item}"
+      onclick="pilihItem(${id}, '${m.id_item}')">
+      <span class="opt-nama">${m.nama_item}</span>
+      <span class="opt-kat">${m.kategori}</span>
+    </div>
+  `).join('');
 }
 
-function onItemChange(id) {
-  const itemSel = document.getElementById(`item-${id}`);
-  const selected = itemSel.options[itemSel.selectedIndex];
-  const satuan   = selected?.dataset?.satuan || '';
-  document.getElementById(`sat-${id}`).value = satuan;
-  hitungBaris(id);
+function pilihItem(barisId, idItem) {
+  const master = masterData.find(m => String(m.id_item) === String(idItem));
+  if (!master) return;
+
+  const card = document.getElementById(`baris-${barisId}`);
+  if (card) card.dataset.selectedId = String(idItem);
+
+  const searchEl = document.getElementById(`search-${barisId}`);
+  if (searchEl) {
+    searchEl.value = master.nama_item;
+    searchEl.classList.add('selected');
+  }
+  document.getElementById(`kat-${barisId}`).value = master.kategori;
+  document.getElementById(`sat-${barisId}`).value = master.satuan;
+
+  tutupDropdown(barisId);
+
+  // Fokus ke qty
+  const qtyEl = document.getElementById(`qty-${barisId}`);
+  if (qtyEl) { qtyEl.focus(); qtyEl.select(); }
+
+  hitungBaris(barisId);
 }
 
+// Navigasi keyboard di dropdown
+function onSearchKey(e, id) {
+  const dd   = document.getElementById(`dropdown-${id}`);
+  const opts = dd.querySelectorAll('.item-opt');
+  const cur  = dd.querySelector('.item-opt.focused');
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (!cur) { opts[0]?.classList.add('focused'); }
+    else {
+      cur.classList.remove('focused');
+      const next = cur.nextElementSibling;
+      (next && next.classList.contains('item-opt') ? next : opts[0])?.classList.add('focused');
+    }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (cur) {
+      cur.classList.remove('focused');
+      const prev = cur.previousElementSibling;
+      (prev && prev.classList.contains('item-opt') ? prev : opts[opts.length-1])?.classList.add('focused');
+    }
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (cur) pilihItem(id, cur.dataset.id);
+  } else if (e.key === 'Escape') {
+    tutupDropdown(id);
+  }
+}
+
+// ── Hitung ──
 function hitungBaris(id) {
   const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
   const harga = parseFloat(document.getElementById(`harga-${id}`)?.value) || 0;
   const sub   = qty * harga;
   const subEl = document.getElementById(`sub-${id}`);
   const card  = document.getElementById(`baris-${id}`);
+  const hasItem = !!card?.dataset?.selectedId;
   if (subEl) subEl.textContent = sub > 0 ? rp(sub) : '—';
-  if (card)  card.classList.toggle('filled', qty > 0);
+  if (card)  card.classList.toggle('filled', qty > 0 && hasItem);
   hitungGrand();
 }
 
@@ -373,8 +495,7 @@ function hitungGrand() {
     const id    = card.id.replace('baris-', '');
     const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
     const harga = parseFloat(document.getElementById(`harga-${id}`)?.value) || 0;
-    const itemEl = document.getElementById(`item-${id}`);
-    if (qty > 0 && itemEl?.value) { total += qty * harga; count++; }
+    if (qty > 0 && card.dataset.selectedId) { total += qty * harga; count++; }
   });
   document.getElementById('totalBelanja').textContent = rp(total);
   document.getElementById('totalItem').textContent    = `${count} item diisi`;
@@ -392,27 +513,24 @@ async function simpanBelanja() {
 
   document.querySelectorAll('[id^="baris-"]').forEach(card => {
     const id      = card.id.replace('baris-', '');
-    const itemSel = document.getElementById(`item-${id}`);
+    const idItem  = card.dataset.selectedId;
     const qty     = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
     const harga   = parseFloat(document.getElementById(`harga-${id}`)?.value) || 0;
-
-    if (!itemSel?.value || qty <= 0) return;
-
-    const master = masterData.find(m => String(m.id_item) === String(itemSel.value));
+    if (!idItem || qty <= 0) return;
+    const master = masterData.find(m => String(m.id_item) === String(idItem));
     if (!master) return;
-
     items.push({
-      id_item    : master.id_item,
-      nama_item  : master.nama_item,
-      kategori   : master.kategori,
-      satuan     : master.satuan,
-      jumlah_beli: qty,
+      id_item     : master.id_item,
+      nama_item   : master.nama_item,
+      kategori    : master.kategori,
+      satuan      : master.satuan,
+      jumlah_beli : qty,
       harga_satuan: harga,
-      keterangan : ''
+      keterangan  : ''
     });
   });
 
-  if (!items.length) { alert('Belum ada item yang diisi dengan benar'); return; }
+  if (!items.length) { alert('Belum ada item yang dipilih dan diisi'); return; }
 
   const btn = document.getElementById('btnSimpan');
   btn.disabled = true; btn.textContent = '⏳ Menyimpan...';
@@ -455,15 +573,14 @@ function resetForm() {
 // MODAL TAMBAH ITEM BARU
 // ══════════════════════════════════════════════
 function bukaModalTambahItem() {
-  // Isi dropdown kategori yang sudah ada
   const sel = document.getElementById('newKatPilih');
   sel.innerHTML = kategoriList.map(k => `<option value="${k}">${k}</option>`).join('');
-  // Reset field
   document.getElementById('newNama').value    = '';
   document.getElementById('newKatBaru').value = '';
   document.getElementById('newSatuan').value  = '';
   toggleKatBaru(false);
   document.getElementById('modalTambahItem').classList.add('open');
+  setTimeout(() => document.getElementById('newNama').focus(), 100);
 }
 
 function tutupModalTambahItem() {
@@ -491,28 +608,11 @@ async function simpanItemBaru() {
     const data = await apiPost({ action:'tambahItemBelanja', nama_item:nama, kategori:kat, satuan });
     if (data.status === 'ok') {
       tutupModalTambahItem();
-      // Reload master agar item baru langsung bisa dipilih
-      await loadMaster();
-      // Kalau kategori baru, update list di semua baris yang sudah ada
-      refreshSemuaBarisKat();
+      await loadMaster(true); // reload tanpa reset baris
     } else { alert('Gagal: ' + data.message); }
   } catch(e) { alert('Gagal konek ke server'); }
 }
 
-// Setelah master reload, refresh dropdown kat di semua baris yang belum dipilih itemnya
-function refreshSemuaBarisKat() {
-  document.querySelectorAll('[id^="baris-"]').forEach(card => {
-    const id     = card.id.replace('baris-', '');
-    const katSel = document.getElementById(`kat-${id}`);
-    if (!katSel) return;
-    const sebelumnya = katSel.value;
-    katSel.innerHTML = '<option value="">— Pilih —</option>' +
-      kategoriList.map(k => `<option value="${k}">${k}</option>`).join('');
-    if (sebelumnya) katSel.value = sebelumnya;
-  });
-}
-
-// Tutup modal kalau klik di luar box
 document.getElementById('modalTambahItem').addEventListener('click', function(e) {
   if (e.target === this) tutupModalTambahItem();
 });
