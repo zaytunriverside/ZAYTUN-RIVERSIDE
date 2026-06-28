@@ -40,10 +40,7 @@
     background: var(--putih); outline: none; transition: border-color 0.2s;
   }
   .entry-grid input:focus { border-color: var(--hijau-mid); }
-  .entry-grid input[readonly] {
-    background: var(--krem); color: var(--teks-abu);
-    cursor: default;
-  }
+  
 
   /* subtotal inline */
   .baris-subtotal {
@@ -523,7 +520,7 @@ async function simpanBelanja() {
       id_item     : master.id_item,
       nama_item   : master.nama_item,
       kategori    : master.kategori,
-      satuan      : master.satuan,
+      satuan      : document.getElementById(`sat-${id}`)?.value || master.satuan,
       jumlah_beli : qty,
       harga_satuan: harga,
       keterangan  : ''
