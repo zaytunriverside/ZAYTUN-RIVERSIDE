@@ -3,36 +3,35 @@
 // ============================================
 
 const NAV_ITEMS = [
-  { id:'dashboard', href:'dashboard.html', icon:'🏠', label:'Dashboard',       section:'Menu Utama' },
-  { id:'transaksi', href:'transaksi.html', icon:'🧾', label:'Transaksi',       section:'Menu Utama' },
-  { id:'belanja',   href:'belanja.html',   icon:'🛒', label:'Input Belanja',   section:'Operasional' },
-  { id:'stok',      href:'stok.html',      icon:'📦', label:'Stok Opname',     section:'Operasional' },
-  { id:'resep',     href:'resep.html',     icon:'📖', label:'Resep Menu',      section:'Operasional' },
-  { id:'modal',     href:'modal.html',     icon:'💰', label:'Modal & Kas',     section:'Keuangan' },
-  { id:'rekap',     href:'rekap.html',     icon:'📊', label:'Rekap Penjualan', section:'Laporan' },
-  { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',       section:'Laporan' },
+  { id:'dashboard', href:'dashboard.html', icon:'🏠', label:'Dashboard',        section:'Menu Utama' },
+  { id:'transaksi', href:'transaksi.html', icon:'🧾', label:'Transaksi',        section:'Menu Utama' },
+  { id:'penjualan', href:'penjualan.html', icon:'💵', label:'Input Penjualan',  section:'Menu Utama' },
+  { id:'belanja',   href:'belanja.html',   icon:'🛒', label:'Input Belanja',    section:'Operasional' },
+  { id:'stok',      href:'stok.html',      icon:'📦', label:'Stok Opname',      section:'Operasional' },
+  { id:'resep',     href:'resep.html',     icon:'📖', label:'Resep Menu',       section:'Operasional' },
+  { id:'modal',     href:'modal.html',     icon:'💰', label:'Modal & Kas',      section:'Keuangan' },
+  { id:'rekap',     href:'rekap.html',     icon:'📊', label:'Rekap Penjualan',  section:'Laporan' },
+  { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',        section:'Laporan' },
 ];
 
 function initPage(activeId) {
-  // Auth check
   const userRaw = localStorage.getItem('zaytun_user');
   if (!userRaw) { window.location.href = 'index.html'; return; }
   const user = JSON.parse(userRaw);
 
-  // Build sidebar
   const sidebar  = document.getElementById('sidebar');
   const sections = [...new Set(NAV_ITEMS.map(n => n.section))];
 
   let html = `
     <div class="sidebar-logo" onclick="doLogout()" title="Klik untuk keluar" style="cursor:pointer;">
-  <div style="display:flex;align-items:center;gap:10px;">
-  <img src="icon.png" class="sidebar-logo-img" alt="Logo">
-  <div>
-    <div class="name">Zaytun Riverside</div>
-    <div class="sub">${user.username||'—'}</div>
-  </div>
-</div>
-</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="icon.png" class="sidebar-logo-img" alt="Logo">
+        <div>
+          <div class="name">Zaytun Riverside</div>
+          <div class="sub">${user.username||'—'}</div>
+        </div>
+      </div>
+    </div>
     <nav class="sidebar-nav">`;
 
   sections.forEach(sec => {
@@ -44,10 +43,9 @@ function initPage(activeId) {
       </a>`;
     });
   });
+
   html += `</nav>`;
-
   if (sidebar) sidebar.innerHTML = html;
-
 }
 
 // ── Format rupiah ────────────────────────────
