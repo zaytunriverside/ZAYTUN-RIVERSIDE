@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input Penjualan — Zaytun Riverside</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+
+  /* ── HEADER STRUK ── */
+  .struk-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .meta-field label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--teks-abu);
+    display: block; margin-bottom: 4px;
+  }
+  .meta-field input[type=date],
+  .meta-field select {
+    width: 100%; padding: 9px 12px; box-sizing: border-box;
+    border: 1.5px solid var(--krem-gelap); border-radius: 10px;
+    font-size: 13px; font-family:'Inter',sans-serif;
+    background: var(--putih); outline: none; transition: border-color 0.2s;
+  }
+  .meta-field input:focus,
+  .meta-field select:focus { border-color: var(--hijau-mid); }
+
+  /* ── TABEL ITEM ── */
+  .item-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .item-table th {
+    text-align: left; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    color: var(--teks-abu); padding: 0 10px 10px;
+    border-bottom: 1px solid var(--krem-gelap);
+  }
+  .item-table td { padding: 6px 10px; border-bottom: 1px solid var(--krem); vertical-align: middle; }
+  .item-table tr:last-child td { border-bottom: none; }
+  .item-table tr.item-row:hover td { background: var(--krem); }
+
+  /* ── ITEM PICKER (SEARCHABLE) ── */
+  .item-picker-wrap { position: relative; min-width: 200px; }
+  .item-search-input {
+    width: 100%; padding: 7px 10px; box-sizing: border-box;
+    border: 1.5px solid var(--krem-gelap); border-radius: 8px;
+    font-size: 13px; font-family:'Inter',sans-serif;
+    background: var(--putih); outline: none; transition: border-color 0.2s;
+  }
+  .item-search-input:focus { border-color: var(--hijau-mid); }
+  .item-search-input.selected {
+    border-color: var(--hijau); background: var(--hijau-pale);
+    font-weight: 600; color: var(--hijau-tua);
+  }
+  .item-dropdown {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0;
+    min-width: 260px; background: var(--putih);
+    border: 1.5px solid var(--hijau-mid); border-radius: 10px;
+    max-height: 200px; overflow-y: auto;
+    z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .item-dropdown.open { display: block; }
+  .item-opt {
+    padding: 8px 14px; cursor: pointer; font-size: 13px;
+    border-bottom: 1px solid var(--krem);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: background 0.15s;
+  }
+  .item-opt:last-child { border-bottom: none; }
+  .item-opt:hover, .item-opt.focused { background: var(--hijau-pale); }
+  .item-opt .opt-nama { font-weight: 500; }
+  .item-opt .opt-harga { font-size: 11px; color: var(--teks-abu); }
+  .item-opt-empty { padding: 12px 14px; text-align: center; color: var(--teks-abu); font-size: 13px; }
+
+  /* ── INPUT ANGKA ── */
+  .num-input {
+    width: 100%; padding: 7px 10px; box-sizing: border-box;
+    border: 1.5px solid var(--krem-gelap); border-radius: 8px;
+    font-size: 13px; font-family:'Inter',sans-serif; text-align: right;
+    background: var(--putih); outline: none; transition: border-color 0.2s;
+  }
+  .num-input:focus { border-color: var(--hijau-mid); }
+
+  .subtotal-cell { font-weight: 700; color: var(--hijau); text-align: right; font-size: 13px; white-space: nowrap; }
+  .btn-remove-row {
+    width: 28px; height: 28px; border-radius: 6px;
+    border: 1px solid #e5b3b3; background: #fff5f5;
+    color: #c0392b; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-remove-row:hover { background: #fde8e8; }
+
+  /* ── TAMBAH BARIS ── */
+  .btn-add-row {
+    width: 100%; padding: 10px; border-radius: 10px;
+    border: 2px dashed var(--hijau-mid); background: transparent;
+    color: var(--hijau); font-size: 13px; font-weight: 600;
+    font-family:'Inter',sans-serif; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 20px;
+  }
+  .btn-add-row:hover { background: var(--hijau-pale); }
+
+  /* ── TOTAL STRUK ── */
+  .struk-footer {
+    background: var(--hijau-tua); border-radius: 14px;
+    padding: 20px 24px; color: var(--putih); margin-bottom: 20px;
+  }
+  .struk-footer-row {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .struk-footer-row:last-child { border-bottom: none; }
+  .struk-footer-row .sf-label { font-size: 12px; color: rgba(255,255,255,0.6); }
+  .struk-footer-row .sf-val   { font-size: 13px; font-weight: 600; }
+  .struk-footer-row.total-row .sf-label { font-size: 14px; color: rgba(255,255,255,0.8); }
+  .struk-footer-row.total-row .sf-val   { font-size: 22px; font-weight: 700; color: var(--hijau-muda); }
+
+  /* ── METODE BAYAR TOGGLE ── */
+  .metode-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .metode-btn {
+    padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    border: 1.5px solid var(--krem-gelap); background: var(--putih);
+    color: var(--teks-abu); cursor: pointer; transition: all 0.2s;
+    font-family:'Inter',sans-serif;
+  }
+  .metode-btn.active { background: var(--hijau); color: var(--putih); border-color: var(--hijau); }
+
+  /* ── KEMBALIAN ── */
+  .kembalian-box {
+    background: var(--krem); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 16px;
+    display: none;
+  }
+  .kembalian-box.show { display: block; }
+  .kembalian-row { display: flex; gap: 12px; align-items: flex-end; }
+  .kembalian-row label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--teks-abu);
+    display: block; margin-bottom: 4px;
+  }
+  .kembalian-row input {
+    padding: 9px 12px; border: 1.5px solid var(--krem-gelap);
+    border-radius: 10px; font-size: 13px; font-family:'Inter',sans-serif;
+    background: var(--putih); outline: none; text-align: right; width: 140px;
+  }
+  .kembalian-row input:focus { border-color: var(--hijau-mid); }
+  .kembali-val {
+    font-size: 20px; font-weight: 700; color: var(--hijau);
+    padding: 9px 0; min-width: 120px;
+  }
+  .kembali-val.kurang { color: var(--merah); }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1>Input Penjualan</h1>
+        <div class="breadcrumb">Catat transaksi penjualan manual</div>
+      </div>
+    </div>
+    <div class="topbar-right"></div>
+  </div>
+
+  <div class="page-content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🧾 Struk Penjualan</div>
+        <div id="noFakturBadge" style="font-size:11px;color:var(--teks-abu);font-family:monospace;">—</div>
+      </div>
+
+      <!-- Meta: tanggal, waktu, kasir -->
+      <div class="struk-meta">
+        <div class="meta-field">
+          <label>Tanggal</label>
+          <input type="date" id="tglTrx">
+        </div>
+        <div class="meta-field">
+          <label>Kasir</label>
+          <input type="text" id="kasirTrx" readonly
+            style="background:var(--krem);color:var(--teks-abu);">
+        </div>
+        <div class="meta-field">
+          <label>Metode Bayar</label>
+          <div class="metode-group" id="metodeGroup">
+            <button class="metode-btn active" data-val="Tunai"         onclick="setMetode(this)">💵 Tunai</button>
+            <button class="metode-btn"        data-val="Bank Transfer" onclick="setMetode(this)">🏦 Transfer</button>
+            <button class="metode-btn"        data-val="E-Money"       onclick="setMetode(this)">📱 E-Money</button>
+            <button class="metode-btn"        data-val="Campuran"      onclick="setMetode(this)">🔀 Campuran</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div style="border-top:2px dashed var(--krem-gelap);margin-bottom:16px;"></div>
+
+      <!-- Tabel item -->
+      <table class="item-table" id="itemTable">
+        <thead>
+          <tr>
+            <th style="width:36px;">#</th>
+            <th>Nama Menu</th>
+            <th style="width:90px;text-align:right;">Harga</th>
+            <th style="width:80px;text-align:right;">Qty</th>
+            <th style="width:120px;text-align:right;">Subtotal</th>
+            <th style="width:36px;"></th>
+          </tr>
+        </thead>
+        <tbody id="itemBody"></tbody>
+      </table>
+
+      <button class="btn-add-row" onclick="tambahBaris()">＋ Tambah Menu</button>
+
+      <!-- Footer struk -->
+      <div class="struk-footer">
+        <div class="struk-footer-row">
+          <span class="sf-label">Jumlah Item</span>
+          <span class="sf-val" id="footerJmlItem">0 menu</span>
+        </div>
+        <div class="struk-footer-row">
+          <span class="sf-label">Total Qty</span>
+          <span class="sf-val" id="footerTotalQty">0 pcs</span>
+        </div>
+        <div class="struk-footer-row total-row">
+          <span class="sf-label">TOTAL</span>
+          <span class="sf-val" id="footerTotal">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- Kembalian (hanya muncul kalau Tunai) -->
+      <div class="kembalian-box" id="kembalianBox">
+        <div class="kembalian-row">
+          <div>
+            <label>Uang Diterima</label>
+            <input type="number" id="uangDiterima" placeholder="0" oninput="hitungKembalian()">
+          </div>
+          <div>
+            <label>Kembalian</label>
+            <div class="kembali-val" id="kembalianVal">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aksi -->
+      <div style="display:flex;gap:10px;">
+        <button class="btn-simpan" id="btnSimpan" onclick="simpanTransaksi()">💾 Simpan Transaksi</button>
+        <button class="btn-reset"  onclick="resetForm()">↺ Baru</button>
+      </div>
+      <div id="simpanStatus" style="margin-top:10px;font-size:13px;font-family:'Inter',sans-serif;"></div>
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let menuList   = [];   // dari getMenuList
+let barisCount = 0;
+let metodeBayar = 'Tunai';
+
+initPage('penjualan');
+
+// Init tanggal & kasir
+const now = new Date();
+document.getElementById('tglTrx').value =
+  now.toISOString().split('T')[0];
+const user = JSON.parse(localStorage.getItem('zaytun_user') || '{}');
+document.getElementById('kasirTrx').value = user.username || 'admin';
+
+loadMenu();
+
+// ══════════════════════════════════════════════
+// LOAD MENU
+// ══════════════════════════════════════════════
+async function loadMenu() {
+  try {
+    const data = await apiGet({ action: 'getMenuList' });
+    if (data.status === 'ok') {
+      menuList = data.data || [];
+      tambahBaris(); // baris pertama otomatis
+    }
+  } catch(e) {
+    document.getElementById('simpanStatus').innerHTML =
+      '<span style="color:var(--merah);">⚠️ Gagal memuat daftar menu</span>';
+  }
+}
+
+// ══════════════════════════════════════════════
+// METODE BAYAR
+// ══════════════════════════════════════════════
+function setMetode(btn) {
+  document.querySelectorAll('.metode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  metodeBayar = btn.dataset.val;
+  // Tampilkan kotak kembalian hanya untuk Tunai
+  document.getElementById('kembalianBox').classList.toggle('show', metodeBayar === 'Tunai');
+  hitungKembalian();
+}
+
+function hitungKembalian() {
+  const total    = hitungTotal();
+  const diterima = parseFloat(document.getElementById('uangDiterima')?.value) || 0;
+  const kembalian = diterima - total;
+  const el = document.getElementById('kembalianVal');
+  if (!diterima) { el.textContent = '—'; el.className = 'kembali-val'; return; }
+  el.textContent = kembalian >= 0 ? rp(kembalian) : `Kurang ${rp(Math.abs(kembalian))}`;
+  el.className   = 'kembali-val' + (kembalian < 0 ? ' kurang' : '');
+}
+
+// ══════════════════════════════════════════════
+// BARIS ITEM
+// ══════════════════════════════════════════════
+function tambahBaris() {
+  barisCount++;
+  const id  = barisCount;
+  const tr  = document.createElement('tr');
+  tr.className = 'item-row';
+  tr.id = `row-${id}`;
+  tr.dataset.menuId   = '';
+  tr.dataset.namaMenu = '';
+  tr.dataset.hargaDef = '0';
+
+  tr.innerHTML = `
+    <td style="color:var(--teks-abu);font-size:12px;font-weight:700;" id="no-${id}">—</td>
+    <td>
+      <div class="item-picker-wrap" id="picker-${id}">
+        <input class="item-search-input" type="text" id="search-${id}"
+          placeholder="Ketik nama menu..."
+          autocomplete="off"
+          oninput="onSearchInput(${id})"
+          onfocus="bukaDropdown(${id})"
+          onkeydown="onSearchKey(event,${id})">
+        <div class="item-dropdown" id="dropdown-${id}"></div>
+      </div>
+    </td>
+    <td style="text-align:right;">
+      <input class="num-input" type="number" min="0" placeholder="0"
+        id="harga-${id}" oninput="hitungBaris(${id})"
+        style="width:110px;">
+    </td>
+    <td style="text-align:right;">
+      <input class="num-input" type="number" min="1" step="1" value="1"
+        id="qty-${id}" oninput="hitungBaris(${id})"
+        style="width:70px;">
+    </td>
+    <td class="subtotal-cell" id="sub-${id}">—</td>
+    <td>
+      <button class="btn-remove-row" onclick="hapusBaris(${id})" title="Hapus">✕</button>
+    </td>
+  `;
+
+  document.getElementById('itemBody').appendChild(tr);
+  nomorUrut();
+
+  // Tutup dropdown kalau klik di luar
+  document.addEventListener('click', function handler(e) {
+    const picker = document.getElementById(`picker-${id}`);
+    if (picker && !picker.contains(e.target)) tutupDropdown(id);
+  });
+
+  // Fokus ke search
+  setTimeout(() => document.getElementById(`search-${id}`)?.focus(), 50);
+}
+
+function hapusBaris(id) {
+  document.getElementById(`row-${id}`)?.remove();
+  nomorUrut();
+  hitungTotal();
+  updateFooter();
+}
+
+function nomorUrut() {
+  let n = 1;
+  document.querySelectorAll('.item-row').forEach(tr => {
+    const id = tr.id.replace('row-', '');
+    const el = document.getElementById(`no-${id}`);
+    if (el) el.textContent = n++;
+  });
+}
+
+// ── Searchable dropdown ──
+function onSearchInput(id) {
+  // Reset pilihan saat user edit ulang
+  const row = document.getElementById(`row-${id}`);
+  if (row) { row.dataset.menuId = ''; row.dataset.namaMenu = ''; }
+  const si = document.getElementById(`search-${id}`);
+  if (si) si.classList.remove('selected');
+  document.getElementById(`harga-${id}`).value = '';
+  document.getElementById(`sub-${id}`).textContent = '—';
+  hitungTotal(); updateFooter();
+  bukaDropdown(id);
+}
+
+function bukaDropdown(id) {
+  renderDropdown(id);
+  document.getElementById(`dropdown-${id}`)?.classList.add('open');
+}
+
+function tutupDropdown(id) {
+  document.getElementById(`dropdown-${id}`)?.classList.remove('open');
+}
+
+function renderDropdown(id) {
+  const q  = (document.getElementById(`search-${id}`)?.value || '').toLowerCase().trim();
+  // Exclude yang sudah dipilih di baris lain
+  const usedNama = new Set();
+  document.querySelectorAll('.item-row').forEach(tr => {
+    if (tr.id !== `row-${id}` && tr.dataset.namaMenu) usedNama.add(tr.dataset.namaMenu);
+  });
+
+  const filtered = menuList.filter(m => {
+    if (usedNama.has(m.nama_menu)) return false;
+    if (!q) return true;
+    return m.nama_menu.toLowerCase().includes(q);
+  });
+
+  const dd = document.getElementById(`dropdown-${id}`);
+  if (!dd) return;
+
+  if (!filtered.length) {
+    dd.innerHTML = `<div class="item-opt-empty">Menu tidak ditemukan</div>`;
+    return;
+  }
+
+  dd.innerHTML = filtered.map(m => `
+    <div class="item-opt" data-nama="${m.nama_menu}"
+      onclick="pilihMenu(${id}, '${m.nama_menu.replace(/'/g,"\\'")}', ${m.harga})">
+      <span class="opt-nama">${m.nama_menu}</span>
+      <span class="opt-harga">${m.harga ? rp(m.harga) : ''}</span>
+    </div>
+  `).join('');
+}
+
+function pilihMenu(id, namaMenu, hargaDef) {
+  const row = document.getElementById(`row-${id}`);
+  if (row) { row.dataset.namaMenu = namaMenu; row.dataset.hargaDef = hargaDef || 0; }
+
+  const si = document.getElementById(`search-${id}`);
+  if (si) { si.value = namaMenu; si.classList.add('selected'); }
+
+  // Isi harga default dari menu (bisa diedit manual)
+  const hi = document.getElementById(`harga-${id}`);
+  if (hi && hargaDef) hi.value = hargaDef;
+
+  tutupDropdown(id);
+  hitungBaris(id);
+
+  // Fokus ke qty
+  const qi = document.getElementById(`qty-${id}`);
+  if (qi) { qi.focus(); qi.select(); }
+}
+
+function onSearchKey(e, id) {
+  const dd   = document.getElementById(`dropdown-${id}`);
+  const opts = dd?.querySelectorAll('.item-opt') || [];
+  const cur  = dd?.querySelector('.item-opt.focused');
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (!cur) opts[0]?.classList.add('focused');
+    else {
+      cur.classList.remove('focused');
+      const next = cur.nextElementSibling;
+      (next?.classList.contains('item-opt') ? next : opts[0])?.classList.add('focused');
+    }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (cur) {
+      cur.classList.remove('focused');
+      const prev = cur.previousElementSibling;
+      (prev?.classList.contains('item-opt') ? prev : opts[opts.length-1])?.classList.add('focused');
+    }
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (cur) cur.click();
+  } else if (e.key === 'Escape') {
+    tutupDropdown(id);
+  } else if (e.key === 'Tab') {
+    // Tab ke baris berikutnya → tambah baris baru kalau ini baris terakhir
+    const rows = document.querySelectorAll('.item-row');
+    const lastId = rows[rows.length - 1]?.id.replace('row-', '');
+    if (String(id) === String(lastId)) { e.preventDefault(); tambahBaris(); }
+    tutupDropdown(id);
+  }
+}
+
+// ── Hitung ──
+function hitungBaris(id) {
+  const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
+  const harga = parseFloat(document.getElementById(`harga-${id}`)?.value) || 0;
+  const sub   = qty * harga;
+  const subEl = document.getElementById(`sub-${id}`);
+  if (subEl) subEl.textContent = sub > 0 ? rp(sub) : '—';
+  hitungTotal();
+  updateFooter();
+  hitungKembalian();
+}
+
+function hitungTotal() {
+  let total = 0;
+  document.querySelectorAll('.item-row').forEach(tr => {
+    const id    = tr.id.replace('row-', '');
+    const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
+    const harga = parseFloat(document.getElementById(`harga-${id}`)?.value) || 0;
+    if (tr.dataset.namaMenu && qty > 0) total += qty * harga;
+  });
+  return total;
+}
+
+function updateFooter() {
+  let jmlMenu = 0, totalQty = 0, totalRp = 0;
+  document.querySelectorAll('.item-row').forEach(tr => {
+    const id    = tr.id.replace('row-', '');
+    const qty   = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
+    const harga = parseFloat(document.getElementById(`harga-${id}`)?.value) || 0;
+    if (tr.dataset.namaMenu && qty > 0) {
+      jmlMenu++; totalQty += qty; totalRp += qty * harga;
+    }
+  });
+  document.getElementById('footerJmlMenu')?.setAttribute && null;
+  document.getElementById('footerJmlItem').textContent = `${jmlMenu} menu`;
+  document.getElementById('footerTotalQty').textContent = `${totalQty} pcs`;
+  document.getElementById('footerTotal').textContent    = rp(totalRp);
+}
+
+// ══════════════════════════════════════════════
+// SIMPAN
+// ══════════════════════════════════════════════
+async function simpanTransaksi() {
+  const tgl   = document.getElementById('tglTrx').value;
+  const kasir = document.getElementById('kasirTrx').value || 'admin';
+  if (!tgl) { alert('Pilih tanggal transaksi'); return; }
+
+  const items = [];
+  document.querySelectorAll('.item-row').forEach(tr => {
+    const id     = tr.id.replace('row-', '');
+    const nama   = tr.dataset.namaMenu;
+    const qty    = parseFloat(document.getElementById(`qty-${id}`)?.value)   || 0;
+    const harga  = parseFloat(document.getElementById(`harga-${id}`)?.value) || 0;
+    if (!nama || qty <= 0) return;
+    items.push({ nama_menu: nama, qty, harga, subtotal: qty * harga });
+  });
+
+  if (!items.length) { alert('Belum ada item menu yang diisi'); return; }
+
+  const btn = document.getElementById('btnSimpan');
+  btn.disabled = true; btn.textContent = '⏳ Menyimpan...';
+
+  try {
+    const data = await apiPost({
+      action      : 'simpanTransaksi',
+      tanggal     : fmtDate(tgl),
+      metode_bayar: metodeBayar,
+      kasir,
+      items
+    });
+
+    if (data.status === 'ok') {
+      document.getElementById('simpanStatus').innerHTML =
+        `<span style="color:var(--hijau);">✅ Transaksi <strong>${data.id_transaksi}</strong> berhasil disimpan — Total: <strong>${rp(data.total)}</strong></span>`;
+      resetForm();
+    } else {
+      document.getElementById('simpanStatus').innerHTML =
+        `<span style="color:var(--merah);">❌ ${data.message}</span>`;
+    }
+  } catch(e) {
+    document.getElementById('simpanStatus').innerHTML =
+      `<span style="color:var(--merah);">❌ Gagal konek ke server</span>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Simpan Transaksi';
+  }
+}
+
+// ══════════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════════
+function resetForm() {
+  document.getElementById('itemBody').innerHTML = '';
+  barisCount = 0;
+  document.getElementById('uangDiterima') && (document.getElementById('uangDiterima').value = '');
+  document.getElementById('kembalianVal') && (document.getElementById('kembalianVal').textContent = '—');
+  updateFooter();
+  tambahBaris();
+}
+</script>
+</body>
+</html>
