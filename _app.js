@@ -13,7 +13,9 @@ const NAV_ITEMS = [
   { id:'karyawan',  href:'karyawan.html',  icon:'👥', label:'Karyawan',         section:'Keuangan' },
   { id:'notifikasi', href:'notifikasi.html', icon:'🔔', label:'Notifikasi',    section:'Keuangan' },
   { id:'rekap',     href:'rekap.html',     icon:'📊', label:'Rekap Penjualan',  section:'Laporan' },
+  { id:'rekap_belanja', href:'rekap_belanja.html', icon:'📉', label:'Rekap Belanja', section:'Laporan' },
   { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',        section:'Laporan' },
+  { id:'pengaturan_akses', href:'pengaturan_akses.html', icon:'🔐', label:'Pengaturan Akses', section:'Admin' },
 ];
 
 function initPage(activeId) {
@@ -21,8 +23,20 @@ function initPage(activeId) {
   if (!userRaw) { window.location.href = 'index.html'; return; }
   const user = JSON.parse(userRaw);
 
+  const isAdmin = String(user.role).toLowerCase() === 'admin';
+  const allowed = isAdmin ? null : (user.allowed_pages || []);
+
+  // Cek akses ke halaman aktif — kalau tidak diizinkan, tendang ke dashboard
+  if (!isAdmin && activeId !== 'dashboard' && !allowed.includes(activeId)) {
+    alert('Anda tidak memiliki akses ke halaman ini.');
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  const navItems = isAdmin ? NAV_ITEMS : NAV_ITEMS.filter(n => allowed.includes(n.id));
+
   const sidebar  = document.getElementById('sidebar');
-  const sections = [...new Set(NAV_ITEMS.map(n => n.section))];
+  const sections = [...new Set(navItems.map(n => n.section))];
 
   let html = `
     <div class="sidebar-logo" onclick="doLogout()" title="Klik untuk keluar" style="cursor:pointer;">
@@ -38,7 +52,7 @@ function initPage(activeId) {
 
   sections.forEach(sec => {
     html += `<div class="nav-section">${sec}</div>`;
-    NAV_ITEMS.filter(n => n.section === sec).forEach(n => {
+    navItems.filter(n => n.section === sec).forEach(n => {
       html += `<a class="nav-item${n.id===activeId?' active':''}" href="${n.href}">
         <span class="nav-icon">${n.icon}</span>
         <span class="nav-label">${n.label}</span>
