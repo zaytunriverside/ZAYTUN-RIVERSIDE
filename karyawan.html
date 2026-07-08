@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karyawan — Gaji & Hutang — Zaytun Riverside</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:900px){ .grid2{grid-template-columns:1fr;} }
+
+  .form-group { margin-bottom:14px; }
+  .form-group label { display:block; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); margin-bottom:6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%; padding:10px 12px; border:1.5px solid var(--krem-gelap);
+    border-radius:10px; font-size:13px; font-family:'Inter',sans-serif;
+    background:var(--putih); outline:none; color:var(--teks);
+  }
+  .form-group input:focus, .form-group select:focus { border-color:var(--hijau-mid); box-shadow:0 0 0 3px rgba(64,145,108,0.1); }
+
+  .jenis-tabs { display:flex; gap:0; margin-bottom:16px; border-radius:12px; overflow:hidden; border:1.5px solid var(--krem-gelap); width:fit-content; }
+  .jenis-tab { padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; background:var(--putih); color:var(--teks-abu); border:none; font-family:'Inter',sans-serif; transition:all 0.2s; }
+  .jenis-tab.active.gaji   { background:var(--hijau); color:var(--putih); }
+  .jenis-tab.active.kasbon { background:var(--emas);  color:var(--putih); }
+  .jenis-tab:hover:not(.active) { background:var(--krem); }
+
+  .karyawan-card { background:var(--putih); border-radius:14px; padding:16px 18px; border:1px solid rgba(0,0,0,0.05); margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .kc-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .kc-nama { font-size:15px; font-weight:700; color:var(--hijau-tua); font-family:'Playfair Display',serif; }
+  .kc-gaji { font-size:12px; color:var(--teks-abu); margin-top:2px; }
+  .kc-sisa { text-align:right; }
+  .kc-sisa .lbl { font-size:10px; color:var(--teks-abu); text-transform:uppercase; letter-spacing:0.5px; }
+  .kc-sisa .val { font-size:18px; font-weight:700; }
+  .kc-sisa .val.aman   { color:var(--hijau); }
+  .kc-sisa .val.kurang { color:var(--merah); }
+
+  .kc-hutang-badge { display:inline-block; font-size:11px; padding:3px 10px; border-radius:20px; background:var(--merah-pale); color:var(--merah); font-weight:600; margin-bottom:8px; }
+  .kc-riwayat { font-size:12px; color:var(--teks-abu); }
+  .kc-riwayat-item { display:flex; justify-content:space-between; padding:5px 0; border-top:1px solid var(--krem); }
+  .kc-riwayat-item:first-child { border-top:none; }
+  .kc-toggle { font-size:11px; color:var(--hijau-mid); cursor:pointer; font-weight:600; margin-top:6px; }
+
+  .kc-actions { display:flex; gap:8px; margin-top:12px; }
+  .kc-btn { flex:1; padding:8px; border-radius:8px; border:1.5px solid var(--krem-gelap); background:var(--putih); font-size:12px; font-weight:600; cursor:pointer; color:var(--teks); }
+  .kc-btn:hover { background:var(--krem); }
+  .kc-btn.nonaktif { color:var(--merah); border-color:var(--merah-pale); }
+
+  .empty-hint { font-size:12px; color:var(--teks-abu); text-align:center; padding:20px; }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Karyawan — Gaji & Hutang</h1><div class="breadcrumb">Kelola gaji pokok, kasbon, dan sisa gaji karyawan</div></div>
+    </div>
+    <div class="topbar-right"></div>
+  </div>
+
+  <div class="page-content">
+    <div class="grid2">
+
+      <!-- Kolom Kiri: Form -->
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><div class="card-title">➕ Tambah Karyawan</div></div>
+          <div class="form-group"><label>Nama Karyawan</label><input type="text" id="inputNama" placeholder="Nama lengkap"></div>
+          <div class="form-group"><label>Gaji Pokok / Periode (Rp)</label><input type="number" id="inputGajiPokok" placeholder="0" min="0"></div>
+          <button class="btn-primary" style="width:100%;padding:11px;" onclick="tambahKaryawan()">💾 Simpan Karyawan</button>
+          <div id="statusKaryawan" style="margin-top:8px;font-size:13px;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">💵 Catat Gaji / Kasbon</div></div>
+
+          <div class="jenis-tabs">
+            <button class="jenis-tab gaji active"  id="tabGaji"   onclick="setJenis('gaji')">💰 Bayar Gaji</button>
+            <button class="jenis-tab kasbon"        id="tabKasbon" onclick="setJenis('kasbon')">📤 Kasbon</button>
+          </div>
+
+          <div class="form-group">
+            <label>Karyawan</label>
+            <select id="inputKaryawan"><option value="">— Pilih Karyawan —</option></select>
+          </div>
+          <div class="form-group"><label>Tanggal</label><input type="date" id="inputTgl"></div>
+          <div class="form-group"><label>Jumlah (Rp)</label><input type="number" id="inputJumlah" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Keterangan</label><textarea id="inputKeterangan" placeholder="Opsional..." style="min-height:60px;"></textarea></div>
+
+          <button class="btn-primary" style="width:100%;padding:11px;" onclick="simpanEntri()">💾 Simpan</button>
+          <div id="statusEntri" style="margin-top:8px;font-size:13px;"></div>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Daftar Karyawan -->
+      <div>
+        <div class="card-header" style="margin-bottom:12px;">
+          <div class="card-title">📋 Daftar Karyawan & Sisa Gaji</div>
+        </div>
+        <div id="listKaryawan"><div class="loading-state"><div class="loading-spinner"></div>Memuat...</div></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = getApiUrl();
+let activeJenis = 'gaji';
+let ringkasan = [];
+
+initPage('karyawan');
+
+const now = new Date();
+document.getElementById('inputTgl').value = now.toISOString().split('T')[0];
+
+loadAll();
+
+function setJenis(jenis) {
+  activeJenis = jenis;
+  document.getElementById('tabGaji').classList.toggle('active',   jenis==='gaji');
+  document.getElementById('tabKasbon').classList.toggle('active', jenis==='kasbon');
+}
+
+async function loadAll() {
+  try {
+    const [kry, ring] = await Promise.all([
+      apiGet({ action:'getKaryawan' }),
+      apiGet({ action:'getRingkasanKaryawan' })
+    ]);
+    if (kry.status==='ok') isiDropdown(kry.data);
+    if (ring.status==='ok') { ringkasan = ring.data; renderList(); }
+  } catch(e) {
+    document.getElementById('listKaryawan').innerHTML = '<div class="empty-state">⚠️ Gagal memuat data</div>';
+  }
+}
+
+function isiDropdown(list) {
+  const sel = document.getElementById('inputKaryawan');
+  sel.innerHTML = '<option value="">— Pilih Karyawan —</option>' +
+    list.map(k => `<option value="${k.id_karyawan}" data-nama="${k.nama}">${k.nama}</option>`).join('');
+}
+
+function renderList() {
+  const cont = document.getElementById('listKaryawan');
+  if (!ringkasan.length) {
+    cont.innerHTML = '<div class="empty-hint">Belum ada karyawan. Tambahkan lewat form di kiri.</div>';
+    return;
+  }
+  cont.innerHTML = ringkasan.map((k, idx) => {
+    const sisaClass = k.sisa_gaji >= 0 ? 'aman' : 'kurang';
+    const hutangBadge = k.total_hutang_aktif > 0
+      ? `<div class="kc-hutang-badge">⚠️ Hutang aktif: ${rp(k.total_hutang_aktif)}</div>` : '';
+    const riwayatHtml = k.riwayat_hutang.length
+      ? k.riwayat_hutang.map(r => `<div class="kc-riwayat-item"><span>📅 ${r.tanggal}${r.keterangan?' — '+r.keterangan:''}</span><span>${rp(r.jumlah)}</span></div>`).join('')
+      : '<div class="kc-riwayat">Tidak ada hutang aktif.</div>';
+
+    return `
+    <div class="karyawan-card">
+      <div class="kc-head">
+        <div>
+          <div class="kc-nama">${k.nama}</div>
+          <div class="kc-gaji">Gaji pokok: ${rp(k.gaji_pokok)}</div>
+        </div>
+        <div class="kc-sisa">
+          <div class="lbl">Sisa Gaji</div>
+          <div class="val ${sisaClass}">${rp(k.sisa_gaji)}</div>
+        </div>
+      </div>
+      ${hutangBadge}
+      <div class="kc-toggle" onclick="toggleRiwayat(${idx})">📜 Lihat riwayat hutang</div>
+      <div id="riwayat-${idx}" style="display:none;margin-top:8px;">${riwayatHtml}</div>
+      <div class="kc-actions">
+        <button class="kc-btn nonaktif" onclick="nonaktifkan('${k.id_karyawan}','${k.nama}')">🚫 Nonaktifkan</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRiwayat(idx) {
+  const el = document.getElementById(`riwayat-${idx}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function tambahKaryawan() {
+  const nama = document.getElementById('inputNama').value.trim();
+  const gaji = document.getElementById('inputGajiPokok').value;
+  const status = document.getElementById('statusKaryawan');
+  if (!nama || !gaji || Number(gaji) <= 0) {
+    status.innerHTML = '<span style="color:var(--merah);">⚠️ Nama dan gaji pokok wajib diisi</span>';
+    return;
+  }
+  try {
+    const data = await apiPost({ action:'tambahKaryawan', nama, gaji_pokok:Number(gaji) });
+    if (data.status==='ok') {
+      status.innerHTML = `<span style="color:var(--hijau);">✅ ${data.message}</span>`;
+      document.getElementById('inputNama').value = '';
+      document.getElementById('inputGajiPokok').value = '';
+      loadAll();
+    } else {
+      status.innerHTML = `<span style="color:var(--merah);">❌ ${data.message}</span>`;
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--merah);">❌ Gagal konek ke server</span>';
+  }
+}
+
+async function simpanEntri() {
+  const sel      = document.getElementById('inputKaryawan');
+  const idKry    = sel.value;
+  const namaKry  = sel.selectedOptions[0]?.dataset.nama || '';
+  const tgl      = document.getElementById('inputTgl').value;
+  const jumlah   = document.getElementById('inputJumlah').value;
+  const ket      = document.getElementById('inputKeterangan').value.trim();
+  const status   = document.getElementById('statusEntri');
+  const user     = JSON.parse(localStorage.getItem('zaytun_user')||'{}');
+
+  if (!idKry || !tgl || !jumlah || Number(jumlah) <= 0) {
+    status.innerHTML = '<span style="color:var(--merah);">⚠️ Karyawan, tanggal, dan jumlah wajib diisi</span>';
+    return;
+  }
+
+  const action = activeJenis === 'gaji' ? 'bayarGajiKaryawan' : 'catatKasbonKaryawan';
+
+  try {
+    const data = await apiPost({
+      action, id_karyawan:idKry, nama_karyawan:namaKry,
+      tanggal: fmtDate(tgl), jumlah: Number(jumlah),
+      keterangan: ket, kasir: user.username || 'admin'
+    });
+    if (data.status==='ok') {
+      status.innerHTML = `<span style="color:var(--hijau);">✅ ${data.message}</span>`;
+      document.getElementById('inputJumlah').value = '';
+      document.getElementById('inputKeterangan').value = '';
+      loadAll();
+    } else {
+      status.innerHTML = `<span style="color:var(--merah);">❌ ${data.message}</span>`;
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--merah);">❌ Gagal konek ke server</span>';
+  }
+}
+
+async function nonaktifkan(id, nama) {
+  if (!confirm(`Nonaktifkan ${nama}? Riwayat gaji/kasbon tetap tersimpan.`)) return;
+  try {
+    const data = await apiPost({ action:'nonaktifkanKaryawan', id_karyawan:id });
+    if (data.status==='ok') loadAll();
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
