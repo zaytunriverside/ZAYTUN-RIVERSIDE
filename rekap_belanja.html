@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekap Belanja — Zaytun Riverside</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .filter-bar { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px; }
+  .filter-bar label { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); display:block; margin-bottom:4px; }
+  .filter-bar input, .filter-bar select { padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); outline:none; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color:var(--hijau-mid); }
+
+  .summary-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  @media(max-width:768px){ .summary-cards{grid-template-columns:1fr;} }
+  .sum-card { background:var(--putih); border-radius:14px; padding:18px; box-shadow:0 1px 4px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04); }
+  .sum-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--teks-abu); margin-bottom:8px; }
+  .sum-val { font-size:22px; font-weight:700; color:var(--teks); }
+  .sum-val.emas { color:var(--emas); }
+
+  .item-card { background:var(--putih); border-radius:14px; padding:14px 16px; border:1px solid rgba(0,0,0,0.05); margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .ic-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .ic-nama { font-size:14px; font-weight:700; color:var(--teks); }
+  .ic-meta { font-size:11.5px; color:var(--teks-abu); margin-top:2px; }
+  .ic-total { text-align:right; }
+  .ic-total .lbl { font-size:10px; color:var(--teks-abu); text-transform:uppercase; }
+  .ic-total .val { font-size:15px; font-weight:700; color:var(--teks); }
+
+  .ic-trend { display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; margin-top:8px; }
+  .trend-naik  { background:var(--merah-pale); color:var(--merah); }
+  .trend-turun { background:var(--hijau-pale); color:var(--hijau); }
+  .trend-stabil{ background:var(--krem-gelap); color:var(--teks-abu); }
+
+  .ic-detail { display:flex; gap:16px; margin-top:10px; font-size:12px; color:var(--teks-abu); flex-wrap:wrap; }
+  .ic-detail b { color:var(--teks); }
+
+  .kategori-badge { display:inline-block; font-size:10px; padding:2px 9px; border-radius:20px; background:var(--krem); color:var(--teks-abu); font-weight:600; margin-top:4px; }
+
+  .empty-hint { font-size:13px; color:var(--teks-abu); text-align:center; padding:24px; }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Rekap Belanja</h1><div class="breadcrumb">Histori pembelian per item & tren harga</div></div>
+    </div>
+    <div class="topbar-right"></div>
+  </div>
+
+  <div class="page-content">
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="card-title">🔎 Filter</div></div>
+      <div class="filter-bar">
+        <div><label>Preset</label>
+          <select id="preset" onchange="applyPreset()">
+            <option value="">— Pilih —</option>
+            <option value="minggu_ini">Minggu Ini</option>
+            <option value="bulan_ini" selected>Bulan Ini</option>
+            <option value="bulan_lalu">Bulan Lalu</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div><label>Dari Tanggal</label><input type="date" id="filterDari"></div>
+        <div><label>Sampai Tanggal</label><input type="date" id="filterSampai"></div>
+        <div><label>Urutkan</label>
+          <select id="urutan" onchange="renderItems()">
+            <option value="belanja">Total Belanja Terbesar</option>
+            <option value="naik">Kenaikan Harga Terbesar</option>
+            <option value="nama">Nama A-Z</option>
+          </select>
+        </div>
+        <div style="align-self:flex-end;"><button class="btn-primary" onclick="loadRekap()">Tampilkan</button></div>
+      </div>
+    </div>
+
+    <div class="summary-cards" id="summaryCards"></div>
+
+    <div class="card-header" style="margin-bottom:12px;">
+      <div class="card-title">📦 Detail per Item</div>
+      <span class="card-badge badge-hijau" id="itemBadge">—</span>
+    </div>
+    <div id="listItem"><div class="loading-state"><div class="loading-spinner"></div>Pilih periode dan klik Tampilkan</div></div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = getApiUrl();
+let currentItems = [];
+initPage('rekap_belanja');
+applyPreset();
+
+function applyPreset() {
+  const p   = document.getElementById('preset').value;
+  const now = new Date();
+  let dari, sampai;
+
+  if (p==='minggu_ini') {
+    const day = now.getDay();
+    const mon = new Date(now); mon.setDate(now.getDate() - (day===0?6:day-1));
+    dari = mon.toISOString().split('T')[0]; sampai = now.toISOString().split('T')[0];
+  } else if (p==='bulan_ini') {
+    dari   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+    sampai = now.toISOString().split('T')[0];
+  } else if (p==='bulan_lalu') {
+    const bl = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const el = new Date(now.getFullYear(), now.getMonth(), 0);
+    dari   = bl.toISOString().split('T')[0];
+    sampai = el.toISOString().split('T')[0];
+  } else return;
+
+  document.getElementById('filterDari').value   = dari;
+  document.getElementById('filterSampai').value = sampai;
+  if (p !== 'custom') loadRekap();
+}
+
+async function loadRekap() {
+  const dari   = document.getElementById('filterDari').value;
+  const sampai = document.getElementById('filterSampai').value;
+  if (!dari || !sampai) return;
+  document.getElementById('listItem').innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Memuat...</div>';
+
+  try {
+    const res = await apiGet({ action:'getRekapBelanja', dari:fmtDate(dari), sampai:fmtDate(sampai) });
+    if (res.status === 'ok') {
+      currentItems = res.data.items;
+      renderSummary(res.data);
+      renderItems();
+    }
+  } catch(e) {
+    document.getElementById('listItem').innerHTML = '<div class="empty-state">⚠️ Gagal memuat data</div>';
+  }
+}
+
+function renderSummary(d) {
+  const naikCount = d.items.filter(i => i.delta_persen > 5).length;
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="sum-card"><div class="sum-label">Total Belanja</div><div class="sum-val">${rp(d.total_belanja)}</div></div>
+    <div class="sum-card"><div class="sum-label">Jumlah Item Dibeli</div><div class="sum-val">${d.jumlah_item}</div></div>
+    <div class="sum-card"><div class="sum-label">Item Harga Naik &gt;5%</div><div class="sum-val emas">${naikCount}</div></div>
+  `;
+}
+
+function renderItems() {
+  const urut = document.getElementById('urutan').value;
+  let items = [...currentItems];
+  if (urut === 'naik')      items.sort((a,b) => b.delta_persen - a.delta_persen);
+  else if (urut === 'nama') items.sort((a,b) => a.nama_item.localeCompare(b.nama_item));
+  else                      items.sort((a,b) => b.total_belanja - a.total_belanja);
+
+  document.getElementById('itemBadge').textContent = `${items.length} item`;
+
+  if (!items.length) {
+    document.getElementById('listItem').innerHTML = '<div class="empty-hint">Tidak ada data belanja di periode ini.</div>';
+    return;
+  }
+
+  document.getElementById('listItem').innerHTML = items.map(i => {
+    let trendHtml = '';
+    if (i.jumlah_pembelian > 1) {
+      if (i.delta_persen > 3) trendHtml = `<div class="ic-trend trend-naik">📈 Naik ${i.delta_persen.toFixed(1)}%</div>`;
+      else if (i.delta_persen < -3) trendHtml = `<div class="ic-trend trend-turun">📉 Turun ${Math.abs(i.delta_persen).toFixed(1)}%</div>`;
+      else trendHtml = `<div class="ic-trend trend-stabil">➡️ Stabil</div>`;
+    }
+    return `
+    <div class="item-card">
+      <div class="ic-head">
+        <div>
+          <div class="ic-nama">${i.nama_item}</div>
+          <div class="ic-meta">${i.jumlah_pembelian}x dibeli · terakhir ${i.tanggal_terakhir}</div>
+          <div class="kategori-badge">${i.kategori}</div>
+        </div>
+        <div class="ic-total">
+          <div class="lbl">Total Belanja</div>
+          <div class="val">${rp(i.total_belanja)}</div>
+        </div>
+      </div>
+      ${trendHtml}
+      <div class="ic-detail">
+        <span>Qty total: <b>${i.total_qty} ${i.satuan}</b></span>
+        <span>Rata-rata harga: <b>${rp(Math.round(i.rata2_harga))}/${i.satuan}</b></span>
+        <span>Harga terakhir: <b>${rp(i.harga_terakhir)}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

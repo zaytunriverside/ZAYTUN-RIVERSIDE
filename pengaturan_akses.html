@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengaturan Akses — Zaytun Riverside</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .role-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .role-tab { padding:9px 18px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; background:var(--putih); color:var(--teks-abu); border:1.5px solid var(--krem-gelap); font-family:'Inter',sans-serif; }
+  .role-tab.active { background:var(--hijau); color:var(--putih); border-color:var(--hijau); }
+  .role-tab.admin-tab { opacity:0.5; cursor:not-allowed; }
+
+  .add-role-box { display:flex; gap:8px; margin-bottom:20px; }
+  .add-role-box input { flex:1; padding:9px 12px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; }
+
+  .section-title { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--teks-abu); margin:18px 0 8px; }
+  .perm-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  @media(max-width:600px){ .perm-grid{grid-template-columns:1fr;} }
+  .perm-item { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--krem); border-radius:10px; cursor:pointer; }
+  .perm-item input { width:16px; height:16px; accent-color:var(--hijau); }
+  .perm-item label { font-size:13px; font-weight:500; cursor:pointer; flex:1; }
+
+  .admin-note { background:var(--emas-pale); border:1px solid rgba(201,168,76,0.3); border-radius:10px; padding:12px 16px; font-size:13px; color:#8a6914; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Pengaturan Akses</h1><div class="breadcrumb">Atur menu yang boleh dilihat tiap role</div></div>
+    </div>
+    <div class="topbar-right"></div>
+  </div>
+
+  <div class="page-content">
+    <div class="admin-note">🔐 Role <b>admin</b> selalu memiliki akses penuh ke semua menu dan tidak bisa dikunci dari sini.</div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><div class="card-title">👤 Pilih Role</div></div>
+      <div class="role-tabs" id="roleTabs"></div>
+      <div class="add-role-box">
+        <input type="text" id="inputRoleBaru" placeholder="Nama role baru (misal: supervisor)">
+        <button class="btn-primary" onclick="tambahRoleBaru()">+ Tambah Role</button>
+      </div>
+    </div>
+
+    <div class="card" id="permCard" style="display:none;">
+      <div class="card-header"><div class="card-title">✅ Menu yang Diizinkan — <span id="roleAktifLabel"></span></div></div>
+      <div id="permGrid"></div>
+      <button class="btn-primary" style="width:100%;padding:12px;margin-top:18px;" onclick="simpanAkses()">💾 Simpan Akses</button>
+      <div id="statusSimpan" style="margin-top:10px;font-size:13px;"></div>
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = getApiUrl();
+initPage('pengaturan_akses');
+
+// Halaman yang bisa diatur — TIDAK termasuk dashboard (selalu boleh) & pengaturan_akses (admin-only)
+const HALAMAN_DIATUR = NAV_ITEMS.filter(n => n.id !== 'dashboard' && n.id !== 'pengaturan_akses');
+
+let allRoles = [];
+let allPermissions = [];
+let roleAktif = null;
+
+loadData();
+
+async function loadData() {
+  try {
+    const [roleRes, permRes] = await Promise.all([
+      apiGet({ action:'getRoles' }),
+      apiGet({ action:'getAllRolePermissions' })
+    ]);
+    if (roleRes.status==='ok') allRoles = roleRes.data;
+    if (permRes.status==='ok') allPermissions = permRes.data;
+    renderRoleTabs();
+  } catch(e) {
+    document.getElementById('roleTabs').innerHTML = '<div class="empty-state">⚠️ Gagal memuat data</div>';
+  }
+}
+
+function renderRoleTabs() {
+  const cont = document.getElementById('roleTabs');
+  cont.innerHTML = allRoles.map(r => {
+    const isAdmin = r.toLowerCase() === 'admin';
+    return `<button class="role-tab ${isAdmin?'admin-tab':''} ${roleAktif===r?'active':''}"
+      onclick="${isAdmin?'':`pilihRole('${r}')`}" ${isAdmin?'title="Admin selalu full akses"':''}>${r}${isAdmin?' 👑':''}</button>`;
+  }).join('');
+}
+
+function pilihRole(role) {
+  roleAktif = role;
+  renderRoleTabs();
+  document.getElementById('permCard').style.display = 'block';
+  document.getElementById('roleAktifLabel').textContent = role;
+
+  const existing = allPermissions.find(p => String(p.role) === String(role));
+  const allowedSet = new Set(existing ? String(existing.allowed_pages||'').split(',').map(s=>s.trim()) : []);
+
+  const sections = [...new Set(HALAMAN_DIATUR.map(n => n.section))];
+  let html = '';
+  sections.forEach(sec => {
+    html += `<div class="section-title">${sec}</div><div class="perm-grid">`;
+    HALAMAN_DIATUR.filter(n => n.section === sec).forEach(n => {
+      const checked = allowedSet.has(n.id) ? 'checked' : '';
+      html += `<div class="perm-item" onclick="document.getElementById('chk-${n.id}').click()">
+        <input type="checkbox" id="chk-${n.id}" value="${n.id}" ${checked} onclick="event.stopPropagation()">
+        <label for="chk-${n.id}">${n.icon} ${n.label}</label>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('permGrid').innerHTML = html;
+}
+
+function tambahRoleBaru() {
+  const input = document.getElementById('inputRoleBaru');
+  const nama  = input.value.trim();
+  if (!nama) return;
+  if (allRoles.includes(nama)) { pilihRole(nama); return; }
+  allRoles.push(nama);
+  input.value = '';
+  renderRoleTabs();
+  pilihRole(nama);
+}
+
+async function simpanAkses() {
+  if (!roleAktif) return;
+  const checked = HALAMAN_DIATUR.filter(n => document.getElementById(`chk-${n.id}`)?.checked).map(n => n.id);
+  const status  = document.getElementById('statusSimpan');
+  status.innerHTML = '⏳ Menyimpan...';
+
+  try {
+    const data = await apiPost({ action:'setRolePermission', role:roleAktif, allowed_pages:checked });
+    if (data.status==='ok') {
+      status.innerHTML = `<span style="color:var(--hijau);">✅ ${data.message}</span>`;
+      loadData();
+    } else {
+      status.innerHTML = `<span style="color:var(--merah);">❌ ${data.message}</span>`;
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--merah);">❌ Gagal konek ke server</span>';
+  }
+}
+</script>
+</body>
+</html>
