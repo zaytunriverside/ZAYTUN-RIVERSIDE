@@ -268,6 +268,21 @@
 }
 @media (max-width: 500px) {
   .menu-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Sembunyikan field Kasir di HP kecil — cuma info, tidak perlu makan tempat */
+  .meta-field.field-kasir { display: none; }
+  .meta-row .meta-field.field-tanggal { flex: 1 1 100%; }
+
+  /* Tombol aksi ditumpuk vertikal, lebih besar & mudah ditekan jempol */
+  .btn-row { flex-direction: column; }
+  .btn-row button { width: 100%; padding: 12px; }
+
+  /* Kontrol qty diperbesar biar gampang disentuh */
+  .si-qty-btn { width: 32px; height: 32px; font-size: 18px; }
+  .si-nama { font-size: 14px; }
+
+  /* Metode bayar: ikon lebih besar, teks tetap ringkas */
+  .metode-btn { padding: 10px 4px; font-size: 12px; }
 }
 </style>
 </head>
@@ -328,11 +343,11 @@
         <!-- Meta -->
         <div class="struk-meta">
           <div class="meta-row">
-            <div class="meta-field">
+            <div class="meta-field field-tanggal">
               <label>Tanggal</label>
               <input type="date" id="tglTrx">
             </div>
-            <div class="meta-field">
+            <div class="meta-field field-kasir">
               <label>Kasir</label>
               <input type="text" id="kasirTrx" readonly>
             </div>
@@ -379,7 +394,7 @@
           <div class="btn-row">
             <button class="btn-draft" onclick="simpanDraft()">📋 Simpan Draft</button>
             <button class="btn-draft" onclick="printStruk(false)" style="background:var(--biru-pale);color:var(--biru);border-color:rgba(36,113,163,0.3);">🖨️ Print Preview</button>
-            <button class="btn-reset-struk" onclick="resetStruk()">✕ Baru</button>
+            <button class="btn-reset-struk" onclick="resetStruk()">🔄 Reset</button>
           </div>
           <div class="simpan-status" id="simpanStatus"></div>
         </div>
