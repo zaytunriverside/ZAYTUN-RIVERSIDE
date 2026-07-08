@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { id:'stok',      href:'stok.html',      icon:'📦', label:'Stok Opname',      section:'Operasional' },
   { id:'resep',     href:'resep.html',     icon:'📖', label:'Resep Menu',       section:'Operasional' },
   { id:'modal',     href:'modal.html',     icon:'💰', label:'Modal & Kas',      section:'Keuangan' },
+  { id:'karyawan',  href:'karyawan.html',  icon:'👥', label:'Karyawan',         section:'Keuangan' },
   { id:'rekap',     href:'rekap.html',     icon:'📊', label:'Rekap Penjualan',  section:'Laporan' },
   { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',        section:'Laporan' },
 ];
