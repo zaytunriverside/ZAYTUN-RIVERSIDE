@@ -616,7 +616,8 @@ async function simpanTransaksi(danPrint = false) {
 
     if (data.status === 'ok') {
       document.getElementById('simpanStatus').innerHTML =
-        `<span style="color:var(--hijau);">✅ ${data.id_transaksi} — ${rp(data.total)}</span>`;
+        `<span style="color:var(--hijau);">✅ ${data.id_transaksi} — ${rp(data.total)}</span>
+        <br><a href="invoice.html?id=${data.id_transaksi}&type=jual" target="_blank" style="color:var(--hijau);font-weight:600;">🔗 Lihat/Bagikan Invoice</a>`;
 
       if (danPrint) printStruk(true, data.id_transaksi);
 
