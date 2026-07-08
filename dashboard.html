@@ -512,6 +512,9 @@
   <!-- Content -->
   <div class="page-content">
 
+    <!-- Banner Belum Input -->
+    <div id="belumInputBanner" style="display:none;"></div>
+
     <!-- Kartu Statistik -->
     <div class="stats-grid">
       <div class="stat-card omzet">
@@ -630,6 +633,27 @@
     const stokPerhatian = data.stok_perhatian || [];
     document.getElementById('statStok').textContent = stokPerhatian.length;
     renderStok(stokPerhatian);
+    renderBelumInput(data);
+  }
+
+  function renderBelumInput(data) {
+    const jamSekarang = new Date().getHours();
+    const banner = document.getElementById('belumInputBanner');
+
+    // Sebelum jam 10 pagi, wajar belum ada transaksi — jangan tampilkan warning.
+    if (jamSekarang < 10) { banner.style.display = 'none'; return; }
+
+    const belumJual  = data.jumlah_transaksi === 0;
+    const belumKeluar = data.keluar_hari_ini === 0;
+
+    if (!belumJual && !belumKeluar) { banner.style.display = 'none'; return; }
+
+    let pesan = '';
+    if (belumJual)  pesan += `<div>⚠️ Belum ada <b>transaksi penjualan</b> yang tercatat hari ini.</div>`;
+    if (belumKeluar) pesan += `<div style="margin-top:4px;">ℹ️ Belum ada <b>catatan belanja</b> hari ini (wajar kalau memang tidak belanja).</div>`;
+
+    banner.innerHTML = `<div style="background:var(--emas-pale);border:1px solid rgba(201,168,76,0.35);border-radius:12px;padding:14px 18px;font-size:13px;color:#8a6914;margin-bottom:20px;">${pesan}</div>`;
+    banner.style.display = 'block';
   }
 
   function renderTransaksi(data) {
