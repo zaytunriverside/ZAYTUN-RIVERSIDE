@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resep Menu - Zaytun Riverside</title>
+<title>Daftar Menu - Zaytun Riverside</title>
 <link rel="icon" type="image/png" href="icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="_layout.css">
@@ -25,6 +25,15 @@ body{font-family:'Inter',sans-serif}
 .mitem-del{display:none;background:none;border:none;color:#C0392B;cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;line-height:1}
 .mitem:hover .mitem-del{display:block}
 .mitem-del:hover{background:#FDECEA}
+.mitem.nonaktif{opacity:0.5}
+.mitem.nonaktif .mitem-name{text-decoration:line-through}
+.mitem-toggle{display:none;background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px;border-radius:4px;line-height:1}
+.mitem:hover .mitem-toggle{display:block}
+.mitem-toggle.aktif{color:#C0392B}
+.mitem-toggle.aktif:hover{background:#FDECEA}
+.mitem-toggle.nonaktif-btn{color:#2D6A4F}
+.mitem-toggle.nonaktif-btn:hover{background:#D8F3DC}
+.nonaktif-badge{font-size:9px;background:#FDECEA;color:#C0392B;padding:1px 6px;border-radius:8px;font-weight:700;margin-right:4px}
 .btn-addmenu{font-size:11px;background:#D8F3DC;color:#2D6A4F;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-weight:600}
 .btn-addmenu:hover{background:#2D6A4F;color:#fff}
 .fnew{background:#F8F3E8;border-radius:10px;padding:12px;margin-bottom:8px;display:none;flex-shrink:0}
@@ -64,7 +73,7 @@ body{font-family:'Inter',sans-serif}
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:12px">
       <button class="menu-toggle" onclick="toggleSidebar()">&#9776;</button>
-      <div class="topbar-left"><h1>Resep Menu</h1><div class="breadcrumb">Mapping bahan baku per menu</div></div>
+      <div class="topbar-left"><h1>Daftar Menu</h1><div class="breadcrumb">Kelola menu & mapping bahan baku</div></div>
     </div>
     <div class="topbar-right">
       
@@ -168,8 +177,9 @@ function renderMenuList() {
     scroll.appendChild(lbl);
 
     grouped[kat].forEach(function(m) {
+      var isNonaktif = m.status === 'nonaktif';
       var item = document.createElement('div');
-      item.className = 'mitem' + (active === m.nama_menu ? ' active' : '');
+      item.className = 'mitem' + (active === m.nama_menu ? ' active' : '') + (isNonaktif ? ' nonaktif' : '');
 
       var nameSpan = document.createElement('span');
       nameSpan.className = 'mitem-name';
@@ -178,19 +188,19 @@ function renderMenuList() {
       var r   = cache[m.nama_menu];
       var jml = r ? r.length : 0;
 
-      var delBtn = document.createElement('button');
-      delBtn.className = 'mitem-del';
-      delBtn.textContent = '\uD83D\uDDD1';
-      delBtn.title = 'Hapus menu';
+      var toggleBtn = document.createElement('button');
+      toggleBtn.className = 'mitem-toggle ' + (isNonaktif ? 'nonaktif-btn' : 'aktif');
+      toggleBtn.textContent = isNonaktif ? '\u2705' : '\uD83D\uDEAB';
+      toggleBtn.title = isNonaktif ? 'Aktifkan menu' : 'Nonaktifkan menu (tidak tampil di Input Penjualan)';
 
       // Simpan data di closure — TIDAK di HTML attribute
-      ;(function(menu) {
+      ;(function(menu, nonaktif) {
         item.addEventListener('click', function() { pickMenu(menu.nama_menu); });
-        delBtn.addEventListener('click', function(e) {
+        toggleBtn.addEventListener('click', function(e) {
           e.stopPropagation();
-          doDelMenu(menu.id_menu, menu.nama_menu);
+          doToggleStatusMenu(menu.id_menu, menu.nama_menu, nonaktif);
         });
-      })(m);
+      })(m, isNonaktif);
 
       item.appendChild(nameSpan);
       if (jml > 0) {
@@ -199,7 +209,7 @@ function renderMenuList() {
         badge.textContent = jml;
         item.appendChild(badge);
       }
-      item.appendChild(delBtn);
+      item.appendChild(toggleBtn);
       scroll.appendChild(item);
     });
   });
@@ -214,7 +224,7 @@ async function doAddMenu() {
   try {
     var d = await apiPost({action:'tambahMenu', nama_menu:nama, kategori:kat});
     if (d.status === 'ok') {
-      menus.push({id_menu: d.id_menu || ('X'+Date.now()), nama_menu:nama, kategori:kat, harga:0});
+      menus.push({id_menu: d.id_menu || ('X'+Date.now()), nama_menu:nama, kategori:kat, harga:0, status:'aktif'});
       document.getElementById('mcount').textContent = menus.length;
       document.getElementById('inpNama').value = '';
       document.getElementById('fnew').classList.remove('open');
@@ -224,22 +234,22 @@ async function doAddMenu() {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
-// ── Hapus menu ────────────────────
-async function doDelMenu(id, nama) {
-  if (!confirm('Hapus menu "' + nama + '"?')) return;
+// ── Nonaktif/Aktifkan menu (TIDAK hapus data) ──
+async function doToggleStatusMenu(id, nama, sedangNonaktif) {
+  var aksi = sedangNonaktif ? 'aktifkan' : 'nonaktifkan';
+  var pesanKonfirmasi = sedangNonaktif
+    ? 'Aktifkan kembali menu "' + nama + '"?'
+    : 'Nonaktifkan menu "' + nama + '"? Menu tidak akan tampil di Input Penjualan, tapi data histori tetap aman.';
+  if (!confirm(pesanKonfirmasi)) return;
   try {
-    var d = await apiPost({action:'hapusMenu', id_menu:id, nama_menu:nama});
+    var action = sedangNonaktif ? 'aktifkanMenu' : 'nonaktifkanMenu';
+    var d = await apiPost({action:action, id_menu:id, nama_menu:nama});
     if (d.status === 'ok') {
-      menus = menus.filter(function(m){ return m.nama_menu !== nama; });
-      delete cache[nama];
-      document.getElementById('mcount').textContent = menus.length;
-      if (active === nama) {
-        active = null;
-        document.getElementById('rightPanel').innerHTML = '<div class="empty-state"><div class="ei">&#128214;</div><div style="font-size:14px;font-weight:600">Pilih menu di sebelah kiri</div></div>';
-      }
+      var m = menus.find(function(x){ return x.nama_menu === nama; });
+      if (m) m.status = sedangNonaktif ? 'aktif' : 'nonaktif';
       renderMenuList();
-    } else { alert('Gagal hapus: ' + d.message); }
-  } catch(e) { alert('Error hapus: ' + e.message); }
+    } else { alert('Gagal ' + aksi + ': ' + d.message); }
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ── Pilih menu ────────────────────
