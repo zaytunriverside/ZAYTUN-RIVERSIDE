@@ -457,7 +457,7 @@ async function loadMenu() {
   try {
     const data = await apiGet({ action: 'getMenuList' });
     if (data.status === 'ok') {
-      menuList     = data.data || [];
+      menuList     = (data.data || []).filter(m => m.status !== 'nonaktif'); // sembunyikan menu nonaktif
       kategoriList = ['Semua', ...new Set(menuList.map(m => m.kategori).filter(Boolean)).values()].sort((a,b) => a === 'Semua' ? -1 : b === 'Semua' ? 1 : a.localeCompare(b));
       buildKatChips();
       renderMenuGrid();
