@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice — Zaytun Riverside</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --hijau-tua:  #1B4332;
+    --hijau:      #2D6A4F;
+    --hijau-mid:  #40916C;
+    --hijau-muda: #74C69D;
+    --hijau-pale: #D8F3DC;
+    --krem:       #F8F3E8;
+    --krem-gelap: #EDE8D8;
+    --emas:       #C9A84C;
+    --emas-pale:  #FDF3DC;
+    --merah:      #C0392B;
+    --merah-pale: #FDECEA;
+    --teks:       #1a1a1a;
+    --teks-abu:   #6b7280;
+    --putih:      #ffffff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',sans-serif; background:var(--krem); color:var(--teks); min-height:100vh; padding:20px 12px; }
+
+  .wrap { max-width:480px; margin:0 auto; }
+
+  .brand { text-align:center; margin-bottom:18px; }
+  .brand img { width:44px; height:44px; border-radius:12px; margin-bottom:6px; }
+  .brand .nm { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:var(--hijau-tua); }
+  .brand .sub { font-size:11px; color:var(--teks-abu); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+
+  .card { background:var(--putih); border-radius:18px; padding:22px 20px; box-shadow:0 4px 16px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04); }
+
+  .inv-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:16px; border-bottom:1.5px dashed var(--krem-gelap); }
+  .inv-type { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+  .inv-type.jual { background:var(--hijau-pale); color:var(--hijau); }
+  .inv-type.beli { background:var(--emas-pale); color:#8a6914; }
+  .inv-id { font-size:11px; color:var(--teks-abu); margin-top:6px; font-family:monospace; }
+  .inv-date { text-align:right; font-size:13px; color:var(--teks-abu); }
+
+  .item-row { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--krem); gap:10px; }
+  .item-row:last-child { border-bottom:none; }
+  .item-nm { font-size:13.5px; font-weight:600; color:var(--teks); }
+  .item-meta { font-size:12px; color:var(--teks-abu); margin-top:2px; }
+  .item-sub { font-size:13.5px; font-weight:700; color:var(--teks); white-space:nowrap; }
+
+  .inv-total { display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:16px; border-top:1.5px dashed var(--krem-gelap); }
+  .inv-total .lbl { font-size:13px; font-weight:600; color:var(--teks-abu); text-transform:uppercase; letter-spacing:0.5px; }
+  .inv-total .val { font-size:22px; font-weight:700; color:var(--hijau-tua); }
+
+  .inv-meta-extra { margin-top:12px; font-size:12px; color:var(--teks-abu); display:flex; justify-content:space-between; }
+
+  .actions { display:flex; gap:10px; margin-top:18px; }
+  .btn { flex:1; padding:13px; border-radius:12px; border:none; font-size:13px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn-share { background:var(--hijau); color:var(--putih); }
+  .btn-print { background:var(--krem); color:var(--teks); border:1.5px solid var(--krem-gelap); }
+
+  .footer-note { text-align:center; font-size:11px; color:var(--teks-abu); margin-top:18px; line-height:1.6; }
+
+  .loading, .error-state { text-align:center; padding:60px 20px; color:var(--teks-abu); font-size:13px; }
+  .error-state .ic { font-size:36px; margin-bottom:10px; }
+
+  @media print {
+    body { background:var(--putih); padding:0; }
+    .actions, .footer-note { display:none; }
+    .card { box-shadow:none; border:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <img src="icon.png" alt="Zaytun Riverside">
+    <div class="nm">Zaytun Riverside</div>
+    <div class="sub">Nota Digital</div>
+  </div>
+
+  <div id="content" class="card">
+    <div class="loading">Memuat invoice...</div>
+  </div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<script>
+function getApiUrl() {
+  return localStorage.getItem('zaytun_api') || 'https://bill.czr.workers.dev';
+}
+async function apiGet(params) {
+  const qs  = Object.entries(params).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+  const res = await fetch(`${getApiUrl()}?${qs}`);
+  return await res.json();
+}
+function rp(n) { return 'Rp ' + Number(n||0).toLocaleString('id-ID'); }
+
+const qp   = new URLSearchParams(location.search);
+const id   = qp.get('id');
+const type = qp.get('type');
+
+async function loadInvoice() {
+  const el = document.getElementById('content');
+  if (!id || !type) {
+    el.innerHTML = `<div class="error-state"><div class="ic">⚠️</div>Link invoice tidak valid.</div>`;
+    return;
+  }
+  try {
+    const res = await apiGet({ action:'getInvoice', id, type });
+    if (res.status !== 'ok') {
+      el.innerHTML = `<div class="error-state"><div class="ic">🔍</div>${res.message || 'Invoice tidak ditemukan'}</div>`;
+      return;
+    }
+    render(res.data);
+  } catch (e) {
+    el.innerHTML = `<div class="error-state"><div class="ic">⚠️</div>Gagal memuat invoice. Cek koneksi internet.</div>`;
+  }
+}
+
+function render(d) {
+  const isJual = d.tipe === 'jual';
+  let itemsHtml = '';
+
+  if (isJual) {
+    d.items.forEach(it => {
+      itemsHtml += `<div class="item-row">
+        <div><div class="item-nm">${it.nama_menu}</div><div class="item-meta">${it.qty} x ${rp(it.harga)}</div></div>
+        <div class="item-sub">${rp(it.subtotal)}</div>
+      </div>`;
+    });
+  } else {
+    d.items.forEach(it => {
+      itemsHtml += `<div class="item-row">
+        <div><div class="item-nm">${it.nama_item}</div><div class="item-meta">${it.jumlah} ${it.satuan} x ${rp(it.harga_satuan)}</div></div>
+        <div class="item-sub">${rp(it.total)}</div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('content').innerHTML = `
+    <div class="inv-head">
+      <div>
+        <span class="inv-type ${isJual?'jual':'beli'}">${isJual?'Invoice Penjualan':'Nota Pembelian'}</span>
+        <div class="inv-id">${d.id}</div>
+      </div>
+      <div class="inv-date">📅 ${d.tanggal}</div>
+    </div>
+    <div class="items-list">${itemsHtml}</div>
+    <div class="inv-total">
+      <div class="lbl">Total</div>
+      <div class="val">${rp(d.total)}</div>
+    </div>
+    ${isJual ? `<div class="inv-meta-extra"><span>Metode Bayar</span><span style="font-weight:600;color:var(--teks);">${d.metode_bayar||'-'}</span></div>` : ''}
+    <div class="actions">
+      <button class="btn btn-share" onclick="shareInvoice()">📤 Bagikan</button>
+      <button class="btn btn-print" onclick="window.print()">🖨️ Cetak</button>
+    </div>
+  `;
+
+  document.getElementById('footerNote').innerHTML =
+    'Nota ini digenerate otomatis oleh sistem Zaytun Riverside.<br>Simpan link ini untuk referensi Anda.';
+}
+
+function shareInvoice() {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: 'Invoice Zaytun Riverside', url }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url).then(() => alert('Link invoice disalin ke clipboard!'));
+  }
+}
+
+loadInvoice();
+</script>
+</body>
+</html>
