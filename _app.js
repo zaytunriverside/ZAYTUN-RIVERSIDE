@@ -4,18 +4,23 @@
 
 const NAV_ITEMS = [
   { id:'dashboard', href:'dashboard.html', icon:'🏠', label:'Dashboard',        section:'Menu Utama' },
-  { id:'transaksi', href:'transaksi.html', icon:'🧾', label:'Transaksi',        section:'Menu Utama' },
-  { id:'penjualan', href:'penjualan.html', icon:'💵', label:'Input Penjualan',  section:'Menu Utama' },
+
+  { id:'penjualan', href:'penjualan.html', icon:'💵', label:'Input Penjualan',  section:'Operasional' },
   { id:'belanja',   href:'belanja.html',   icon:'🛒', label:'Input Belanja',    section:'Operasional' },
   { id:'stok',      href:'stok.html',      icon:'📦', label:'Stok Opname',      section:'Operasional' },
   { id:'resep',     href:'resep.html',     icon:'📖', label:'Daftar Menu',      section:'Operasional' },
+  { id:'transaksi', href:'transaksi.html', icon:'📥', label:'Import KasPOS',    section:'Operasional' },
+
   { id:'modal',     href:'modal.html',     icon:'💰', label:'Modal & Kas',      section:'Keuangan' },
-  { id:'karyawan',  href:'karyawan.html',  icon:'👥', label:'Karyawan',         section:'Keuangan' },
-  { id:'notifikasi', href:'notifikasi.html', icon:'🔔', label:'Notifikasi',    section:'Keuangan' },
+
+  { id:'karyawan',  href:'karyawan.html',  icon:'👥', label:'Karyawan',         section:'SDM' },
+
   { id:'rekap',     href:'rekap.html',     icon:'📊', label:'Rekap Penjualan',  section:'Laporan' },
   { id:'rekap_belanja', href:'rekap_belanja.html', icon:'📉', label:'Rekap Belanja', section:'Laporan' },
   { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',        section:'Laporan' },
-  { id:'pengaturan_akses', href:'pengaturan_akses.html', icon:'🔐', label:'Pengaturan Akses', section:'Admin' },
+
+  { id:'notifikasi', href:'notifikasi.html', icon:'🔔', label:'Notifikasi',    section:'Pengaturan' },
+  { id:'pengaturan_akses', href:'pengaturan_akses.html', icon:'🔐', label:'Hak Akses', section:'Pengaturan' },
 ];
 
 function initPage(activeId) {
