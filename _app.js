@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { id:'penjualan', href:'penjualan.html', icon:'💵', label:'Input Penjualan',  section:'Menu Utama' },
   { id:'belanja',   href:'belanja.html',   icon:'🛒', label:'Input Belanja',    section:'Operasional' },
   { id:'stok',      href:'stok.html',      icon:'📦', label:'Stok Opname',      section:'Operasional' },
-  { id:'resep',     href:'resep.html',     icon:'📖', label:'Resep Menu',       section:'Operasional' },
+  { id:'resep',     href:'resep.html',     icon:'📖', label:'Daftar Menu',      section:'Operasional' },
   { id:'modal',     href:'modal.html',     icon:'💰', label:'Modal & Kas',      section:'Keuangan' },
   { id:'karyawan',  href:'karyawan.html',  icon:'👥', label:'Karyawan',         section:'Keuangan' },
   { id:'notifikasi', href:'notifikasi.html', icon:'🔔', label:'Notifikasi',    section:'Keuangan' },
