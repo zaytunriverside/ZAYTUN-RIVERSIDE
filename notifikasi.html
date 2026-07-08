@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifikasi Reminder — Zaytun Riverside</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:900px){ .grid2{grid-template-columns:1fr;} }
+
+  .steps { font-size:13px; color:var(--teks-abu); line-height:1.9; margin-bottom:16px; }
+  .steps b { color:var(--teks); }
+  .steps a { color:var(--hijau-mid); font-weight:600; }
+
+  .recipient-row { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:var(--krem); border-radius:10px; margin-bottom:8px; }
+  .recipient-nama { font-size:13.5px; font-weight:600; color:var(--teks); }
+  .recipient-id { font-size:11px; color:var(--teks-abu); font-family:monospace; }
+  .btn-hapus { background:none; border:none; color:var(--merah); cursor:pointer; font-size:16px; padding:4px 8px; border-radius:6px; }
+  .btn-hapus:hover { background:var(--merah-pale); }
+
+  .candidate-row { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:var(--hijau-pale); border-radius:10px; margin-bottom:8px; gap:10px; }
+  .candidate-nama { font-size:13.5px; font-weight:600; color:var(--hijau-tua); }
+  .candidate-id { font-size:11px; color:var(--teks-abu); font-family:monospace; }
+  .btn-tambah { background:var(--hijau); color:var(--putih); border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn-tambah:hover { background:var(--hijau-mid); }
+
+  .empty-hint { font-size:12px; color:var(--teks-abu); text-align:center; padding:16px; }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Notifikasi Reminder</h1><div class="breadcrumb">Kelola siapa saja yang menerima reminder Telegram</div></div>
+    </div>
+    <div class="topbar-right"></div>
+  </div>
+
+  <div class="page-content">
+    <div class="grid2">
+
+      <!-- Kolom Kiri: Penerima Aktif -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">✅ Penerima Aktif</div></div>
+        <div id="listPenerima"><div class="loading-state"><div class="loading-spinner"></div>Memuat...</div></div>
+      </div>
+
+      <!-- Kolom Kanan: Tambah Penerima Baru -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">➕ Tambah Penerima Baru</div></div>
+        <div class="steps">
+          <b>1.</b> Minta orang yang mau ditambahkan buka <a href="https://t.me/CZRreminder_bot" target="_blank">t.me/CZRreminder_bot</a> lalu klik <b>Start</b> (kirim pesan apa saja).<br>
+          <b>2.</b> Klik tombol <b>"Cek Chat Baru"</b> di bawah ini.<br>
+          <b>3.</b> Namanya akan otomatis muncul (dari nama Telegram-nya) — klik <b>Tambahkan</b>.
+        </div>
+        <button class="btn-primary" style="width:100%;padding:11px;" onclick="cekChatBaru()">🔄 Cek Chat Baru</button>
+        <div id="statusCek" style="margin-top:8px;font-size:13px;"></div>
+        <div id="listKandidat" style="margin-top:14px;"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script>
+const API_URL = getApiUrl();
+initPage('notifikasi');
+loadPenerima();
+
+async function loadPenerima() {
+  const cont = document.getElementById('listPenerima');
+  try {
+    const res = await apiGet({ action:'getTelegramRecipients' });
+    if (res.status !== 'ok' || !res.data.length) {
+      cont.innerHTML = '<div class="empty-hint">Belum ada penerima terdaftar.</div>';
+      return;
+    }
+    cont.innerHTML = res.data.map(r => `
+      <div class="recipient-row">
+        <div>
+          <div class="recipient-nama">${r.nama}</div>
+          <div class="recipient-id">${r.chat_id}</div>
+        </div>
+        <button class="btn-hapus" onclick="hapusPenerima('${r.chat_id}')">🗑</button>
+      </div>`).join('');
+  } catch(e) {
+    cont.innerHTML = '<div class="empty-state">⚠️ Gagal memuat data</div>';
+  }
+}
+
+async function cekChatBaru() {
+  const status = document.getElementById('statusCek');
+  const cont   = document.getElementById('listKandidat');
+  status.innerHTML = '⏳ Mengecek chat baru...';
+  cont.innerHTML = '';
+  try {
+    const res = await apiGet({ action:'getTelegramCandidates' });
+    if (res.status !== 'ok') {
+      status.innerHTML = `<span style="color:var(--merah);">❌ ${res.message}</span>`;
+      return;
+    }
+    if (!res.data.length) {
+      status.innerHTML = '<span style="color:var(--teks-abu);">Tidak ada chat baru. Pastikan sudah Start bot dulu.</span>';
+      return;
+    }
+    status.innerHTML = `<span style="color:var(--hijau);">✅ Ditemukan ${res.data.length} chat baru</span>`;
+    cont.innerHTML = res.data.map(k => `
+      <div class="candidate-row">
+        <div>
+          <div class="candidate-nama">${k.nama}</div>
+          <div class="candidate-id">${k.chat_id}</div>
+        </div>
+        <button class="btn-tambah" onclick="tambahPenerima('${k.chat_id}','${k.nama.replace(/'/g,"\\'")}')">+ Tambahkan</button>
+      </div>`).join('');
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--merah);">❌ Gagal konek ke server</span>';
+  }
+}
+
+async function tambahPenerima(chatId, nama) {
+  try {
+    const data = await apiPost({ action:'tambahTelegramRecipient', chat_id:chatId, nama });
+    if (data.status === 'ok') {
+      loadPenerima();
+      cekChatBaru();
+    } else {
+      alert(data.message);
+    }
+  } catch(e) {
+    alert('Gagal konek ke server');
+  }
+}
+
+async function hapusPenerima(chatId) {
+  if (!confirm('Hapus penerima ini dari daftar reminder?')) return;
+  try {
+    const data = await apiPost({ action:'hapusTelegramRecipient', chat_id:chatId });
+    if (data.status === 'ok') loadPenerima();
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
