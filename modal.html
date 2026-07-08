@@ -44,6 +44,17 @@
   .modal-table tr:last-child td { border-bottom:none; }
   .modal-table tr:hover td { background:var(--krem); }
 
+  /* Mobile: tabel → card, pakai data-label sebagai pseudo-header */
+  @media (max-width:640px) {
+    .modal-table thead { display:none; }
+    .modal-table, .modal-table tbody, .modal-table tr, .modal-table td { display:block; width:100%; }
+    .modal-table tr { background:var(--putih); border:1px solid var(--krem-gelap); border-radius:12px; padding:10px 14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+    .modal-table td { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--krem); text-align:right; }
+    .modal-table td:last-child { border-bottom:none; }
+    .modal-table td::before { content:attr(data-label); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--teks-abu); text-align:left; }
+    .modal-table td:last-child::before { content:''; }
+  }
+
   .jenis-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; }
   .jenis-masuk  { background:var(--hijau-pale); color:var(--hijau); }
   .jenis-keluar { background:var(--merah-pale);  color:var(--merah); }
@@ -218,11 +229,11 @@ function renderTabel() {
   [...data].reverse().forEach(d => {
     const bc = d.jenis==='masuk' ? 'jenis-masuk' : 'jenis-keluar';
     html += `<tr>
-      <td>${d.tanggal}</td>
-      <td><span class="jenis-badge ${bc}">${d.jenis==='masuk'?'Masuk':'Keluar'}</span></td>
-      <td>${d.kategori}</td>
-      <td style="font-weight:700;color:${d.jenis==='masuk'?'var(--hijau)':'var(--merah)'};">${rp(d.jumlah)}</td>
-      <td style="color:var(--teks-abu);font-size:12px;">${d.keterangan||'—'}</td>
+      <td data-label="Tanggal">${d.tanggal}</td>
+      <td data-label="Jenis"><span class="jenis-badge ${bc}">${d.jenis==='masuk'?'Masuk':'Keluar'}</span></td>
+      <td data-label="Kategori">${d.kategori}</td>
+      <td data-label="Jumlah" style="font-weight:700;color:${d.jenis==='masuk'?'var(--hijau)':'var(--merah)'};">${rp(d.jumlah)}</td>
+      <td data-label="Keterangan" style="color:var(--teks-abu);font-size:12px;">${d.keterangan||'—'}</td>
       <td><button class="btn-hapus-row" onclick="hapusModal('${d.id_modal}')">🗑</button></td>
     </tr>`;
   });
