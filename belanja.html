@@ -541,7 +541,8 @@ async function simpanBelanja() {
     });
     if (data.status === 'ok') {
       document.getElementById('simpanStatus').innerHTML =
-        `<span style="color:var(--hijau);">✅ ${data.message} — Total: ${rp(data.total)}</span>`;
+        `<span style="color:var(--hijau);">✅ ${data.message} — Total: ${rp(data.total)}</span>
+        <br><a href="invoice.html?id=${data.id_nota}&type=beli" target="_blank" style="color:var(--hijau);font-weight:600;">🔗 Lihat/Bagikan Nota</a>`;
       resetForm();
     } else {
       document.getElementById('simpanStatus').innerHTML =
