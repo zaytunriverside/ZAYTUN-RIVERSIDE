@@ -81,6 +81,15 @@ function fmtDate(str) {
   return `${d}/${m}/${y}`;
 }
 
+// ── Tanggal lokal → YYYY-MM-DD (AMAN dari bug timezone) ──
+// JANGAN pakai date.toISOString().split('T')[0] — itu konversi ke UTC,
+// dan untuk WIB (UTC+7) bisa mundur 1 hari kalau dipanggil sebelum jam 7 pagi.
+function toLocalISODate(date) {
+  const d = date || new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 // ── API URL ──────────────────────────────────
 function getApiUrl() {
   return localStorage.getItem('zaytun_api') || 'https://bill.czr.workers.dev';
