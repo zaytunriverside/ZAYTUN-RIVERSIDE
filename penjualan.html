@@ -464,7 +464,7 @@ let currentDraftId = null;
 // ── Init ──
 initPage('penjualan');
 const nowDate = new Date();
-document.getElementById('tglTrx').value = nowDate.toISOString().split('T')[0];
+document.getElementById('tglTrx').value = toLocalISODate(nowDate);
 const user = JSON.parse(localStorage.getItem('zaytun_user') || '{}');
 document.getElementById('kasirTrx').value = user.username || 'admin';
 updateNoFaktur();
