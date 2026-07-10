@@ -360,7 +360,6 @@
         <!-- Header -->
         <div class="struk-head">
           <span class="struk-head-title">🧾 Struk Pesanan</span>
-          <span class="struk-head-no" id="noFakturDisplay">—</span>
         </div>
 
         <!-- Meta -->
@@ -470,7 +469,6 @@ document.getElementById('tglTrx').value = toLocalISODate(nowDate);
 document.getElementById('tglRekapHarian').value = toLocalISODate(nowDate);
 const user = JSON.parse(localStorage.getItem('zaytun_user') || '{}');
 document.getElementById('kasirTrx').value = user.username || 'admin';
-updateNoFaktur();
 renderDraftCount();
 loadMenu();
 
@@ -620,13 +618,7 @@ function hitungKembalian() {
   el.className   = 'kembalian-val' + (sisa < 0 ? ' kurang' : '');
 }
 
-// ── No Faktur ──
-function updateNoFaktur() {
-  const ts  = Date.now().toString().slice(-6);
-  const no  = `TRX${ts}`;
-  document.getElementById('noFakturDisplay').textContent = no;
-  return no;
-}
+// (nomor faktur pratinjau dihapus — nomor asli baru muncul setelah disimpan)
 
 // ══════════════════════════════════════════════
 // SIMPAN TRANSAKSI
@@ -834,7 +826,7 @@ async function printStrukBluetooth(idTrxOverride) {
   const tgl   = document.getElementById('tglTrx').value;
   const kasir = document.getElementById('kasirTrx').value || 'admin';
   const total = items.reduce((s, it) => s + it.qty * it.harga, 0);
-  const idTrx = idTrxOverride || document.getElementById('noFakturDisplay').textContent;
+  const idTrx = idTrxOverride || '(belum tersimpan)';
   const now_  = new Date();
   const jam   = now_.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
   const tglFmt= tgl ? fmtDate(tgl) : todayStrDisplay();
@@ -953,7 +945,6 @@ function resetStruk() {
   metodeBayar = 'Tunai';
   document.querySelectorAll('.metode-btn').forEach(b => b.classList.toggle('active', b.dataset.val === 'Tunai'));
   document.getElementById('kembalianWrap').style.display = 'block';
-  updateNoFaktur();
   renderStruk();
   renderMenuGrid();
 }
