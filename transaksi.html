@@ -148,7 +148,7 @@ initPage('transaksi');
 // Default filter: bulan ini
 const now = new Date();
 document.getElementById('filterDari').value   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-document.getElementById('filterSampai').value = now.toISOString().split('T')[0];
+document.getElementById('filterSampai').value = toLocalISODate(now);
 loadTransaksi();
 
 async function loadTransaksi() {
