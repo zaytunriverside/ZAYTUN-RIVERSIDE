@@ -311,7 +311,16 @@
         <div class="breadcrumb">Catat transaksi manual</div>
       </div>
     </div>
-    <div class="topbar-right">
+    <div class="topbar-right" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span class="printer-badge printer-disconnected" id="printerBadge">🔴 Printer</span>
+      <button class="btn-printer-connect" onclick="connectPrinterBLE()">🔗 Hubungkan</button>
+      <select id="paperWidthSelect" class="paper-select" title="Ukuran kertas">
+        <option value="58">58mm</option>
+        <option value="80">80mm</option>
+      </select>
+      <button class="btn-secondary" onclick="cetakRekapHarian()" id="btnRekapHarian" style="font-size:12px;">
+        🧾 Rekap Harian
+      </button>
       <button class="btn-secondary" onclick="bukaModalDraft()" id="btnLihatDraft" style="font-size:12px;">
         📋 Draft <span id="draftCount" style="display:none;background:var(--merah);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px;">0</span>
       </button>
@@ -399,32 +408,15 @@
           </div>
         </div>
 
-        <!-- Printer & Kertas -->
-        <div class="printer-panel">
-          <div class="printer-row">
-            <span class="printer-badge printer-disconnected" id="printerBadge">🔴 Belum terhubung</span>
-            <button class="btn-printer-connect" onclick="connectPrinterBLE()">🔗 Hubungkan Printer</button>
-          </div>
-          <div class="printer-row">
-            <label style="font-size:11px;color:var(--teks-abu);">Ukuran kertas:</label>
-            <select id="paperWidthSelect" class="paper-select">
-              <option value="58">58mm</option>
-              <option value="80">80mm</option>
-            </select>
-          </div>
-        </div>
-
         <!-- Aksi -->
         <div class="struk-actions">
           <button class="btn-simpan-trx" id="btnSimpan" onclick="simpanTransaksi()">
-            💾 Simpan & Selesai
+            🖨️ Simpan & Cetak
           </button>
           <div class="btn-row">
             <button class="btn-draft" onclick="simpanDraft()">📋 Simpan Draft</button>
-            <button class="btn-draft" onclick="printStruk(false)" style="background:var(--biru-pale);color:var(--biru);border-color:rgba(36,113,163,0.3);">🖨️ Print Preview</button>
             <button class="btn-reset-struk" onclick="resetStruk()">🔄 Reset</button>
           </div>
-          <button class="btn-draft" style="width:100%;margin-top:8px;" onclick="printStrukBluetooth()">⚡ Cetak Langsung (Bluetooth)</button>
           <div class="simpan-status" id="simpanStatus"></div>
         </div>
       </div>
@@ -636,7 +628,7 @@ function updateNoFaktur() {
 // ══════════════════════════════════════════════
 // SIMPAN TRANSAKSI
 // ══════════════════════════════════════════════
-async function simpanTransaksi(danPrint = false) {
+async function simpanTransaksi() {
   const tgl   = document.getElementById('tglTrx').value;
   const kasir = document.getElementById('kasirTrx').value || 'admin';
   if (!tgl) { alert('Pilih tanggal'); return; }
@@ -663,7 +655,19 @@ async function simpanTransaksi(danPrint = false) {
         `<span style="color:var(--hijau);">✅ ${data.id_transaksi} — ${rp(data.total)}</span>
         <br><a href="invoice.html?id=${data.id_transaksi}&type=jual" target="_blank" style="color:var(--hijau);font-weight:600;">🔗 Lihat/Bagikan Invoice</a>`;
 
-      if (danPrint) printStruk(true, data.id_transaksi);
+      // Cetak otomatis — struk & item masih ada di memori sebelum reset di bawah
+      if (btCharacteristic) {
+        btn.textContent = '🖨️ Mencetak...';
+        try {
+          await printStrukBluetooth(data.id_transaksi);
+        } catch(e) {
+          document.getElementById('simpanStatus').innerHTML +=
+            `<br><span style="color:var(--merah);">⚠️ Gagal cetak: ${e.message}</span>`;
+        }
+      } else {
+        document.getElementById('simpanStatus').innerHTML +=
+          `<br><span style="color:var(--emas);">⚠️ Printer belum terhubung — struk tidak tercetak</span>`;
+      }
 
       // Hapus dari draft kalau ini dari draft
       if (currentDraftId !== null) hapusDraft(currentDraftId, false);
@@ -678,7 +682,7 @@ async function simpanTransaksi(danPrint = false) {
     document.getElementById('simpanStatus').innerHTML =
       `<span style="color:var(--merah);">❌ Gagal konek ke server</span>`;
   } finally {
-    btn.disabled = false; btn.textContent = '💾 Simpan & Selesai';
+    btn.disabled = false; btn.textContent = '🖨️ Simpan & Cetak';
   }
 }
 
@@ -812,143 +816,10 @@ function renderModalDraftList() {
 }
 
 // ══════════════════════════════════════════════
-// ══════════════════════════════════════════════
-// PRINT TERMAL — 58mm / 80mm (dipilih via setting)
+// PENGATURAN KERTAS — 58mm / 80mm
 // ══════════════════════════════════════════════
 function getPaperWidth() {
   return localStorage.getItem('zaytun_paper_width') || '58';
-}
-
-function printStruk(setelahSimpan = false, idTrxArg = null) {
-  const items  = Object.values(orderItems);
-  if (!items.length && !setelahSimpan) { alert('Belum ada item'); return; }
-
-  const paper  = getPaperWidth(); // '58' atau '80'
-  const cfg    = paper === '80'
-    ? { pageW:'80mm', bodyW:'76mm', cols:48, divider:'='.repeat(48), thin:'-'.repeat(48), fontSize:'9.5pt' }
-    : { pageW:'58mm', bodyW:'54mm', cols:32, divider:'='.repeat(32), thin:'-'.repeat(32), fontSize:'8.5pt' };
-
-  const tgl    = document.getElementById('tglTrx').value;
-  const kasir  = document.getElementById('kasirTrx').value || 'admin';
-  const total  = items.reduce((s, it) => s + it.qty * it.harga, 0);
-  const idTrx  = idTrxArg || document.getElementById('noFakturDisplay').textContent;
-  const now_   = new Date();
-  const jam    = now_.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  const tglFmt = tgl ? fmtDate(tgl) : todayStrDisplay();
-
-  // Build HTML struk — 2 rangkap dalam 1 print window
-  const rowsHtml = items.map(it => `
-    <tr>
-      <td style="padding:1px 0;">${it.nama_menu}</td>
-      <td style="text-align:center;">${it.qty}</td>
-      <td style="text-align:right;">${rpPrint(it.harga)}</td>
-      <td style="text-align:right;">${rpPrint(it.qty * it.harga)}</td>
-    </tr>`).join('');
-
-  const struk = (forCustomer) => `
-    <div class="struk-page">
-      <div class="s-header">
-        <div class="s-nama">ZAYTUN RIVERSIDE</div>
-        <div class="s-tagline">Cafe & Kuliner</div>
-        <div class="s-divider">${cfg.divider}</div>
-        ${forCustomer
-          ? `<div class="s-copy">* STRUK PELANGGAN *</div>`
-          : `<div class="s-copy s-copy-kasir">* SALINAN KASIR *</div>`}
-        <div class="s-divider">${cfg.thin}</div>
-      </div>
-      <div class="s-meta">
-        <div class="s-meta-row"><span>No</span><span>${idTrx}</span></div>
-        <div class="s-meta-row"><span>Tgl</span><span>${tglFmt} ${jam}</span></div>
-        <div class="s-meta-row"><span>Kasir</span><span>${kasir}</span></div>
-        <div class="s-meta-row"><span>Bayar</span><span>${metodeBayar}</span></div>
-      </div>
-      <div class="s-divider">${cfg.divider}</div>
-      <table class="s-table">
-        <thead><tr>
-          <th style="text-align:left;">Menu</th>
-          <th>Qty</th>
-          <th style="text-align:right;">Harga</th>
-          <th style="text-align:right;">Sub</th>
-        </tr></thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
-      <div class="s-divider">${cfg.thin}</div>
-      <div class="s-total-row"><span>TOTAL</span><span>${rpPrint(total)}</span></div>
-      ${metodeBayar === 'Tunai' ? (() => {
-        const diterima = parseFloat(document.getElementById('uangDiterima')?.value) || 0;
-        const kembalian = diterima - total;
-        return diterima ? `
-          <div class="s-total-row s-tunai"><span>Diterima</span><span>${rpPrint(diterima)}</span></div>
-          <div class="s-total-row s-kembalian"><span>Kembali</span><span>${rpPrint(kembalian >= 0 ? kembalian : 0)}</span></div>` : '';
-      })() : ''}
-      <div class="s-divider">${cfg.divider}</div>
-      ${forCustomer
-        ? `<div class="s-footer">Terima kasih atas kunjungan Anda!<br>Semoga hari Anda menyenangkan 🌿</div>`
-        : `<div class="s-footer">Arsip Kasir — ${tglFmt}<br>Simpan sebagai bukti transaksi</div>`}
-      <div class="s-cut">✂ - - - - - - - - - - - - - - - </div>
-    </div>`;
-
-  const printHtml = `<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<style>
-  @page {
-    size: ${cfg.pageW} auto;
-    margin: 2mm 2mm 4mm 2mm;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: ${cfg.fontSize};
-    width: ${cfg.bodyW};
-    color: #000;
-    background: #fff;
-  }
-  .struk-page { width: 100%; padding-bottom: 4mm; }
-  .s-header { text-align: center; margin-bottom: 2mm; }
-  .s-nama { font-size: 11pt; font-weight: bold; letter-spacing: 1px; }
-  .s-tagline { font-size: 7.5pt; margin-bottom: 1mm; }
-  .s-copy { font-size: 8pt; font-weight: bold; margin: 1mm 0; }
-  .s-copy-kasir { font-style: italic; }
-  .s-divider { font-size: 7.5pt; letter-spacing: 0; line-height: 1.2; }
-  .s-meta { margin: 1mm 0; }
-  .s-meta-row { display: flex; justify-content: space-between; font-size: 7.5pt; line-height: 1.5; }
-  .s-table { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin: 1mm 0; }
-  .s-table th { font-size: 7pt; font-weight: bold; border-bottom: 1px dashed #000; padding-bottom: 1mm; }
-  .s-table td { padding: 0.5mm 0; line-height: 1.4; vertical-align: top; }
-  .s-table td:first-child { width: 40%; word-break: break-word; }
-  .s-total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 9pt; padding: 1mm 0; }
-  .s-tunai, .s-kembalian { font-size: 8pt; font-weight: normal; }
-  .s-kembalian { font-weight: bold; }
-  .s-footer { text-align: center; font-size: 7.5pt; margin: 2mm 0 1mm; line-height: 1.5; }
-  .s-cut { text-align: center; font-size: 7pt; color: #555; margin: 2mm 0; letter-spacing: 1px; }
-
-  /* Struk kasir — cetak miring tipis untuk beda visual */
-  .struk-page:nth-child(2) .s-header,
-  .struk-page:nth-child(2) .s-meta,
-  .struk-page:nth-child(2) .s-table {
-    opacity: 0.88;
-  }
-  .struk-page:nth-child(2) .s-nama {
-    font-size: 10pt;
-  }
-</style>
-</head>
-<body>
-  ${struk(true)}
-  ${struk(false)}
-  <script>window.onload=function(){window.print();}<\/script>
-</body>
-</html>`;
-
-  const win = window.open('', '_blank', 'width=300,height=600');
-  if (win) { win.document.write(printHtml); win.document.close(); }
-  else alert('Pop-up diblokir browser. Izinkan pop-up untuk halaman ini.');
-}
-
-function rpPrint(n) {
-  return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 }
 
 // ══════════════════════════════════════════════
@@ -1043,7 +914,47 @@ function padBetween(left, right, cols) {
 }
 function rpPlain(n) { return Number(n || 0).toLocaleString('id-ID'); }
 
-function buildEscPosReceipt(items, meta, cols) {
+// ── Logo CZR → bitmap ESC/POS (GS v 0), di-cache biar tidak convert ulang tiap cetak ──
+let _logoBitmapCache = null;
+function getLogoBitmap(maxWidthDots) {
+  if (_logoBitmapCache && _logoBitmapCache.forWidth === maxWidthDots) return Promise.resolve(_logoBitmapCache.bytes);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const targetW = Math.min(100, maxWidthDots);
+        const scale   = targetW / img.width;
+        const targetH = Math.round(img.height * scale);
+        const canvas  = document.createElement('canvas');
+        canvas.width = targetW; canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, targetW, targetH);
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+        const px = ctx.getImageData(0, 0, targetW, targetH).data;
+
+        const bytesPerRow = Math.ceil(targetW / 8);
+        const raster = new Uint8Array(bytesPerRow * targetH);
+        for (let y = 0; y < targetH; y++) {
+          for (let x = 0; x < targetW; x++) {
+            const i = (y * targetW + x) * 4;
+            const a = px[i + 3];
+            const lum = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+            if (a > 128 && lum < 160) raster[y * bytesPerRow + (x >> 3)] |= (0x80 >> (x & 7));
+          }
+        }
+        const xL = bytesPerRow & 0xFF, xH = (bytesPerRow >> 8) & 0xFF;
+        const yL = targetH & 0xFF, yH = (targetH >> 8) & 0xFF;
+        const bytes = new Uint8Array([0x1D, 0x76, 0x30, 0x00, xL, xH, yL, yH, ...raster]);
+        _logoBitmapCache = { forWidth: maxWidthDots, bytes };
+        resolve(bytes);
+      } catch (e) { resolve(null); } // gagal convert logo → tetap lanjut cetak tanpa logo
+    };
+    img.onerror = () => resolve(null);
+    img.src = 'icon.png';
+  });
+}
+
+async function buildEscPosReceipt(items, meta, cols, dots) {
   const enc = new TextEncoder();
   const bytes = [];
   const push = (arr) => bytes.push(...arr);
@@ -1051,8 +962,18 @@ function buildEscPosReceipt(items, meta, cols) {
 
   push([0x1B, 0x40]); // init
   push([0x1B, 0x61, 0x01]); // center
+
+  const logo = await getLogoBitmap(dots);
+  if (logo) { push(Array.from(logo)); text('\n'); }
+
+  push([0x1D, 0x21, 0x10]); // double-height (lebar tetap → aman tidak terpotong)
   push([0x1B, 0x45, 0x01]); text('ZAYTUN RIVERSIDE\n'); push([0x1B, 0x45, 0x00]);
+  push([0x1D, 0x21, 0x00]); // normal
   text('Cafe & Kuliner\n');
+  push([0x1D, 0x21, 0x10]); // double-height untuk alamat & telp
+  text('Alam Pauh Duo, Solok Selatan\n');
+  text('0851-1144-7878\n');
+  push([0x1D, 0x21, 0x00]); // reset normal
   text('='.repeat(cols) + '\n');
   push([0x1B, 0x61, 0x00]); // left
   text(`No   : ${meta.idTrx}\n`);
@@ -1077,24 +998,25 @@ function buildEscPosReceipt(items, meta, cols) {
   }
   text('='.repeat(cols) + '\n');
   push([0x1B, 0x61, 0x01]); // center
-  text('Terima kasih atas kunjungan Anda!\n');
+  text('Terima kasih atas kunjungan Anda,\nsilahkan datang kembali \u{1F60A}\n');
   text('\n\n\n');
   push([0x1D, 0x56, 0x42, 0x00]); // potong kertas (partial cut + feed)
   return new Uint8Array(bytes);
 }
 
-async function printStrukBluetooth() {
-  if (!btCharacteristic) { alert('Printer belum terhubung. Klik "Hubungkan Printer" dulu.'); return; }
+async function printStrukBluetooth(idTrxOverride) {
+  if (!btCharacteristic) { alert('Printer belum terhubung. Klik "Hubungkan" dulu.'); return; }
   const items = Object.values(orderItems);
   if (!items.length) { alert('Belum ada item'); return; }
 
   const paper = getPaperWidth();
   const cols  = paper === '80' ? 48 : 32;
+  const dots  = paper === '80' ? 576 : 384;
 
   const tgl   = document.getElementById('tglTrx').value;
   const kasir = document.getElementById('kasirTrx').value || 'admin';
   const total = items.reduce((s, it) => s + it.qty * it.harga, 0);
-  const idTrx = document.getElementById('noFakturDisplay').textContent;
+  const idTrx = idTrxOverride || document.getElementById('noFakturDisplay').textContent;
   const now_  = new Date();
   const jam   = now_.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
   const tglFmt= tgl ? fmtDate(tgl) : todayStrDisplay();
@@ -1103,12 +1025,95 @@ async function printStrukBluetooth() {
 
   const meta = { idTrx, tglFmt, jam, kasir, metodeBayar, total, diterima: metodeBayar==='Tunai'?diterima:0, kembalian };
 
+  const bytesReceipt = await buildEscPosReceipt(items, meta, cols, dots);
+  await sendToPrinterBLE(bytesReceipt);
+}
+
+// ══════════════════════════════════════════════
+// CETAK REKAP HARIAN — bukti fisik kasir/shift
+// ══════════════════════════════════════════════
+async function cetakRekapHarian() {
+  if (!btCharacteristic) { alert('Printer belum terhubung. Klik "Hubungkan" dulu.'); return; }
+
+  const btn = document.getElementById('btnRekapHarian');
+  const teksAsli = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Memuat...';
+
   try {
-    const bytes = buildEscPosReceipt(items, meta, cols);
+    const tgl = document.getElementById('tglTrx').value;
+    const tglFmt = tgl ? fmtDate(tgl) : todayStrDisplay();
+
+    const res = await apiGet({ action:'getRekapHarianStruk', tanggal: tglFmt });
+    if (res.status !== 'ok' || !res.data.length) {
+      alert('Belum ada transaksi tercatat hari ini.');
+      return;
+    }
+
+    const paper = getPaperWidth();
+    const cols  = paper === '80' ? 48 : 32;
+    const dots  = paper === '80' ? 576 : 384;
+
+    btn.textContent = '🖨️ Mencetak...';
+    const bytes = await buildRekapHarianEscPos(res.data, tglFmt, cols, dots);
     await sendToPrinterBLE(bytes);
   } catch(e) {
-    alert('Gagal cetak: ' + e.message);
+    alert('Gagal cetak rekap: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = teksAsli;
   }
+}
+
+async function buildRekapHarianEscPos(transaksiList, tglFmt, cols, dots) {
+  const enc = new TextEncoder();
+  const bytes = [];
+  const push = (arr) => bytes.push(...arr);
+  const text = (str) => push(Array.from(enc.encode(str)));
+
+  push([0x1B, 0x40]);
+  push([0x1B, 0x61, 0x01]); // center
+
+  const logo = await getLogoBitmap(dots);
+  if (logo) { push(Array.from(logo)); text('\n'); }
+
+  push([0x1D, 0x21, 0x10]); // double-height
+  push([0x1B, 0x45, 0x01]);
+  text('REKAP PENJUALAN\n');
+  text('ZAYTUN RIVERSIDE\n');
+  push([0x1B, 0x45, 0x00]);
+  push([0x1D, 0x21, 0x00]); // normal
+  text('Alam Pauh Duo, Solok Selatan\n');
+  text('0851-1144-7878\n');
+  text(`Tanggal: ${tglFmt}\n`);
+  text('='.repeat(cols) + '\n');
+  push([0x1B, 0x61, 0x00]); // left
+
+  transaksiList.forEach(trx => {
+    text('='.repeat(cols) + '\n');
+    push([0x1B, 0x61, 0x01]);
+    text(`No: ${trx.id_transaksi}\n`);
+    push([0x1B, 0x61, 0x00]);
+    text(`Bayar: ${trx.metode_bayar}\n`);
+    text('-'.repeat(cols) + '\n');
+    trx.items.forEach(it => {
+      text(padRight(it.nama_menu, cols) + '\n');
+      text(padBetween(`${it.qty} x ${rpPlain(it.harga)}`, rpPlain(it.subtotal), cols) + '\n');
+    });
+    text('-'.repeat(cols) + '\n');
+    push([0x1B, 0x45, 0x01]);
+    text(padBetween('TOTAL', 'Rp ' + rpPlain(trx.total), cols) + '\n');
+    push([0x1B, 0x45, 0x00]);
+  });
+
+  const grandTotal = transaksiList.reduce((s, t) => s + t.total, 0);
+  text('='.repeat(cols) + '\n');
+  push([0x1B, 0x61, 0x01]);
+  push([0x1B, 0x45, 0x01]);
+  text(`TOTAL ${transaksiList.length} STRUK\n`);
+  text(`Rp ${rpPlain(grandTotal)}\n`);
+  push([0x1B, 0x45, 0x00]);
+  text('\n\n\n');
+  push([0x1D, 0x56, 0x42, 0x00]);
+  return new Uint8Array(bytes);
 }
 
 // Terapkan pilihan lebar kertas tersimpan ke dropdown saat halaman dibuka
