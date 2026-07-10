@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengaturan Printer — Zaytun Riverside</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_layout.css">
+<style>
+  body { font-family:'Inter',sans-serif; }
+
+  .printer-badge { font-size:14px; font-weight:600; padding:6px 14px; border-radius:20px; display:inline-block; }
+  .printer-badge.printer-connected    { background:var(--hijau-pale); color:var(--hijau); }
+  .printer-badge.printer-connecting   { background:var(--emas-pale); color:#8a6914; }
+  .printer-badge.printer-disconnected { background:var(--merah-pale); color:var(--merah); }
+
+  .settings-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--krem); gap:12px; flex-wrap:wrap; }
+  .settings-row:last-child { border-bottom:none; }
+  .settings-label { font-size:13px; font-weight:600; color:var(--teks); }
+  .settings-hint { font-size:11.5px; color:var(--teks-abu); margin-top:2px; }
+
+  .btn-printer-connect { background:var(--hijau); color:var(--putih); border:none; border-radius:10px; padding:10px 18px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-printer-connect:hover { background:var(--hijau-mid); }
+  .btn-secondary-action { background:var(--putih); border:1.5px solid var(--krem-gelap); border-radius:10px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; color:var(--teks); }
+  .btn-secondary-action:hover { background:var(--krem); }
+
+  .paper-select { padding:9px 14px; border:1.5px solid var(--krem-gelap); border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; background:var(--putih); }
+
+  .info-box { background:var(--krem); border-radius:12px; padding:14px 16px; font-size:12.5px; color:var(--teks-abu); line-height:1.7; margin-top:16px; }
+  .info-box b { color:var(--teks); }
+  .info-box code { background:var(--putih); padding:1px 6px; border-radius:4px; font-size:11.5px; }
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-left"><h1>Pengaturan Printer</h1><div class="breadcrumb">Koneksi Bluetooth & ukuran kertas — berlaku di semua halaman</div></div>
+    </div>
+    <div class="topbar-right"></div>
+  </div>
+
+  <div class="page-content">
+    <div class="card" style="max-width:560px;">
+      <div class="card-header"><div class="card-title">🖨️ Status Printer</div></div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Koneksi Bluetooth</div>
+          <div class="settings-hint">Sekali dihubungkan di sini, halaman lain akan coba nyambung otomatis</div>
+        </div>
+        <span class="printer-badge printer-disconnected" id="printerBadge">🔴 Belum terhubung</span>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">Hubungkan / Ganti Printer</div>
+        <button class="btn-printer-connect" onclick="connectPrinterBLE()">🔗 Hubungkan Printer</button>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Ukuran Kertas</div>
+          <div class="settings-hint">Berlaku otomatis di Input Penjualan & cetak ulang Dashboard</div>
+        </div>
+        <select id="paperWidthSelect" class="paper-select">
+          <option value="58">58mm</option>
+          <option value="80">80mm</option>
+        </select>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">Tes Cetak</div>
+        <button class="btn-secondary-action" onclick="tesCetak()">🧾 Cetak Struk Percobaan</button>
+      </div>
+
+      <div class="info-box">
+        <b>Kenapa harus connect ulang tiap ganti printer/HP baru?</b><br>
+        Itu wajar — begitu Anda ganti device atau printer, browser belum pernah dapat izin untuk device yang baru itu.<br><br>
+        <b>Kalau auto-reconnect tidak jalan</b> (harus klik "Hubungkan" tiap buka halaman baru), kemungkinan versi Chrome di HP Anda belum mendukung fitur permission tersimpan. Coba cek di address bar Chrome: ketik <code>chrome://flags/#enable-web-bluetooth-new-permissions-backend</code> → kalau ada opsinya, aktifkan → restart Chrome → coba lagi. Kalau tidak ada opsi itu sama sekali, berarti versi Chrome Anda belum mendukung — tidak apa-apa, tinggal klik "Hubungkan" manual tiap pindah halaman, prosesnya cuma 1 kali sentuh, tidak perlu pilih device lagi.
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="_app.js"></script>
+<script src="printer.js"></script>
+<script>
+initPage('pengaturan_printer');
+
+async function tesCetak() {
+  if (!btCharacteristic) { alert('Hubungkan printer dulu.'); return; }
+  try {
+    const paper = getPaperWidth();
+    const cols  = paper === '80' ? 48 : 32;
+    const dots  = paper === '80' ? 576 : 384;
+
+    const meta = {
+      idTrx: 'TES-PRINT', tglFmt: todayStrDisplay ? todayStrDisplay() : '-',
+      jam: new Date().toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }),
+      kasir: 'Tes', metodeBayar: 'Tunai', total: 0, diterima: 0, kembalian: 0
+    };
+    const items = [{ nama_menu: 'Contoh Item Tes', qty: 1, harga: 0 }];
+
+    const bytes = await buildEscPosReceipt(items, meta, cols, dots);
+    await sendToPrinterBLE(bytes);
+  } catch(e) {
+    alert('Gagal tes cetak: ' + e.message);
+  }
+}
+
+// fallback kalau todayStrDisplay belum ada di halaman ini
+function todayStrDisplay() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+</script>
+</body>
+</html>
