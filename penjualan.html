@@ -318,6 +318,7 @@
         <option value="58">58mm</option>
         <option value="80">80mm</option>
       </select>
+      <input type="date" id="tglRekapHarian" class="paper-select" title="Tanggal rekap yang akan dicetak" style="padding:5px 8px;">
       <button class="btn-secondary" onclick="cetakRekapHarian()" id="btnRekapHarian" style="font-size:12px;">
         🧾 Rekap Harian
       </button>
@@ -465,6 +466,7 @@ let currentDraftId = null;
 initPage('penjualan');
 const nowDate = new Date();
 document.getElementById('tglTrx').value = toLocalISODate(nowDate);
+document.getElementById('tglRekapHarian').value = toLocalISODate(nowDate);
 const user = JSON.parse(localStorage.getItem('zaytun_user') || '{}');
 document.getElementById('kasirTrx').value = user.username || 'admin';
 updateNoFaktur();
@@ -1041,7 +1043,7 @@ async function cetakRekapHarian() {
   btn.disabled = true; btn.textContent = '⏳ Memuat...';
 
   try {
-    const tgl = document.getElementById('tglTrx').value;
+    const tgl = document.getElementById('tglRekapHarian').value;
     const tglFmt = tgl ? fmtDate(tgl) : todayStrDisplay();
 
     const res = await apiGet({ action:'getRekapHarianStruk', tanggal: tglFmt });
