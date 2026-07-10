@@ -1045,8 +1045,12 @@ async function cetakRekapHarian() {
     const tglFmt = tgl ? fmtDate(tgl) : todayStrDisplay();
 
     const res = await apiGet({ action:'getRekapHarianStruk', tanggal: tglFmt });
-    if (res.status !== 'ok' || !res.data.length) {
-      alert('Belum ada transaksi tercatat hari ini.');
+    if (res.status !== 'ok') {
+      alert('Gagal mengambil data rekap: ' + (res.message || 'error tidak diketahui') + '\n\n(Kalau pesannya "Action tidak dikenal", kemungkinan Code.gs belum di-deploy ulang dengan versi terbaru.)');
+      return;
+    }
+    if (!res.data.length) {
+      alert(`Belum ada transaksi tercatat pada tanggal ${tglFmt}.`);
       return;
     }
 
