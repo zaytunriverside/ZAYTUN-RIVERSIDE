@@ -274,7 +274,7 @@ function getSelectedIds() {
 
 initPage('belanja');
 const now = new Date();
-document.getElementById('tglBelanja').value = now.toISOString().split('T')[0];
+document.getElementById('tglBelanja').value = toLocalISODate(now);
 
 // ══════════════════════════════════════════════
 // LOAD MASTER
