@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { id:'laporan',   href:'laporan.html',   icon:'📈', label:'Laba Rugi',        section:'Laporan' },
 
   { id:'notifikasi', href:'notifikasi.html', icon:'🔔', label:'Notifikasi',    section:'Pengaturan' },
+  { id:'pengaturan_printer', href:'pengaturan_printer.html', icon:'🖨️', label:'Printer & Kertas', section:'Pengaturan' },
   { id:'pengaturan_akses', href:'pengaturan_akses.html', icon:'🔐', label:'Hak Akses', section:'Pengaturan' },
 ];
 
