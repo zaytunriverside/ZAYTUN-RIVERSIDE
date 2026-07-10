@@ -257,6 +257,19 @@
 }
 
 /* ══════════════════════════════════════════
+   PRINTER BLUETOOTH PANEL
+══════════════════════════════════════════ */
+.printer-panel { background:var(--krem); border-radius:10px; padding:10px 12px; margin:10px 0; }
+.printer-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 0; }
+.printer-badge { font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px; }
+.printer-badge.printer-connected    { background:var(--hijau-pale); color:var(--hijau); }
+.printer-badge.printer-connecting   { background:var(--emas-pale); color:#8a6914; }
+.printer-badge.printer-disconnected { background:var(--merah-pale); color:var(--merah); }
+.btn-printer-connect { background:var(--putih); border:1.5px solid var(--krem-gelap); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; color:var(--teks); }
+.btn-printer-connect:hover { background:var(--hijau); color:var(--putih); border-color:var(--hijau); }
+.paper-select { padding:5px 10px; border:1.5px solid var(--krem-gelap); border-radius:8px; font-size:12px; font-family:'Inter',sans-serif; background:var(--putih); }
+
+/* ══════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════ */
 @media (max-width: 860px) {
@@ -386,6 +399,21 @@
           </div>
         </div>
 
+        <!-- Printer & Kertas -->
+        <div class="printer-panel">
+          <div class="printer-row">
+            <span class="printer-badge printer-disconnected" id="printerBadge">🔴 Belum terhubung</span>
+            <button class="btn-printer-connect" onclick="connectPrinterBLE()">🔗 Hubungkan Printer</button>
+          </div>
+          <div class="printer-row">
+            <label style="font-size:11px;color:var(--teks-abu);">Ukuran kertas:</label>
+            <select id="paperWidthSelect" class="paper-select">
+              <option value="58">58mm</option>
+              <option value="80">80mm</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Aksi -->
         <div class="struk-actions">
           <button class="btn-simpan-trx" id="btnSimpan" onclick="simpanTransaksi()">
@@ -396,6 +424,7 @@
             <button class="btn-draft" onclick="printStruk(false)" style="background:var(--biru-pale);color:var(--biru);border-color:rgba(36,113,163,0.3);">🖨️ Print Preview</button>
             <button class="btn-reset-struk" onclick="resetStruk()">🔄 Reset</button>
           </div>
+          <button class="btn-draft" style="width:100%;margin-top:8px;" onclick="printStrukBluetooth()">⚡ Cetak Langsung (Bluetooth)</button>
           <div class="simpan-status" id="simpanStatus"></div>
         </div>
       </div>
@@ -783,11 +812,21 @@ function renderModalDraftList() {
 }
 
 // ══════════════════════════════════════════════
-// PRINT TERMAL 58mm
 // ══════════════════════════════════════════════
+// PRINT TERMAL — 58mm / 80mm (dipilih via setting)
+// ══════════════════════════════════════════════
+function getPaperWidth() {
+  return localStorage.getItem('zaytun_paper_width') || '58';
+}
+
 function printStruk(setelahSimpan = false, idTrxArg = null) {
   const items  = Object.values(orderItems);
   if (!items.length && !setelahSimpan) { alert('Belum ada item'); return; }
+
+  const paper  = getPaperWidth(); // '58' atau '80'
+  const cfg    = paper === '80'
+    ? { pageW:'80mm', bodyW:'76mm', cols:48, divider:'='.repeat(48), thin:'-'.repeat(48), fontSize:'9.5pt' }
+    : { pageW:'58mm', bodyW:'54mm', cols:32, divider:'='.repeat(32), thin:'-'.repeat(32), fontSize:'8.5pt' };
 
   const tgl    = document.getElementById('tglTrx').value;
   const kasir  = document.getElementById('kasirTrx').value || 'admin';
@@ -811,11 +850,11 @@ function printStruk(setelahSimpan = false, idTrxArg = null) {
       <div class="s-header">
         <div class="s-nama">ZAYTUN RIVERSIDE</div>
         <div class="s-tagline">Cafe & Kuliner</div>
-        <div class="s-divider">================================</div>
+        <div class="s-divider">${cfg.divider}</div>
         ${forCustomer
           ? `<div class="s-copy">* STRUK PELANGGAN *</div>`
           : `<div class="s-copy s-copy-kasir">* SALINAN KASIR *</div>`}
-        <div class="s-divider">--------------------------------</div>
+        <div class="s-divider">${cfg.thin}</div>
       </div>
       <div class="s-meta">
         <div class="s-meta-row"><span>No</span><span>${idTrx}</span></div>
@@ -823,7 +862,7 @@ function printStruk(setelahSimpan = false, idTrxArg = null) {
         <div class="s-meta-row"><span>Kasir</span><span>${kasir}</span></div>
         <div class="s-meta-row"><span>Bayar</span><span>${metodeBayar}</span></div>
       </div>
-      <div class="s-divider">================================</div>
+      <div class="s-divider">${cfg.divider}</div>
       <table class="s-table">
         <thead><tr>
           <th style="text-align:left;">Menu</th>
@@ -833,7 +872,7 @@ function printStruk(setelahSimpan = false, idTrxArg = null) {
         </tr></thead>
         <tbody>${rowsHtml}</tbody>
       </table>
-      <div class="s-divider">--------------------------------</div>
+      <div class="s-divider">${cfg.thin}</div>
       <div class="s-total-row"><span>TOTAL</span><span>${rpPrint(total)}</span></div>
       ${metodeBayar === 'Tunai' ? (() => {
         const diterima = parseFloat(document.getElementById('uangDiterima')?.value) || 0;
@@ -842,7 +881,7 @@ function printStruk(setelahSimpan = false, idTrxArg = null) {
           <div class="s-total-row s-tunai"><span>Diterima</span><span>${rpPrint(diterima)}</span></div>
           <div class="s-total-row s-kembalian"><span>Kembali</span><span>${rpPrint(kembalian >= 0 ? kembalian : 0)}</span></div>` : '';
       })() : ''}
-      <div class="s-divider">================================</div>
+      <div class="s-divider">${cfg.divider}</div>
       ${forCustomer
         ? `<div class="s-footer">Terima kasih atas kunjungan Anda!<br>Semoga hari Anda menyenangkan 🌿</div>`
         : `<div class="s-footer">Arsip Kasir — ${tglFmt}<br>Simpan sebagai bukti transaksi</div>`}
@@ -855,14 +894,14 @@ function printStruk(setelahSimpan = false, idTrxArg = null) {
 <meta charset="UTF-8">
 <style>
   @page {
-    size: 58mm auto;
+    size: ${cfg.pageW} auto;
     margin: 2mm 2mm 4mm 2mm;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 8.5pt;
-    width: 54mm;
+    font-size: ${cfg.fontSize};
+    width: ${cfg.bodyW};
     color: #000;
     background: #fff;
   }
@@ -912,10 +951,175 @@ function rpPrint(n) {
   return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 }
 
-function todayStrDisplay() {
-  const d = new Date();
-  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+// ══════════════════════════════════════════════
+// PRINTER BLUETOOTH — Web Bluetooth (best-effort)
+// ══════════════════════════════════════════════
+// CATATAN: hanya jalan di Chrome Android/Desktop, dan hanya untuk printer
+// tipe BLE. Printer Bluetooth Classic (SPP) TIDAK bisa dideteksi dari
+// browser — ini batasan platform, bukan bug. Kalau gagal, tetap pakai
+// tombol "Print Preview" (popup) seperti biasa.
+
+const BLE_PRINTER_SERVICES = [
+  '000018f0-0000-1000-8000-00805f9b34fb',
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+  '0000ff00-0000-1000-8000-00805f9b34fb',
+  '0000ffe0-0000-1000-8000-00805f9b34fb',
+];
+
+let btDevice = null;
+let btCharacteristic = null;
+
+function updatePrinterBadge(state, label) {
+  const badge = document.getElementById('printerBadge');
+  if (!badge) return;
+  const map = {
+    connected   : { icon:'🟢', cls:'printer-connected' },
+    connecting  : { icon:'🟡', cls:'printer-connecting' },
+    disconnected: { icon:'🔴', cls:'printer-disconnected' },
+  };
+  const m = map[state] || map.disconnected;
+  badge.innerHTML = `${m.icon} ${label}`;
+  badge.className = 'printer-badge ' + m.cls;
 }
+
+async function connectPrinterBLE() {
+  if (!navigator.bluetooth) {
+    alert('Browser ini tidak mendukung Web Bluetooth.\n\nGunakan Chrome di Android/Desktop. Kalau tetap tidak bisa, kemungkinan printer Anda tipe Bluetooth Classic — gunakan tombol Print Preview seperti biasa.');
+    return;
+  }
+  try {
+    updatePrinterBadge('connecting', 'Mencari printer...');
+    btDevice = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: BLE_PRINTER_SERVICES
+    });
+
+    updatePrinterBadge('connecting', 'Menghubungkan...');
+    const server = await btDevice.gatt.connect();
+
+    let writable = null;
+    const services = await server.getPrimaryServices();
+    for (const service of services) {
+      const chars = await service.getCharacteristics();
+      writable = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+      if (writable) break;
+    }
+    if (!writable) throw new Error('Tidak ditemukan jalur tulis (characteristic) di printer ini.');
+
+    btCharacteristic = writable;
+    btDevice.addEventListener('gattserverdisconnected', () => {
+      btCharacteristic = null;
+      updatePrinterBadge('disconnected', 'Printer terputus');
+    });
+
+    updatePrinterBadge('connected', `${btDevice.name || 'Printer'} — Siap`);
+  } catch (e) {
+    updatePrinterBadge('disconnected', 'Belum terhubung');
+    alert('Gagal connect: ' + e.message + '\n\nKemungkinan printer Anda tipe Bluetooth Classic (SPP), bukan BLE — fitur cetak langsung tidak bisa dipakai untuk printer ini. Tetap gunakan tombol "Print Preview" seperti biasa.');
+  }
+}
+
+async function sendToPrinterBLE(bytes) {
+  const CHUNK = 20; // batas aman banyak stack BLE tanpa negosiasi MTU
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    const chunk = bytes.slice(i, i + CHUNK);
+    if (btCharacteristic.properties.writeWithoutResponse) {
+      await btCharacteristic.writeValueWithoutResponse(chunk);
+    } else {
+      await btCharacteristic.writeValue(chunk);
+    }
+    await new Promise(r => setTimeout(r, 15));
+  }
+}
+
+function padRight(str, len) {
+  str = String(str);
+  return str.length >= len ? str.slice(0, len) : str + ' '.repeat(len - str.length);
+}
+function padBetween(left, right, cols) {
+  left = String(left); right = String(right);
+  const space = cols - left.length - right.length;
+  return left + ' '.repeat(Math.max(space, 1)) + right;
+}
+function rpPlain(n) { return Number(n || 0).toLocaleString('id-ID'); }
+
+function buildEscPosReceipt(items, meta, cols) {
+  const enc = new TextEncoder();
+  const bytes = [];
+  const push = (arr) => bytes.push(...arr);
+  const text = (str) => push(Array.from(enc.encode(str)));
+
+  push([0x1B, 0x40]); // init
+  push([0x1B, 0x61, 0x01]); // center
+  push([0x1B, 0x45, 0x01]); text('ZAYTUN RIVERSIDE\n'); push([0x1B, 0x45, 0x00]);
+  text('Cafe & Kuliner\n');
+  text('='.repeat(cols) + '\n');
+  push([0x1B, 0x61, 0x00]); // left
+  text(`No   : ${meta.idTrx}\n`);
+  text(`Tgl  : ${meta.tglFmt} ${meta.jam}\n`);
+  text(`Kasir: ${meta.kasir}\n`);
+  text(`Bayar: ${meta.metodeBayar}\n`);
+  text('='.repeat(cols) + '\n');
+
+  items.forEach(it => {
+    text(padRight(it.nama_menu, cols) + '\n');
+    const line = `${it.qty} x ${rpPlain(it.harga)}`;
+    text(padBetween(line, rpPlain(it.qty * it.harga), cols) + '\n');
+  });
+
+  text('-'.repeat(cols) + '\n');
+  push([0x1B, 0x45, 0x01]);
+  text(padBetween('TOTAL', 'Rp ' + rpPlain(meta.total), cols) + '\n');
+  push([0x1B, 0x45, 0x00]);
+  if (meta.diterima) {
+    text(padBetween('Diterima', rpPlain(meta.diterima), cols) + '\n');
+    text(padBetween('Kembali', rpPlain(meta.kembalian), cols) + '\n');
+  }
+  text('='.repeat(cols) + '\n');
+  push([0x1B, 0x61, 0x01]); // center
+  text('Terima kasih atas kunjungan Anda!\n');
+  text('\n\n\n');
+  push([0x1D, 0x56, 0x42, 0x00]); // potong kertas (partial cut + feed)
+  return new Uint8Array(bytes);
+}
+
+async function printStrukBluetooth() {
+  if (!btCharacteristic) { alert('Printer belum terhubung. Klik "Hubungkan Printer" dulu.'); return; }
+  const items = Object.values(orderItems);
+  if (!items.length) { alert('Belum ada item'); return; }
+
+  const paper = getPaperWidth();
+  const cols  = paper === '80' ? 48 : 32;
+
+  const tgl   = document.getElementById('tglTrx').value;
+  const kasir = document.getElementById('kasirTrx').value || 'admin';
+  const total = items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const idTrx = document.getElementById('noFakturDisplay').textContent;
+  const now_  = new Date();
+  const jam   = now_.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  const tglFmt= tgl ? fmtDate(tgl) : todayStrDisplay();
+  const diterima  = parseFloat(document.getElementById('uangDiterima')?.value) || 0;
+  const kembalian = diterima - total;
+
+  const meta = { idTrx, tglFmt, jam, kasir, metodeBayar, total, diterima: metodeBayar==='Tunai'?diterima:0, kembalian };
+
+  try {
+    const bytes = buildEscPosReceipt(items, meta, cols);
+    await sendToPrinterBLE(bytes);
+  } catch(e) {
+    alert('Gagal cetak: ' + e.message);
+  }
+}
+
+// Terapkan pilihan lebar kertas tersimpan ke dropdown saat halaman dibuka
+(function initPaperSetting() {
+  const sel = document.getElementById('paperWidthSelect');
+  if (sel) {
+    sel.value = getPaperWidth();
+    sel.addEventListener('change', () => localStorage.setItem('zaytun_paper_width', sel.value));
+  }
+})();
+
 
 // ══════════════════════════════════════════════
 // RESET
