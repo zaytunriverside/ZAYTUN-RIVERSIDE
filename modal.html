@@ -177,9 +177,9 @@ initPage('modal');
 
 // Default tanggal
 const now = new Date();
-document.getElementById('inputTgl').value    = now.toISOString().split('T')[0];
+document.getElementById('inputTgl').value    = toLocalISODate(now);
 document.getElementById('filterDari').value  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-document.getElementById('filterSampai').value = now.toISOString().split('T')[0];
+document.getElementById('filterSampai').value = toLocalISODate(now);
 
 loadData();
 
