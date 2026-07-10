@@ -105,15 +105,15 @@ function applyPreset() {
   if (p==='minggu_ini') {
     const day = now.getDay();
     const mon = new Date(now); mon.setDate(now.getDate() - (day===0?6:day-1));
-    dari = mon.toISOString().split('T')[0]; sampai = now.toISOString().split('T')[0];
+    dari = toLocalISODate(mon); sampai = toLocalISODate(now);
   } else if (p==='bulan_ini') {
     dari   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-    sampai = now.toISOString().split('T')[0];
+    sampai = toLocalISODate(now);
   } else if (p==='bulan_lalu') {
     const bl = new Date(now.getFullYear(), now.getMonth()-1, 1);
     const el = new Date(now.getFullYear(), now.getMonth(), 0);
-    dari   = bl.toISOString().split('T')[0];
-    sampai = el.toISOString().split('T')[0];
+    dari   = toLocalISODate(bl);
+    sampai = toLocalISODate(el);
   } else return;
 
   document.getElementById('filterDari').value   = dari;
