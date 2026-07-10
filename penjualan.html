@@ -970,8 +970,9 @@ async function buildEscPosReceipt(items, meta, cols, dots) {
   push([0x1B, 0x45, 0x01]); text('ZAYTUN RIVERSIDE\n'); push([0x1B, 0x45, 0x00]);
   push([0x1D, 0x21, 0x00]); // normal
   text('Cafe & Kuliner\n');
-  push([0x1D, 0x21, 0x10]); // double-height untuk alamat & telp
+  push([0x1D, 0x21, 0x00]); // normal — alamat sama ukuran dengan tagline
   text('Alam Pauh Duo, Solok Selatan\n');
+  push([0x1D, 0x21, 0x10]); // double-height untuk no HP
   text('0851-1144-7878\n');
   push([0x1D, 0x21, 0x00]); // reset normal
   text('='.repeat(cols) + '\n');
@@ -998,7 +999,7 @@ async function buildEscPosReceipt(items, meta, cols, dots) {
   }
   text('='.repeat(cols) + '\n');
   push([0x1B, 0x61, 0x01]); // center
-  text('Terima kasih atas kunjungan Anda,\nsilahkan datang kembali \u{1F60A}\n');
+  text('Terima Kasih,\nDatang Kembali ;)\n');
   text('\n\n\n');
   push([0x1D, 0x56, 0x42, 0x00]); // potong kertas (partial cut + feed)
   return new Uint8Array(bytes);
