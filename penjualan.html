@@ -72,6 +72,8 @@
 .menu-card .mc-harga { font-size: 13px; font-weight: 700; color: var(--hijau); }
 .menu-card.paket-card { background: var(--emas-pale); border-color: rgba(201,168,76,0.35); }
 .mc-hemat { font-size: 10px; font-weight: 700; color: #8a6914; background: var(--putih); display: inline-block; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+.menu-card.tanpanasi-card { background: var(--merah-pale); border-color: rgba(192,57,43,0.25); }
+.mc-tag-nasi { font-size: 9px; font-weight: 700; color: var(--merah); background: var(--putih); padding: 1px 6px; border-radius: 8px; vertical-align: middle; }
 
 .si-paket-info { font-size: 11px; color: var(--teks-abu); margin: 2px 0 4px; line-height: 1.5; }
 .si-hemat { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 700; color: #8a6914; background: var(--emas-pale); padding: 1px 7px; border-radius: 10px; }
@@ -502,9 +504,11 @@ async function loadMenu() {
       paketList = dataPaket.data || [];
     }
     const katMenu = [...new Set(menuList.map(m => m.kategori).filter(Boolean))];
-    kategoriList = ['Semua', ...(paketList.length ? ['Paket'] : []), ...katMenu].sort((a, b) => {
+    const adaTanpaNasi = menuList.some(m => m.include_nasi);
+    kategoriList = ['Semua', ...(paketList.length ? ['Paket'] : []), ...(adaTanpaNasi ? ['Tanpa Nasi'] : []), ...katMenu].sort((a, b) => {
       if (a === 'Semua') return -1; if (b === 'Semua') return 1;
       if (a === 'Paket') return -1; if (b === 'Paket') return 1;
+      if (a === 'Tanpa Nasi') return -1; if (b === 'Tanpa Nasi') return 1;
       return a.localeCompare(b);
     });
     buildKatChips();
@@ -516,9 +520,10 @@ async function loadMenu() {
 }
 
 function buildKatChips() {
-  document.getElementById('katChips').innerHTML = kategoriList.map(k =>
-    `<button class="kat-chip${k === activeKat ? ' active' : ''}" onclick="setKat('${k}')">${k === 'Paket' ? '🎁 Paket' : k}</button>`
-  ).join('');
+  document.getElementById('katChips').innerHTML = kategoriList.map(k => {
+    const label = k === 'Paket' ? '🎁 Paket' : k === 'Tanpa Nasi' ? '🚫🍚 Tanpa Nasi' : k;
+    return `<button class="kat-chip${k === activeKat ? ' active' : ''}" onclick="setKat('${k}')">${label}</button>`;
+  }).join('');
 }
 
 function setKat(kat) { activeKat = kat; buildKatChips(); renderMenuGrid(); }
@@ -545,6 +550,29 @@ function renderMenuGrid() {
         <div class="mc-kat">${p.komponen.map(k => k.nama_menu + (k.qty>1?' x'+k.qty:'')).join(' + ')}</div>
         <div class="mc-harga">${rp(p.harga_paket)}</div>
         ${p.hemat > 0 ? `<div class="mc-hemat">Hemat ${rp(p.hemat)}</div>` : ''}
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // ── Grup "Tanpa Nasi" — kloning menu yang include_nasi, harga sudah dipotong ──
+  if (activeKat === 'Tanpa Nasi') {
+    let data = menuList.filter(m => m.include_nasi);
+    if (q) data = data.filter(m => m.nama_menu.toLowerCase().includes(q));
+    if (!data.length) {
+      document.getElementById('menuGrid').innerHTML =
+        '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🚫🍚</div>Belum ada menu yang ditandai "termasuk nasi"<br><span style="font-size:12px;color:var(--teks-abu);">Atur di halaman Daftar Menu</span></div>';
+      return;
+    }
+    document.getElementById('menuGrid').innerHTML = data.map(m => {
+      const key = m.nama_menu + '::tanpanasi';
+      const qty = orderItems[key]?.qty || 0;
+      const hargaFinal = Math.max(0, (m.harga || 0) - (m.diskon_tanpa_nasi || 0));
+      return `<div class="menu-card tanpanasi-card${qty > 0 ? ' in-order' : ''}" onclick="tambahMenuTanpaNasi('${m.nama_menu.replace(/'/g,"\\'")}')">
+        <div class="mc-badge">${qty}</div>
+        <div class="mc-nama">${m.nama_menu} <span class="mc-tag-nasi">tanpa nasi</span></div>
+        <div class="mc-kat">${m.kategori || '—'}</div>
+        <div class="mc-harga">${rp(hargaFinal)}</div>
       </div>`;
     }).join('');
     return;
@@ -614,12 +642,22 @@ function tambahPaketKeCart(paket) {
   if (window.innerWidth <= 860) switchTab('struk');
 }
 
-function toggleTanpaNasi(key) {
-  const it = orderItems[key];
-  if (!it) return;
-  it.tanpaNasi = !it.tanpaNasi;
-  it.harga = it.tanpaNasi ? Math.max(0, it.hargaAsli - it.diskonNasi) : it.hargaAsli;
+function tambahMenuTanpaNasi(nama) {
+  const m = menuList.find(x => x.nama_menu === nama);
+  if (!m) return;
+  const key = nama + '::tanpanasi';
+  if (!orderItems[key]) {
+    const hargaFinal = Math.max(0, (m.harga || 0) - (m.diskon_tanpa_nasi || 0));
+    orderItems[key] = {
+      nama_menu: nama + ' (Tanpa Nasi)', harga: hargaFinal, hargaAsli: m.harga || 0, qty: 0,
+      kategori: m.kategori, tipe: 'reguler',
+      includeNasi: false, diskonNasi: m.diskon_tanpa_nasi || 0, tanpaNasi: true
+    };
+  }
+  orderItems[key].qty++;
   renderStruk();
+  renderMenuGrid();
+  if (window.innerWidth <= 860) switchTab('struk');
 }
 
 function ubahQty(nama, delta) {
@@ -656,17 +694,14 @@ function renderStruk() {
         ${it.hemat > 0 ? `<span class="si-hemat">Hemat ${rp(it.hemat)}</span>` : ''}
       </div>` : '';
 
-    const nasiToggle = it.includeNasi ? `
-      <div class="si-nasi-toggle${it.tanpaNasi ? ' active' : ''}" onclick="toggleTanpaNasi('${keyEsc}')">
-        🍚 ${it.tanpaNasi ? 'Tanpa Nasi ✓ (klik batal)' : `Tanpa Nasi (-${rp(it.diskonNasi)})`}
-      </div>` : '';
+    const nasiLabel = it.tanpaNasi ? `<div class="si-nasi-toggle active">🚫🍚 Tanpa Nasi (potongan ${rp(it.diskonNasi)})</div>` : '';
 
     return `
     <div class="struk-item">
       <div style="flex:1;min-width:0;">
         <div class="si-nama">${it.nama_menu}${it.tipe === 'paket' ? ' 🎁' : ''}</div>
         ${paketInfo}
-        ${nasiToggle}
+        ${nasiLabel}
         <input class="si-harga-input" type="number" value="${it.harga}"
           placeholder="Harga" oninput="ubahHarga('${keyEsc}', this.value)"
           title="Edit harga">
