@@ -100,7 +100,7 @@
 /* Meta: tanggal, kasir, metode */
 .struk-meta { padding: 12px 16px; border-bottom: 1px solid var(--krem-gelap); background: var(--krem); }
 .meta-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.meta-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 100px; }
+.meta-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 80px; }
 .meta-field label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--teks-abu); text-align: center; }
 .meta-field input[type=date],
 .meta-field input[type=text],
@@ -374,14 +374,18 @@
         <div class="struk-meta">
           <div class="meta-row">
             <div class="meta-field field-tanggal">
-              <label>Tanggal Struk</label>
+              <label>Tanggal</label>
               <input type="date" id="tglTrx">
             </div>
             <div class="meta-field field-meja">
-              <label>Saung / Meja</label>
+              <label>Meja</label>
               <select id="mejaTrx">
                 <option value="">— Pilih —</option>
               </select>
+            </div>
+            <div class="meta-field field-nama">
+              <label>Nama</label>
+              <input type="text" id="namaPelanggan" placeholder="Nama pelanggan">
             </div>
           </div>
           <!-- Metode bayar -->
@@ -790,8 +794,10 @@ function hitungKembalian() {
 async function simpanTransaksi() {
   const tgl  = document.getElementById('tglTrx').value;
   const meja = document.getElementById('mejaTrx').value;
+  const nama = document.getElementById('namaPelanggan').value.trim();
   if (!tgl) { alert('Pilih tanggal'); return; }
-  if (!meja) { alert('Pilih Saung/Meja dulu sebelum menyimpan.'); document.getElementById('mejaTrx').focus(); return; }
+  if (!meja) { alert('Pilih Meja dulu sebelum menyimpan.'); document.getElementById('mejaTrx').focus(); return; }
+  if (!nama) { alert('Isi Nama pelanggan dulu sebelum menyimpan.'); document.getElementById('namaPelanggan').focus(); return; }
   const items = Object.values(orderItems);
   if (!items.length) { alert('Belum ada menu dipilih'); return; }
 
@@ -808,7 +814,7 @@ async function simpanTransaksi() {
       action: 'simpanTransaksi',
       tanggal: fmtDate(tgl),
       metode_bayar: metodeBayar,
-      kasir: currentKasir, meja, items: payload, diskon_total: diskonTotal
+      kasir: currentKasir, meja, nama_pelanggan: nama, items: payload, diskon_total: diskonTotal
     });
 
     if (data.status === 'ok') {
@@ -868,7 +874,9 @@ async function simpanDraft() {
   const items = Object.values(orderItems);
   if (!items.length) { alert('Belum ada menu dipilih'); return; }
   const meja = document.getElementById('mejaTrx').value;
-  if (!meja) { alert('Pilih Saung/Meja dulu sebelum menyimpan draft.'); document.getElementById('mejaTrx').focus(); return; }
+  if (!meja) { alert('Pilih Meja dulu sebelum menyimpan draft.'); document.getElementById('mejaTrx').focus(); return; }
+  const nama = document.getElementById('namaPelanggan').value.trim();
+  if (!nama) { alert('Isi Nama pelanggan dulu sebelum menyimpan draft.'); document.getElementById('namaPelanggan').focus(); return; }
   const tgl = document.getElementById('tglTrx').value;
 
   document.getElementById('simpanStatus').innerHTML =
@@ -881,6 +889,7 @@ async function simpanDraft() {
       tanggal: fmtDate(tgl),
       kasir: currentKasir,
       meja: document.getElementById('mejaTrx').value,
+      nama_pelanggan: nama,
       metode_bayar: metodeBayar,
       items
     });
@@ -911,6 +920,7 @@ function loadDraft(id) {
   });
   document.getElementById('tglTrx').value = draft.tanggal ? isoFromDMY(draft.tanggal) : document.getElementById('tglTrx').value;
   document.getElementById('mejaTrx').value = draft.meja || '';
+  document.getElementById('namaPelanggan').value = draft.nama_pelanggan || '';
   // Set metode
   metodeBayar = draft.metode_bayar || 'Tunai';
   document.querySelectorAll('.metode-btn').forEach(b => {
@@ -1022,6 +1032,7 @@ async function printStrukBluetooth(idTrxOverride) {
   const tgl      = document.getElementById('tglTrx').value;
   const kasir    = currentKasir;
   const meja     = document.getElementById('mejaTrx').value;
+  const nama     = document.getElementById('namaPelanggan').value.trim();
   const subtotal = items.reduce((s, it) => s + it.qty * it.harga, 0);
   const diskonTotal = getDiskonCustom();
   const total    = Math.max(0, subtotal - diskonTotal);
@@ -1033,7 +1044,7 @@ async function printStrukBluetooth(idTrxOverride) {
   const kembalian = diterima - total;
 
   const meta = {
-    idTrx, tglFmt, jam, kasir, meja, metodeBayar, subtotal, diskonTotal, total,
+    idTrx, tglFmt, jam, kasir, meja, nama, metodeBayar, subtotal, diskonTotal, total,
     diterima: metodeBayar==='Tunai'?diterima:0, kembalian
   };
 
@@ -1144,6 +1155,7 @@ function resetStruk() {
   document.getElementById('uangDiterima') && (document.getElementById('uangDiterima').value = '');
   document.getElementById('inpDiskonCustom') && (document.getElementById('inpDiskonCustom').value = '');
   document.getElementById('mejaTrx') && (document.getElementById('mejaTrx').value = '');
+  document.getElementById('namaPelanggan') && (document.getElementById('namaPelanggan').value = '');
   document.getElementById('kembalianVal').textContent = '—';
   document.getElementById('simpanStatus').innerHTML = '';
   metodeBayar = 'Tunai';
