@@ -210,6 +210,7 @@ async function buildEscPosReceipt(items, meta, cols, dots) {
   text(`No   : ${meta.idTrx}\n`);
   text(`Tgl  : ${meta.tglFmt} ${meta.jam}\n`);
   text(`Kasir: ${meta.kasir}\n`);
+  if (meta.meja) text(`Meja : ${meta.meja}\n`);
   text(`Bayar: ${meta.metodeBayar}\n`);
   text('='.repeat(cols) + '\n');
 
