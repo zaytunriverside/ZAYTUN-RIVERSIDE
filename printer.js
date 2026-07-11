@@ -214,9 +214,25 @@ async function buildEscPosReceipt(items, meta, cols, dots) {
   text('='.repeat(cols) + '\n');
 
   items.forEach(it => {
-    text(padRight(it.nama_menu, cols) + '\n');
+    text(padRight(it.nama_menu + (it.tipe === 'paket' ? ' \u{1F381}' : ''), cols) + '\n');
     const line = `${it.qty} x ${rpPlain(it.harga)}`;
     text(padBetween(line, rpPlain(it.qty * it.harga), cols) + '\n');
+
+    // Rincian isi paket + hemat
+    if (it.tipe === 'paket' && it.komponen && it.komponen.length) {
+      it.komponen.forEach(k => {
+        text('  ' + padBetween(k.nama_menu, rpPlain(k.harga_asli), cols - 2) + '\n');
+      });
+      text('  ' + padBetween('Harga Asli', rpPlain(it.totalAsli), cols - 2) + '\n');
+      if (it.hemat > 0) {
+        text('  ' + padBetween('Hemat', rpPlain(it.hemat), cols - 2) + '\n');
+      }
+    }
+    // Rincian potongan tanpa nasi
+    else if (it.tanpaNasi && it.diskonNasi > 0) {
+      text('  ' + padBetween('Harga Asli', rpPlain(it.hargaAsli), cols - 2) + '\n');
+      text('  ' + padBetween('Potongan (Tanpa Nasi)', '-' + rpPlain(it.diskonNasi), cols - 2) + '\n');
+    }
   });
 
   text('-'.repeat(cols) + '\n');
