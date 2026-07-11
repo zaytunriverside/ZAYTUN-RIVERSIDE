@@ -221,7 +221,9 @@ async function buildEscPosReceipt(items, meta, cols, dots) {
     // Rincian isi paket + hemat
     if (it.tipe === 'paket' && it.komponen && it.komponen.length) {
       it.komponen.forEach(k => {
-        text('  ' + padBetween(k.nama_menu, rpPlain(k.harga_asli), cols - 2) + '\n');
+        const label = k.nama_menu + (k.qty > 1 ? ' x' + k.qty : '');
+        const nilai = k.subtotal_asli !== undefined ? k.subtotal_asli : k.harga_asli;
+        text('  ' + padBetween(label, rpPlain(nilai), cols - 2) + '\n');
       });
       text('  ' + padBetween('Harga Asli', rpPlain(it.totalAsli), cols - 2) + '\n');
       if (it.hemat > 0) {
@@ -236,6 +238,10 @@ async function buildEscPosReceipt(items, meta, cols, dots) {
   });
 
   text('-'.repeat(cols) + '\n');
+  if (meta.diskonTotal > 0) {
+    text(padBetween('Subtotal', rpPlain(meta.subtotal), cols) + '\n');
+    text(padBetween('Diskon', '-' + rpPlain(meta.diskonTotal), cols) + '\n');
+  }
   push([0x1B, 0x45, 0x01]);
   text(padBetween('TOTAL', 'Rp ' + rpPlain(meta.total), cols) + '\n');
   push([0x1B, 0x45, 0x00]);
