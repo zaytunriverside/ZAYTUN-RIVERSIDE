@@ -84,7 +84,10 @@ body{font-family:'Inter',sans-serif}
       <div class="left-panel">
         <div class="lp-head">
           <span>Menu (<span id="mcount">0</span>)</span>
-          <button class="btn-addmenu" id="btnToggleNew">+ Tambah</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-addmenu" id="btnKelolaPaket" style="background:#FDF3DC;color:#8a6914;">🎁 Paket</button>
+            <button class="btn-addmenu" id="btnToggleNew">+ Tambah</button>
+          </div>
         </div>
         <div class="fnew" id="fnew">
           <input type="text" id="inpNama" placeholder="Nama menu baru...">
@@ -285,6 +288,34 @@ function renderRightPanel() {
   sub.className = 'rp-sub';
   sub.textContent = 'Bahan baku per 1 porsi \u2014 untuk hitung stok keluar otomatis';
   panel.appendChild(sub);
+
+  // ── Opsi Nasi ──
+  var menuObj = menus.find(function(m){ return m.nama_menu === nama; }) || {};
+  var nasiBox = document.createElement('div');
+  nasiBox.className = 'fbox';
+  nasiBox.style.marginBottom = '16px';
+  nasiBox.innerHTML =
+    '<div class="fbox-title">\uD83C\uDF5A Opsi Nasi</div>' +
+    '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px;cursor:pointer;">' +
+      '<input type="checkbox" id="chkIncludeNasi" style="width:16px;height:16px;">' +
+      'Menu ini sudah termasuk nasi' +
+    '</label>' +
+    '<div id="diskonNasiWrap" style="display:none;">' +
+      '<label style="font-size:11px;color:#6b7280;text-transform:uppercase;font-weight:600;display:block;margin-bottom:6px;">Diskon jika dipesan TANPA nasi (Rp)</label>' +
+      '<input type="number" id="inpDiskonNasi" placeholder="5000" style="width:100%;padding:8px 10px;border:1.5px solid #EDE8D8;border-radius:8px;font-size:13px;box-sizing:border-box;">' +
+    '</div>' +
+    '<button class="btn-primary" id="btnSimpanNasi" style="margin-top:10px;padding:8px 16px;font-size:12px;">Simpan Opsi Nasi</button>' +
+    '<span id="statusNasi" style="margin-left:10px;font-size:12px;"></span>';
+  panel.appendChild(nasiBox);
+
+  document.getElementById('chkIncludeNasi').checked = !!menuObj.include_nasi;
+  document.getElementById('diskonNasiWrap').style.display = menuObj.include_nasi ? 'block' : 'none';
+  document.getElementById('inpDiskonNasi').value = menuObj.diskon_tanpa_nasi || '';
+
+  document.getElementById('chkIncludeNasi').addEventListener('change', function(e) {
+    document.getElementById('diskonNasiWrap').style.display = e.target.checked ? 'block' : 'none';
+  });
+  document.getElementById('btnSimpanNasi').addEventListener('click', function() { simpanOpsiNasi(menuObj); });
 
   // Form box
   var fbox = document.createElement('div');
@@ -511,6 +542,230 @@ async function doDelBahan(idResep) {
   try {
     var d = await apiPost({action:'hapusResep', id_resep:idResep});
     if (d.status === 'ok') { cache[active] = null; await pickMenu(active); }
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+// ── Simpan Opsi Nasi ──────────────
+async function simpanOpsiNasi(menuObj) {
+  var include = document.getElementById('chkIncludeNasi').checked;
+  var diskon  = Number(document.getElementById('inpDiskonNasi').value) || 0;
+  var status  = document.getElementById('statusNasi');
+  status.textContent = 'Menyimpan...';
+  try {
+    var d = await apiPost({
+      action: 'setOpsiNasi', id_menu: menuObj.id_menu, nama_menu: menuObj.nama_menu,
+      include_nasi: include, diskon_tanpa_nasi: diskon
+    });
+    if (d.status === 'ok') {
+      menuObj.include_nasi = include;
+      menuObj.diskon_tanpa_nasi = diskon;
+      status.innerHTML = '<span style="color:#2D6A4F;">\u2705 Tersimpan</span>';
+    } else {
+      status.innerHTML = '<span style="color:#C0392B;">\u274C ' + d.message + '</span>';
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:#C0392B;">\u274C Gagal konek</span>';
+  }
+}
+
+// =============================================
+// KELOLA PAKET
+// =============================================
+var pakets = [];
+var paketItemsPicked = []; // nama_menu yang dicentang untuk paket baru
+
+document.getElementById('btnKelolaPaket').addEventListener('click', bukaPanelPaket);
+
+async function bukaPanelPaket() {
+  active = null;
+  renderMenuList();
+  var panel = document.getElementById('rightPanel');
+  panel.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div></div>';
+  try {
+    var r = await apiGet({action:'getPaketList'});
+    pakets = (r.status === 'ok') ? r.data : [];
+    renderPanelPaket();
+  } catch(e) {
+    panel.innerHTML = '<div class="empty-state"><div class="ei">\u26A0</div><div>Gagal: ' + e.message + '</div></div>';
+  }
+}
+
+function renderPanelPaket() {
+  var panel = document.getElementById('rightPanel');
+  panel.innerHTML = '';
+
+  var title = document.createElement('div');
+  title.className = 'rp-title';
+  title.textContent = '\uD83C\uDF81 Kelola Paket';
+  panel.appendChild(title);
+
+  var sub = document.createElement('div');
+  sub.className = 'rp-sub';
+  sub.textContent = 'Gabung beberapa menu jadi 1 paket dengan harga hemat \u2014 hemat dihitung otomatis dari harga menu saat ini';
+  panel.appendChild(sub);
+
+  // ── Form tambah paket ──
+  var fbox = document.createElement('div');
+  fbox.className = 'fbox';
+
+  var ftitle = document.createElement('div');
+  ftitle.className = 'fbox-title';
+  ftitle.textContent = '\u2795 Buat Paket Baru';
+  fbox.appendChild(ftitle);
+
+  var inpNamaPaket = document.createElement('input');
+  inpNamaPaket.id = 'inpNamaPaket';
+  inpNamaPaket.placeholder = 'Nama paket, mis: Paket Ayam Gembira';
+  inpNamaPaket.style.cssText = 'width:100%;padding:8px 10px;border:1.5px solid #EDE8D8;border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:8px;';
+  fbox.appendChild(inpNamaPaket);
+
+  var lblPilih = document.createElement('div');
+  lblPilih.style.cssText = 'font-size:11px;font-weight:600;text-transform:uppercase;color:#6b7280;margin:10px 0 6px;';
+  lblPilih.textContent = 'Pilih Item Komponen';
+  fbox.appendChild(lblPilih);
+
+  var pickWrap = document.createElement('div');
+  pickWrap.style.cssText = 'max-height:220px;overflow-y:auto;background:#fff;border-radius:8px;padding:8px;margin-bottom:10px;';
+  var menuAktif = menus.filter(function(m){ return m.status !== 'nonaktif'; });
+  menuAktif.forEach(function(m) {
+    var row = document.createElement('label');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px;padding:5px 4px;cursor:pointer;';
+    var chk = document.createElement('input');
+    chk.type = 'checkbox'; chk.value = m.nama_menu;
+    chk.style.cssText = 'width:15px;height:15px;';
+    chk.addEventListener('change', function() { hitungPreviewPaket(); });
+    var lbl = document.createElement('span'); lbl.style.flex = '1';
+    lbl.textContent = m.nama_menu;
+    var harga = document.createElement('span'); harga.style.cssText = 'color:#6b7280;font-size:12px;';
+    harga.textContent = rp(m.harga);
+    row.appendChild(chk); row.appendChild(lbl); row.appendChild(harga);
+    pickWrap.appendChild(row);
+  });
+  fbox.appendChild(pickWrap);
+
+  var previewBox = document.createElement('div');
+  previewBox.id = 'previewPaket';
+  previewBox.style.cssText = 'background:#D8F3DC;border-radius:8px;padding:10px 12px;font-size:12.5px;margin-bottom:10px;display:none;';
+  fbox.appendChild(previewBox);
+
+  var inpHargaPaket = document.createElement('input');
+  inpHargaPaket.id = 'inpHargaPaket';
+  inpHargaPaket.type = 'number';
+  inpHargaPaket.placeholder = 'Harga jual paket, mis: 28000';
+  inpHargaPaket.style.cssText = 'width:100%;padding:8px 10px;border:1.5px solid #EDE8D8;border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:10px;';
+  inpHargaPaket.addEventListener('input', hitungPreviewPaket);
+  fbox.appendChild(inpHargaPaket);
+
+  var btnSimpanPaket = document.createElement('button');
+  btnSimpanPaket.className = 'btn-primary';
+  btnSimpanPaket.style.cssText = 'width:100%;padding:10px;';
+  btnSimpanPaket.textContent = 'Simpan Paket';
+  btnSimpanPaket.addEventListener('click', doSimpanPaket);
+  fbox.appendChild(btnSimpanPaket);
+
+  var statusPaket = document.createElement('div');
+  statusPaket.id = 'statusPaket';
+  statusPaket.style.cssText = 'margin-top:8px;font-size:12px;';
+  fbox.appendChild(statusPaket);
+
+  panel.appendChild(fbox);
+
+  // ── Daftar paket yang sudah ada ──
+  var secLbl = document.createElement('div');
+  secLbl.className = 'sec-lbl';
+  secLbl.innerHTML = '<span>Paket Aktif (' + pakets.length + ')</span>';
+  panel.appendChild(secLbl);
+
+  if (!pakets.length) {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'font-size:13px;color:#6b7280;padding:12px 0;';
+    empty.textContent = 'Belum ada paket dibuat.';
+    panel.appendChild(empty);
+  } else {
+    pakets.forEach(function(p) {
+      var card = document.createElement('div');
+      card.style.cssText = 'background:#F8F3E8;border-radius:12px;padding:14px;margin-bottom:10px;';
+
+      var head = document.createElement('div');
+      head.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;';
+      var nama = document.createElement('div');
+      nama.style.cssText = 'font-weight:700;font-size:14px;color:#1B4332;';
+      nama.textContent = p.nama_paket;
+      var hargaEl = document.createElement('div');
+      hargaEl.style.cssText = 'font-weight:700;color:#2D6A4F;';
+      hargaEl.textContent = rp(p.harga_paket);
+      head.appendChild(nama); head.appendChild(hargaEl);
+      card.appendChild(head);
+
+      var komp = document.createElement('div');
+      komp.style.cssText = 'font-size:12px;color:#6b7280;margin-bottom:6px;';
+      komp.textContent = p.komponen.map(function(k){ return k.nama_menu; }).join(' + ');
+      card.appendChild(komp);
+
+      var hemat = document.createElement('div');
+      hemat.style.cssText = 'font-size:12px;font-weight:600;color:#8a6914;margin-bottom:8px;';
+      hemat.textContent = 'Harga asli ' + rp(p.total_asli) + ' \u2014 Hemat ' + rp(p.hemat);
+      card.appendChild(hemat);
+
+      var btnHapus = document.createElement('button');
+      btnHapus.className = 'btn-rdel';
+      btnHapus.textContent = '\uD83D\uDDD1 Hapus Paket';
+      btnHapus.addEventListener('click', function() { doHapusPaket(p.id_paket, p.nama_paket); });
+      card.appendChild(btnHapus);
+
+      panel.appendChild(card);
+    });
+  }
+}
+
+function hitungPreviewPaket() {
+  var checked = Array.from(document.querySelectorAll('#rightPanel input[type=checkbox]:checked')).map(function(c){ return c.value; });
+  var preview = document.getElementById('previewPaket');
+  if (!checked.length) { preview.style.display = 'none'; return; }
+
+  var totalAsli = 0;
+  checked.forEach(function(nama) {
+    var m = menus.find(function(x){ return x.nama_menu === nama; });
+    if (m) totalAsli += Number(m.harga) || 0;
+  });
+  var hargaPaket = Number(document.getElementById('inpHargaPaket').value) || 0;
+  var hemat = totalAsli - hargaPaket;
+
+  preview.style.display = 'block';
+  preview.innerHTML =
+    '<b>' + checked.join(' + ') + '</b><br>' +
+    'Harga asli: ' + rp(totalAsli) +
+    (hargaPaket > 0 ? '<br>Hemat: <b>' + rp(hemat > 0 ? hemat : 0) + '</b>' : '');
+}
+
+async function doSimpanPaket() {
+  var nama = document.getElementById('inpNamaPaket').value.trim();
+  var harga = Number(document.getElementById('inpHargaPaket').value) || 0;
+  var checked = Array.from(document.querySelectorAll('#rightPanel input[type=checkbox]:checked')).map(function(c){ return c.value; });
+  var status = document.getElementById('statusPaket');
+
+  if (!nama || !harga || checked.length < 2) {
+    status.innerHTML = '<span style="color:#C0392B;">\u26A0 Isi nama, harga, dan pilih minimal 2 item</span>';
+    return;
+  }
+  status.textContent = 'Menyimpan...';
+  try {
+    var d = await apiPost({action:'tambahPaket', nama_paket:nama, harga_paket:harga, items:checked});
+    if (d.status === 'ok') {
+      await bukaPanelPaket();
+    } else {
+      status.innerHTML = '<span style="color:#C0392B;">\u274C ' + d.message + '</span>';
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:#C0392B;">\u274C Gagal konek</span>';
+  }
+}
+
+async function doHapusPaket(id, nama) {
+  if (!confirm('Hapus paket "' + nama + '"?')) return;
+  try {
+    var d = await apiPost({action:'hapusPaket', id_paket:id});
+    if (d.status === 'ok') await bukaPanelPaket();
   } catch(e) { alert('Error: ' + e.message); }
 }
 </script>
