@@ -167,6 +167,9 @@
 .total-row .tr-val   { font-size: 13px; font-weight: 600; color: var(--teks); }
 .total-row.grand { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--krem-gelap); }
 .total-row.grand .tr-label { font-size: 15px; font-weight: 700; color: var(--hijau-tua); }
+.diskon-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
+.diskon-row input { width: 100px; padding: 5px 8px; border: 1.5px solid var(--merah-pale); border-radius: 6px; font-size: 12px; text-align: right; font-family: 'Inter', sans-serif; }
+.diskon-row input:focus { outline: none; border-color: var(--merah); }
 .total-row.grand .tr-val   { font-size: 18px; font-weight: 700; color: var(--hijau); }
 
 /* Kembalian */
@@ -396,6 +399,13 @@
             <span class="tr-label">Subtotal</span>
             <span class="tr-val" id="totalSub">Rp 0</span>
           </div>
+
+          <!-- Diskon custom (opsional) -->
+          <div class="diskon-row">
+            <span class="tr-label" style="color:var(--merah);">💸 Diskon</span>
+            <input type="number" id="inpDiskonCustom" placeholder="0" oninput="hitungTotal()">
+          </div>
+
           <div class="total-row grand">
             <span class="tr-label">TOTAL</span>
             <span class="tr-val" id="totalGrand">Rp 0</span>
@@ -532,7 +542,7 @@ function renderMenuGrid() {
       return `<div class="menu-card paket-card${qty > 0 ? ' in-order' : ''}" onclick="tambahPaketByIndex(${idx})">
         <div class="mc-badge">${qty}</div>
         <div class="mc-nama">🎁 ${p.nama_paket}</div>
-        <div class="mc-kat">${p.komponen.map(k => k.nama_menu).join(' + ')}</div>
+        <div class="mc-kat">${p.komponen.map(k => k.nama_menu + (k.qty>1?' x'+k.qty:'')).join(' + ')}</div>
         <div class="mc-harga">${rp(p.harga_paket)}</div>
         ${p.hemat > 0 ? `<div class="mc-hemat">Hemat ${rp(p.hemat)}</div>` : ''}
       </div>`;
@@ -642,7 +652,7 @@ function renderStruk() {
 
     const paketInfo = it.tipe === 'paket' ? `
       <div class="si-paket-info">
-        ${it.komponen.map(k => k.nama_menu).join(' + ')}
+        ${it.komponen.map(k => k.nama_menu + (k.qty>1?' x'+k.qty:'')).join(' + ')}
         ${it.hemat > 0 ? `<span class="si-hemat">Hemat ${rp(it.hemat)}</span>` : ''}
       </div>` : '';
 
@@ -674,10 +684,16 @@ function renderStruk() {
   updateTabBadge();
 }
 
+function getDiskonCustom() {
+  return Number(document.getElementById('inpDiskonCustom')?.value) || 0;
+}
+
 function hitungTotal() {
   const items = Object.values(orderItems);
-  const total = items.reduce((s, it) => s + it.qty * it.harga, 0);
-  document.getElementById('totalSub').textContent   = rp(total);
+  const subtotal = items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const diskon = getDiskonCustom();
+  const total = Math.max(0, subtotal - diskon);
+  document.getElementById('totalSub').textContent   = rp(subtotal);
   document.getElementById('totalGrand').textContent = rp(total);
   hitungKembalian();
 }
@@ -699,7 +715,8 @@ function setMetode(btn) {
 }
 
 function hitungKembalian() {
-  const total    = Object.values(orderItems).reduce((s, it) => s + it.qty * it.harga, 0);
+  const subtotal = Object.values(orderItems).reduce((s, it) => s + it.qty * it.harga, 0);
+  const total    = Math.max(0, subtotal - getDiskonCustom());
   const diterima = parseFloat(document.getElementById('uangDiterima')?.value) || 0;
   const sisa     = diterima - total;
   const el       = document.getElementById('kembalianVal');
@@ -728,16 +745,18 @@ async function simpanTransaksi() {
       nama_menu: it.nama_menu, qty: it.qty,
       harga: it.harga, subtotal: it.qty * it.harga
     }));
+    const diskonTotal = getDiskonCustom();
     const data = await apiPost({
       action: 'simpanTransaksi',
       tanggal: fmtDate(tgl),
       metode_bayar: metodeBayar,
-      kasir, items: payload
+      kasir, items: payload, diskon_total: diskonTotal
     });
 
     if (data.status === 'ok') {
+      const diskonInfo = data.diskon > 0 ? ` <span style="color:var(--merah);">(diskon ${rp(data.diskon)})</span>` : '';
       document.getElementById('simpanStatus').innerHTML =
-        `<span style="color:var(--hijau);">✅ ${data.id_transaksi} — ${rp(data.total)}</span>
+        `<span style="color:var(--hijau);">✅ ${data.id_transaksi} — ${rp(data.total)}${diskonInfo}</span>
         <br><a href="invoice.html?id=${data.id_transaksi}&type=jual" target="_blank" style="color:var(--hijau);font-weight:600;">🔗 Lihat/Bagikan Invoice</a>`;
 
       // Cetak otomatis — struk & item masih ada di memori sebelum reset di bawah
@@ -913,17 +932,22 @@ async function printStrukBluetooth(idTrxOverride) {
   const cols  = paper === '80' ? 48 : 32;
   const dots  = paper === '80' ? 576 : 384;
 
-  const tgl   = document.getElementById('tglTrx').value;
-  const kasir = document.getElementById('kasirTrx').value || 'admin';
-  const total = items.reduce((s, it) => s + it.qty * it.harga, 0);
-  const idTrx = idTrxOverride || '(belum tersimpan)';
-  const now_  = new Date();
-  const jam   = now_.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
-  const tglFmt= tgl ? fmtDate(tgl) : todayStrDisplay();
+  const tgl      = document.getElementById('tglTrx').value;
+  const kasir    = document.getElementById('kasirTrx').value || 'admin';
+  const subtotal = items.reduce((s, it) => s + it.qty * it.harga, 0);
+  const diskonTotal = getDiskonCustom();
+  const total    = Math.max(0, subtotal - diskonTotal);
+  const idTrx    = idTrxOverride || '(belum tersimpan)';
+  const now_     = new Date();
+  const jam      = now_.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  const tglFmt   = tgl ? fmtDate(tgl) : todayStrDisplay();
   const diterima  = parseFloat(document.getElementById('uangDiterima')?.value) || 0;
   const kembalian = diterima - total;
 
-  const meta = { idTrx, tglFmt, jam, kasir, metodeBayar, total, diterima: metodeBayar==='Tunai'?diterima:0, kembalian };
+  const meta = {
+    idTrx, tglFmt, jam, kasir, metodeBayar, subtotal, diskonTotal, total,
+    diterima: metodeBayar==='Tunai'?diterima:0, kembalian
+  };
 
   const bytesReceipt = await buildEscPosReceipt(items, meta, cols, dots);
   await sendToPrinterBLE(bytesReceipt);
@@ -1030,6 +1054,7 @@ function resetStruk() {
   orderItems = {};
   currentDraftId = null;
   document.getElementById('uangDiterima') && (document.getElementById('uangDiterima').value = '');
+  document.getElementById('inpDiskonCustom') && (document.getElementById('inpDiskonCustom').value = '');
   document.getElementById('kembalianVal').textContent = '—';
   document.getElementById('simpanStatus').innerHTML = '';
   metodeBayar = 'Tunai';
