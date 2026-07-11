@@ -99,7 +99,11 @@
 
 /* Meta: tanggal, kasir, metode */
 .struk-meta { padding: 12px 16px; border-bottom: 1px solid var(--krem-gelap); background: var(--krem); }
-.meta-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.meta-row {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  background: #FFF3E0; border: 1.5px solid #FFCC80; border-radius: 10px;
+  padding: 10px; margin-bottom: 10px;
+}
 .meta-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 80px; }
 .meta-field label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--teks-abu); text-align: center; }
 .meta-field input[type=date],
@@ -958,6 +962,13 @@ function renderDraftCount() {
   if (kartu) kartu.textContent = `${n} draft`;
 }
 
+function labelIdentitasDraft(d) {
+  const meja = d.meja ? `Meja ${d.meja}` : 'Meja —';
+  const nama = d.nama_pelanggan ? d.nama_pelanggan : '—';
+  const kasir = d.kasir ? ` (${d.kasir})` : '';
+  return `${meja} — ${nama}${kasir}`;
+}
+
 function renderDraftUI() {
   const card = document.getElementById('cardDraft');
   const list = document.getElementById('draftList');
@@ -968,7 +979,8 @@ function renderDraftUI() {
     return `
     <div class="draft-item" onclick="loadDraft('${d.id_draft}')">
       <div class="di-left">
-        <div class="di-no">${d.id_draft} <span style="font-size:10px;color:var(--teks-abu);">${d.dibuat_pada||''} — ${d.kasir||''}</span></div>
+        <div class="di-no">${d.id_draft} <span style="font-size:10px;color:var(--teks-abu);">${d.dibuat_pada||''}</span></div>
+        <div class="di-info" style="font-weight:600;color:var(--teks);">${labelIdentitasDraft(d)}</div>
         <div class="di-info">${(d.items||[]).length} menu · ${d.metode_bayar||'Tunai'}</div>
       </div>
       <div class="di-right">
@@ -1002,7 +1014,8 @@ function renderModalDraftList() {
     return `
     <div class="draft-item" style="margin-bottom:8px;" onclick="loadDraft('${d.id_draft}')">
       <div class="di-left">
-        <div class="di-no">${d.id_draft} <span style="font-size:10px;color:var(--teks-abu);">${d.dibuat_pada||''} — ${d.kasir||''}</span></div>
+        <div class="di-no">${d.id_draft} <span style="font-size:10px;color:var(--teks-abu);">${d.dibuat_pada||''}</span></div>
+        <div class="di-info" style="font-weight:600;color:var(--teks);">${labelIdentitasDraft(d)}</div>
         <div class="di-info">${(d.items||[]).length} menu — ${d.metode_bayar||'Tunai'}</div>
         <div class="di-info" style="margin-top:2px;font-size:11px;">
           ${(d.items||[]).slice(0,3).map(it=>`${it.nama_menu} ×${it.qty}`).join(', ')}${(d.items||[]).length>3?'...':''}
@@ -1156,6 +1169,7 @@ function resetStruk() {
   document.getElementById('inpDiskonCustom') && (document.getElementById('inpDiskonCustom').value = '');
   document.getElementById('mejaTrx') && (document.getElementById('mejaTrx').value = '');
   document.getElementById('namaPelanggan') && (document.getElementById('namaPelanggan').value = '');
+  document.getElementById('tglTrx').value = toLocalISODate(new Date());
   document.getElementById('kembalianVal').textContent = '—';
   document.getElementById('simpanStatus').innerHTML = '';
   metodeBayar = 'Tunai';
