@@ -490,7 +490,7 @@ let kategoriList = [];
 let activeKat    = 'Semua';
 let orderItems   = {};   // { key: { nama_menu, harga, qty, kategori, tipe, ... } }
 let metodeBayar  = 'Tunai';
-let draftList    = JSON.parse(localStorage.getItem('zaytun_drafts') || '[]');
+let draftList    = []; // dimuat dari server (sheet draft_transaksi), sinkron lintas device
 let currentDraftId = null;
 
 // ── Init ──
@@ -500,7 +500,7 @@ document.getElementById('tglTrx').value = toLocalISODate(nowDate);
 document.getElementById('tglRekapHarian').value = toLocalISODate(nowDate);
 const user = JSON.parse(localStorage.getItem('zaytun_user') || '{}');
 document.getElementById('kasirTrx').value = user.username || 'admin';
-renderDraftCount();
+loadDraftListFromServer();
 loadMenu();
 
 // ══════════════════════════════════════════════
@@ -823,8 +823,8 @@ async function simpanTransaksi() {
           `<br><span style="color:var(--emas);">⚠️ Printer belum terhubung — struk tidak tercetak</span>`;
       }
 
-      // Hapus dari draft kalau ini dari draft
-      if (currentDraftId !== null) hapusDraft(currentDraftId, false);
+      // Hapus dari draft (di server) kalau transaksi ini berasal dari draft
+      if (currentDraftId !== null) { await hapusDraft(currentDraftId, false); }
       currentDraftId = null;
 
       setTimeout(resetStruk, 1800);
@@ -843,52 +843,64 @@ async function simpanTransaksi() {
 // ══════════════════════════════════════════════
 // DRAFT
 // ══════════════════════════════════════════════
-function simpanDraft() {
+async function loadDraftListFromServer() {
+  try {
+    const res = await apiGet({ action: 'getDraftList' });
+    if (res.status === 'ok') {
+      draftList = res.data || [];
+    }
+  } catch(e) {
+    console.error('Gagal memuat draft:', e);
+  }
+  renderDraftCount();
+  renderDraftUI();
+}
+
+async function simpanDraft() {
   const items = Object.values(orderItems);
   if (!items.length) { alert('Belum ada menu dipilih'); return; }
   const tgl = document.getElementById('tglTrx').value;
 
-  if (currentDraftId !== null) {
-    // Update draft yang sedang aktif
-    const idx = draftList.findIndex(d => d.id === currentDraftId);
-    if (idx > -1) {
-      draftList[idx].items   = items;
-      draftList[idx].tanggal = tgl;
-      draftList[idx].metode  = metodeBayar;
-      draftList[idx].total   = items.reduce((s, it) => s + it.qty * it.harga, 0);
-    }
-  } else {
-    const draft = {
-      id     : Date.now(),
-      no     : `DRAFT-${draftList.length + 1}`,
-      tanggal: tgl,
-      metode : metodeBayar,
-      items,
-      total  : items.reduce((s, it) => s + it.qty * it.harga, 0),
-      kasir  : document.getElementById('kasirTrx').value || 'admin',
-      savedAt: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-    };
-    draftList.unshift(draft);
-    currentDraftId = draft.id;
-  }
-
-  localStorage.setItem('zaytun_drafts', JSON.stringify(draftList));
-  renderDraftCount();
-  renderDraftUI();
   document.getElementById('simpanStatus').innerHTML =
-    `<span style="color:var(--emas);">📋 Draft disimpan</span>`;
-  setTimeout(() => { document.getElementById('simpanStatus').innerHTML = ''; }, 2000);
+    `<span style="color:var(--emas);">⏳ Menyimpan draft...</span>`;
+
+  try {
+    const res = await apiPost({
+      action: 'simpanDraftServer',
+      id_draft: currentDraftId, // null kalau draft baru
+      tanggal: fmtDate(tgl),
+      kasir: document.getElementById('kasirTrx').value || 'admin',
+      metode_bayar: metodeBayar,
+      items
+    });
+    if (res.status === 'ok') {
+      currentDraftId = res.id_draft;
+      await loadDraftListFromServer();
+      document.getElementById('simpanStatus').innerHTML =
+        `<span style="color:var(--emas);">📋 Draft tersimpan — bisa dilanjutkan dari device lain</span>`;
+    } else {
+      document.getElementById('simpanStatus').innerHTML =
+        `<span style="color:var(--merah);">❌ Gagal simpan draft: ${res.message}</span>`;
+    }
+  } catch(e) {
+    document.getElementById('simpanStatus').innerHTML =
+      `<span style="color:var(--merah);">❌ Gagal konek ke server</span>`;
+  }
+  setTimeout(() => { document.getElementById('simpanStatus').innerHTML = ''; }, 2500);
 }
 
 function loadDraft(id) {
-  const draft = draftList.find(d => d.id === id);
+  const draft = draftList.find(d => String(d.id_draft) === String(id));
   if (!draft) return;
-  currentDraftId = id;
+  currentDraftId = draft.id_draft;
   orderItems = {};
-  draft.items.forEach(it => { orderItems[it.nama_menu] = { ...it }; });
-  document.getElementById('tglTrx').value = draft.tanggal || document.getElementById('tglTrx').value;
+  (draft.items || []).forEach(it => {
+    const key = it.tipe === 'paket' ? ('PAKET::' + it.nama_menu.replace(' 🎁','')) : (it.nama_menu.includes('(Tanpa Nasi)') ? it.nama_menu.replace(' (Tanpa Nasi)','') + '::tanpanasi' : it.nama_menu);
+    orderItems[key] = { ...it };
+  });
+  document.getElementById('tglTrx').value = draft.tanggal ? isoFromDMY(draft.tanggal) : document.getElementById('tglTrx').value;
   // Set metode
-  metodeBayar = draft.metode || 'Tunai';
+  metodeBayar = draft.metode_bayar || 'Tunai';
   document.querySelectorAll('.metode-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.val === metodeBayar);
   });
@@ -899,13 +911,19 @@ function loadDraft(id) {
   if (window.innerWidth <= 860) switchTab('struk');
 }
 
-function hapusDraft(id, confirm_ = true) {
-  if (confirm_ && !confirm('Hapus draft ini?')) return;
-  draftList = draftList.filter(d => d.id !== id);
-  if (currentDraftId === id) currentDraftId = null;
-  localStorage.setItem('zaytun_drafts', JSON.stringify(draftList));
-  renderDraftCount();
-  renderDraftUI();
+function isoFromDMY(dmy) {
+  const [d, m, y] = (dmy || '').split('/');
+  if (!d || !m || !y) return '';
+  return `${y}-${m}-${d}`;
+}
+
+async function hapusDraft(id, confirm_ = true) {
+  if (confirm_ && !confirm('Hapus draft ini? Draft akan hilang dari semua device.')) return;
+  try {
+    await apiPost({ action: 'hapusDraftServer', id_draft: id });
+  } catch(e) {}
+  if (String(currentDraftId) === String(id)) currentDraftId = null;
+  await loadDraftListFromServer();
   renderModalDraftList();
 }
 
@@ -923,23 +941,28 @@ function renderDraftUI() {
   const list = document.getElementById('draftList');
   if (!draftList.length) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-  list.innerHTML = draftList.map(d => `
-    <div class="draft-item" onclick="loadDraft(${d.id})">
+  list.innerHTML = draftList.map(d => {
+    const total = (d.items||[]).reduce((s,it) => s + it.qty * it.harga, 0);
+    return `
+    <div class="draft-item" onclick="loadDraft('${d.id_draft}')">
       <div class="di-left">
-        <div class="di-no">${d.no} <span style="font-size:10px;color:var(--teks-abu);">${d.savedAt||''}</span></div>
-        <div class="di-info">${d.items.length} menu · ${d.metode||'Tunai'}</div>
+        <div class="di-no">${d.id_draft} <span style="font-size:10px;color:var(--teks-abu);">${d.dibuat_pada||''} — ${d.kasir||''}</span></div>
+        <div class="di-info">${(d.items||[]).length} menu · ${d.metode_bayar||'Tunai'}</div>
       </div>
       <div class="di-right">
-        <span class="di-total">${rp(d.total)}</span>
-        <button class="btn-del-draft" onclick="event.stopPropagation();hapusDraft(${d.id})">✕</button>
+        <span class="di-total">${rp(total)}</span>
+        <button class="btn-del-draft" onclick="event.stopPropagation();hapusDraft('${d.id_draft}')">✕</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function bukaModalDraft() {
-  renderModalDraftList();
   document.getElementById('modalDraft').style.display = 'flex';
+  document.getElementById('modalDraftList').innerHTML =
+    '<div class="loading-state"><div class="loading-spinner"></div>Memuat draft terbaru...</div>';
+  // Selalu refresh dari server saat modal dibuka — biar lihat draft terbaru dari device lain
+  loadDraftListFromServer().then(renderModalDraftList);
 }
 function tutupModalDraft() { document.getElementById('modalDraft').style.display = 'none'; }
 document.getElementById('modalDraft').addEventListener('click', function(e) {
@@ -952,21 +975,23 @@ function renderModalDraftList() {
     el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>Belum ada draft tersimpan</div>';
     return;
   }
-  el.innerHTML = draftList.map(d => `
-    <div class="draft-item" style="margin-bottom:8px;" onclick="loadDraft(${d.id})">
+  el.innerHTML = draftList.map(d => {
+    const total = (d.items||[]).reduce((s,it) => s + it.qty * it.harga, 0);
+    return `
+    <div class="draft-item" style="margin-bottom:8px;" onclick="loadDraft('${d.id_draft}')">
       <div class="di-left">
-        <div class="di-no">${d.no} <span style="font-size:10px;color:var(--teks-abu);">${d.savedAt||''}</span></div>
-        <div class="di-info">${d.items.length} menu — ${d.metode||'Tunai'}</div>
+        <div class="di-no">${d.id_draft} <span style="font-size:10px;color:var(--teks-abu);">${d.dibuat_pada||''} — ${d.kasir||''}</span></div>
+        <div class="di-info">${(d.items||[]).length} menu — ${d.metode_bayar||'Tunai'}</div>
         <div class="di-info" style="margin-top:2px;font-size:11px;">
-          ${d.items.slice(0,3).map(it=>`${it.nama_menu} ×${it.qty}`).join(', ')}${d.items.length>3?'...':''}
+          ${(d.items||[]).slice(0,3).map(it=>`${it.nama_menu} ×${it.qty}`).join(', ')}${(d.items||[]).length>3?'...':''}
         </div>
       </div>
       <div class="di-right">
-        <span class="di-total">${rp(d.total)}</span>
-        <button class="btn-del-draft" onclick="event.stopPropagation();hapusDraft(${d.id})">✕</button>
+        <span class="di-total">${rp(total)}</span>
+        <button class="btn-del-draft" onclick="event.stopPropagation();hapusDraft('${d.id_draft}')">✕</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════
