@@ -70,6 +70,13 @@
 .menu-card .mc-nama { font-size: 13px; font-weight: 600; color: var(--teks); margin-bottom: 4px; line-height: 1.3; }
 .menu-card .mc-kat  { font-size: 10px; color: var(--teks-abu); margin-bottom: 6px; }
 .menu-card .mc-harga { font-size: 13px; font-weight: 700; color: var(--hijau); }
+.menu-card.paket-card { background: var(--emas-pale); border-color: rgba(201,168,76,0.35); }
+.mc-hemat { font-size: 10px; font-weight: 700; color: #8a6914; background: var(--putih); display: inline-block; padding: 1px 8px; border-radius: 10px; margin-top: 4px; }
+
+.si-paket-info { font-size: 11px; color: var(--teks-abu); margin: 2px 0 4px; line-height: 1.5; }
+.si-hemat { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 700; color: #8a6914; background: var(--emas-pale); padding: 1px 7px; border-radius: 10px; }
+.si-nasi-toggle { font-size: 11px; font-weight: 600; color: var(--hijau-mid); cursor: pointer; margin: 2px 0 6px; padding: 3px 8px; background: var(--hijau-pale); border-radius: 8px; display: inline-block; }
+.si-nasi-toggle.active { background: var(--merah-pale); color: var(--merah); }
 .menu-card .mc-badge {
   position: absolute; top: -8px; right: -8px;
   width: 24px; height: 24px; background: var(--hijau); color: var(--putih);
@@ -451,9 +458,10 @@
 // STATE
 // ══════════════════════════════════════════════
 let menuList     = [];
+let paketList    = [];
 let kategoriList = [];
 let activeKat    = 'Semua';
-let orderItems   = {};   // { nama_menu: { nama, harga, qty, kategori } }
+let orderItems   = {};   // { key: { nama_menu, harga, qty, kategori, tipe, ... } }
 let metodeBayar  = 'Tunai';
 let draftList    = JSON.parse(localStorage.getItem('zaytun_drafts') || '[]');
 let currentDraftId = null;
@@ -469,17 +477,28 @@ renderDraftCount();
 loadMenu();
 
 // ══════════════════════════════════════════════
-// LOAD MENU
+// LOAD MENU + PAKET
 // ══════════════════════════════════════════════
 async function loadMenu() {
   try {
-    const data = await apiGet({ action: 'getMenuList' });
-    if (data.status === 'ok') {
-      menuList     = (data.data || []).filter(m => m.status !== 'nonaktif'); // sembunyikan menu nonaktif
-      kategoriList = ['Semua', ...new Set(menuList.map(m => m.kategori).filter(Boolean)).values()].sort((a,b) => a === 'Semua' ? -1 : b === 'Semua' ? 1 : a.localeCompare(b));
-      buildKatChips();
-      renderMenuGrid();
+    const [dataMenu, dataPaket] = await Promise.all([
+      apiGet({ action: 'getMenuList' }),
+      apiGet({ action: 'getPaketList' })
+    ]);
+    if (dataMenu.status === 'ok') {
+      menuList = (dataMenu.data || []).filter(m => m.status !== 'nonaktif'); // sembunyikan menu nonaktif
     }
+    if (dataPaket.status === 'ok') {
+      paketList = dataPaket.data || [];
+    }
+    const katMenu = [...new Set(menuList.map(m => m.kategori).filter(Boolean))];
+    kategoriList = ['Semua', ...(paketList.length ? ['Paket'] : []), ...katMenu].sort((a, b) => {
+      if (a === 'Semua') return -1; if (b === 'Semua') return 1;
+      if (a === 'Paket') return -1; if (b === 'Paket') return 1;
+      return a.localeCompare(b);
+    });
+    buildKatChips();
+    renderMenuGrid();
   } catch(e) {
     document.getElementById('menuGrid').innerHTML =
       '<div class="empty-state" style="grid-column:1/-1;">⚠️ Gagal memuat menu</div>';
@@ -488,7 +507,7 @@ async function loadMenu() {
 
 function buildKatChips() {
   document.getElementById('katChips').innerHTML = kategoriList.map(k =>
-    `<button class="kat-chip${k === activeKat ? ' active' : ''}" onclick="setKat('${k}')">${k}</button>`
+    `<button class="kat-chip${k === activeKat ? ' active' : ''}" onclick="setKat('${k}')">${k === 'Paket' ? '🎁 Paket' : k}</button>`
   ).join('');
 }
 
@@ -497,6 +516,31 @@ function filterMenu() { renderMenuGrid(); }
 
 function renderMenuGrid() {
   const q = document.getElementById('searchMenu').value.toLowerCase().trim();
+
+  // ── Grup Paket ──
+  if (activeKat === 'Paket') {
+    let data = paketList;
+    if (q) data = data.filter(p => p.nama_paket.toLowerCase().includes(q));
+    if (!data.length) {
+      document.getElementById('menuGrid').innerHTML =
+        '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🎁</div>Belum ada paket dibuat<br><span style="font-size:12px;color:var(--teks-abu);">Buat paket dulu di halaman Daftar Menu</span></div>';
+      return;
+    }
+    document.getElementById('menuGrid').innerHTML = data.map((p, idx) => {
+      const key = 'PAKET::' + p.nama_paket;
+      const qty = orderItems[key]?.qty || 0;
+      return `<div class="menu-card paket-card${qty > 0 ? ' in-order' : ''}" onclick="tambahPaketByIndex(${idx})">
+        <div class="mc-badge">${qty}</div>
+        <div class="mc-nama">🎁 ${p.nama_paket}</div>
+        <div class="mc-kat">${p.komponen.map(k => k.nama_menu).join(' + ')}</div>
+        <div class="mc-harga">${rp(p.harga_paket)}</div>
+        ${p.hemat > 0 ? `<div class="mc-hemat">Hemat ${rp(p.hemat)}</div>` : ''}
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // ── Grup menu reguler ──
   let data = menuList;
   if (activeKat !== 'Semua') data = data.filter(m => m.kategori === activeKat);
   if (q) data = data.filter(m =>
@@ -513,7 +557,7 @@ function renderMenuGrid() {
     const qty = orderItems[m.nama_menu]?.qty || 0;
     return `<div class="menu-card${qty > 0 ? ' in-order' : ''}" onclick="tambahMenu('${m.nama_menu.replace(/'/g,"\\'")}', ${m.harga || 0}, '${(m.kategori||'').replace(/'/g,"\\'")}')">
       <div class="mc-badge" id="badge-${CSS.escape(m.nama_menu)}">${qty}</div>
-      <div class="mc-nama">${m.nama_menu}</div>
+      <div class="mc-nama">${m.nama_menu}${m.include_nasi ? ' 🍚' : ''}</div>
       <div class="mc-kat">${m.kategori || '—'}</div>
       <div class="mc-harga">${m.harga ? rp(m.harga) : '—'}</div>
     </div>`;
@@ -525,13 +569,47 @@ function renderMenuGrid() {
 // ══════════════════════════════════════════════
 function tambahMenu(nama, harga, kategori) {
   if (!orderItems[nama]) {
-    orderItems[nama] = { nama_menu: nama, harga: harga || 0, qty: 0, kategori };
+    const m = menuList.find(x => x.nama_menu === nama) || {};
+    orderItems[nama] = {
+      nama_menu: nama, harga: harga || 0, hargaAsli: harga || 0, qty: 0, kategori,
+      tipe: 'reguler',
+      includeNasi: !!m.include_nasi, diskonNasi: m.diskon_tanpa_nasi || 0, tanpaNasi: false
+    };
   }
   orderItems[nama].qty++;
   renderStruk();
   renderMenuGrid();
   // Mobile: auto switch ke struk
   if (window.innerWidth <= 860) switchTab('struk');
+}
+
+function tambahPaketByIndex(idx) {
+  const p = paketList[idx];
+  if (p) tambahPaketKeCart(p);
+}
+
+function tambahPaketKeCart(paket) {
+  const key = 'PAKET::' + paket.nama_paket;
+  if (!orderItems[key]) {
+    orderItems[key] = {
+      nama_menu: paket.nama_paket, harga: paket.harga_paket, hargaAsli: paket.harga_paket,
+      qty: 0, kategori: 'Paket', tipe: 'paket',
+      komponen: paket.komponen, totalAsli: paket.total_asli, hemat: paket.hemat,
+      includeNasi: false, diskonNasi: 0, tanpaNasi: false
+    };
+  }
+  orderItems[key].qty++;
+  renderStruk();
+  renderMenuGrid();
+  if (window.innerWidth <= 860) switchTab('struk');
+}
+
+function toggleTanpaNasi(key) {
+  const it = orderItems[key];
+  if (!it) return;
+  it.tanpaNasi = !it.tanpaNasi;
+  it.harga = it.tanpaNasi ? Math.max(0, it.hargaAsli - it.diskonNasi) : it.hargaAsli;
+  renderStruk();
 }
 
 function ubahQty(nama, delta) {
@@ -549,32 +627,48 @@ function ubahHarga(nama, val) {
 }
 
 function renderStruk() {
-  const items = Object.values(orderItems);
+  const entries = Object.entries(orderItems);
   const container = document.getElementById('strukItems');
 
-  if (!items.length) {
+  if (!entries.length) {
     container.innerHTML = '<div class="struk-empty"><div class="se-icon">🍽️</div>Pilih menu dari sebelah kiri</div>';
     hitungTotal();
     updateTabBadge();
     return;
   }
 
-  container.innerHTML = items.map(it => `
+  container.innerHTML = entries.map(([key, it]) => {
+    const keyEsc = key.replace(/'/g,"\\'");
+
+    const paketInfo = it.tipe === 'paket' ? `
+      <div class="si-paket-info">
+        ${it.komponen.map(k => k.nama_menu).join(' + ')}
+        ${it.hemat > 0 ? `<span class="si-hemat">Hemat ${rp(it.hemat)}</span>` : ''}
+      </div>` : '';
+
+    const nasiToggle = it.includeNasi ? `
+      <div class="si-nasi-toggle${it.tanpaNasi ? ' active' : ''}" onclick="toggleTanpaNasi('${keyEsc}')">
+        🍚 ${it.tanpaNasi ? 'Tanpa Nasi ✓ (klik batal)' : `Tanpa Nasi (-${rp(it.diskonNasi)})`}
+      </div>` : '';
+
+    return `
     <div class="struk-item">
       <div style="flex:1;min-width:0;">
-        <div class="si-nama">${it.nama_menu}</div>
+        <div class="si-nama">${it.nama_menu}${it.tipe === 'paket' ? ' 🎁' : ''}</div>
+        ${paketInfo}
+        ${nasiToggle}
         <input class="si-harga-input" type="number" value="${it.harga}"
-          placeholder="Harga" oninput="ubahHarga('${it.nama_menu.replace(/'/g,"\\'")}', this.value)"
+          placeholder="Harga" oninput="ubahHarga('${keyEsc}', this.value)"
           title="Edit harga">
       </div>
       <div class="si-qty-wrap">
-        <button class="si-qty-btn minus" onclick="ubahQty('${it.nama_menu.replace(/'/g,"\\'")}', -1)">−</button>
+        <button class="si-qty-btn minus" onclick="ubahQty('${keyEsc}', -1)">−</button>
         <span class="si-qty">${it.qty}</span>
-        <button class="si-qty-btn" onclick="ubahQty('${it.nama_menu.replace(/'/g,"\\'")}', 1)">+</button>
+        <button class="si-qty-btn" onclick="ubahQty('${keyEsc}', 1)">+</button>
       </div>
       <div class="si-sub">${rp(it.qty * it.harga)}</div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 
   hitungTotal();
   updateTabBadge();
