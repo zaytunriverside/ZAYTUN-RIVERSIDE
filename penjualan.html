@@ -96,12 +96,6 @@
   overflow: hidden; display: flex; flex-direction: column;
   max-height: calc(100vh - 100px);
 }
-.struk-head {
-  background: var(--hijau-tua); padding: 16px 18px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.struk-head-title { color: var(--putih); font-size: 14px; font-weight: 700; font-family: 'Playfair Display', serif; }
-.struk-head-no { color: var(--hijau-muda); font-size: 11px; font-family: monospace; }
 
 /* Meta: tanggal, kasir, metode */
 .struk-meta { padding: 12px 16px; border-bottom: 1px solid var(--krem-gelap); background: var(--krem); }
@@ -167,38 +161,50 @@
 .total-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
 .total-row .tr-label { font-size: 12px; color: var(--teks-abu); }
 .total-row .tr-val   { font-size: 13px; font-weight: 600; color: var(--teks); }
-.total-row.grand { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--krem-gelap); }
-.total-row.grand .tr-label { font-size: 15px; font-weight: 700; color: var(--hijau-tua); }
+.total-row.grand {
+  margin-top: 8px; padding: 8px 10px;
+  border: 1.5px solid var(--hijau); border-radius: 10px;
+  background: var(--hijau-pale);
+}
+.total-row.grand .tr-label { font-size: 12px; font-weight: 700; color: var(--hijau-tua); }
+.total-row.grand .tr-val   { font-size: 13px; font-weight: 700; color: var(--hijau-tua); }
 .diskon-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
 .diskon-row input { width: 100px; padding: 5px 8px; border: 1.5px solid var(--merah-pale); border-radius: 6px; font-size: 12px; text-align: right; font-family: 'Inter', sans-serif; }
 .diskon-row input:focus { outline: none; border-color: var(--merah); }
-.total-row.grand .tr-val   { font-size: 18px; font-weight: 700; color: var(--hijau); }
 
-/* Kembalian */
+/* Kembalian — 2 kolom jelas: Uang Cash | Kembalian */
 .kembalian-wrap { margin-top: 10px; background: var(--krem); border-radius: 10px; padding: 10px 12px; }
-.kembalian-wrap label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--teks-abu); display: block; margin-bottom: 4px; }
-.kembalian-row { display: flex; gap: 10px; align-items: center; }
-.kembalian-row input {
-  flex: 1; padding: 8px 10px; border: 1.5px solid var(--krem-gelap); border-radius: 8px;
+.kembalian-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kembalian-col label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--teks-abu); display: block; margin-bottom: 4px; }
+.kembalian-col input {
+  width: 100%; padding: 8px 10px; border: 1.5px solid var(--krem-gelap); border-radius: 8px;
   font-size: 14px; font-family: 'Inter', sans-serif; text-align: right;
-  background: var(--putih); outline: none;
+  background: var(--putih); outline: none; box-sizing: border-box;
 }
-.kembalian-row input:focus { border-color: var(--hijau-mid); }
-.kembalian-val { font-size: 15px; font-weight: 700; color: var(--hijau); min-width: 80px; text-align: right; }
+.kembalian-col input:focus { border-color: var(--hijau-mid); }
+.kembalian-col .kembalian-val {
+  font-size: 14px; font-weight: 700; color: var(--hijau); text-align: right;
+  padding: 8px 10px; background: var(--putih); border-radius: 8px; border: 1.5px solid var(--krem-gelap);
+}
 .kembalian-val.kurang { color: var(--merah); }
 
-/* Tombol aksi struk */
+/* Tombol aksi struk — Simpan&Cetak persegi kiri, Draft+Reset ditumpuk kanan */
 .struk-actions { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--krem-gelap); }
-.btn-row { display: flex; gap: 8px; }
-.btn-row button { flex: 1; }
+.aksi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .btn-simpan-trx {
-  width: 100%; padding: 13px; background: linear-gradient(135deg, var(--hijau), var(--hijau-mid));
-  color: var(--putih); border: none; border-radius: 12px; font-size: 14px; font-weight: 700;
+  aspect-ratio: 1 / 1; width: 100%;
+  background: linear-gradient(135deg, var(--hijau), var(--hijau-mid));
+  color: var(--putih); border: none; border-radius: 12px; font-size: 13px; font-weight: 700;
   font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
   box-shadow: 0 4px 16px rgba(45,106,79,0.25);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  line-height: 1.25;
 }
-.btn-simpan-trx:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-simpan-trx:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-simpan-trx span:first-child { font-size: 22px; }
+.btn-simpan-trx:hover { opacity: 0.9; }
+.btn-simpan-trx:disabled { opacity: 0.5; cursor: not-allowed; }
+.aksi-kanan { display: flex; flex-direction: column; gap: 8px; }
+.aksi-kanan button { flex: 1; }
 .btn-draft {
   padding: 10px; background: var(--emas-pale); color: #8a6914;
   border: 1.5px solid rgba(201,168,76,0.4); border-radius: 10px;
@@ -286,7 +292,11 @@
 ══════════════════════════════════════════ */
 @media (max-width: 860px) {
   .penjualan-wrap { grid-template-columns: 1fr; }
-  .panel-struk { position: static; max-height: none; }
+  .panel-struk {
+    position: static;
+    max-height: none;
+    height: calc(100vh - 128px); /* topbar + mobile-tabs — item list scroll internal, tombol aksi tetap kelihatan */
+  }
   .mobile-tabs { display: flex; }
   .panel-menu.hidden-mobile  { display: none; }
   .panel-struk.hidden-mobile { display: none; }
@@ -365,11 +375,6 @@
 
       <!-- ── PANEL KANAN: Struk ── -->
       <div class="panel-struk" id="panelStruk">
-        <!-- Header -->
-        <div class="struk-head">
-          <span class="struk-head-title">🧾 Struk Pesanan</span>
-        </div>
-
         <!-- Meta -->
         <div class="struk-meta">
           <div class="meta-row">
@@ -384,9 +389,9 @@
           </div>
           <!-- Metode bayar -->
           <div class="metode-row" style="margin-top:10px;">
-            <button class="metode-btn active" data-val="Tunai"         onclick="setMetode(this)">💵<br>Tunai</button>
-            <button class="metode-btn"        data-val="QRIS"          onclick="setMetode(this)">📱<br>QRIS</button>
-            <button class="metode-btn"        data-val="Bank Transfer" onclick="setMetode(this)">🏦<br>Transfer</button>
+            <button class="metode-btn active" data-val="Tunai"         onclick="setMetode(this)">Tunai</button>
+            <button class="metode-btn"        data-val="QRIS"          onclick="setMetode(this)">QRIS</button>
+            <button class="metode-btn"        data-val="Bank Transfer" onclick="setMetode(this)">Transfer</button>
           </div>
         </div>
 
@@ -413,24 +418,32 @@
             <span class="tr-val" id="totalGrand">Rp 0</span>
           </div>
 
-          <!-- Kembalian — hanya Tunai -->
+          <!-- Kembalian — hanya Tunai, 2 kolom jelas -->
           <div class="kembalian-wrap" id="kembalianWrap">
-            <label>Uang Diterima</label>
-            <div class="kembalian-row">
-              <input type="number" id="uangDiterima" placeholder="0" oninput="hitungKembalian()">
-              <div class="kembalian-val" id="kembalianVal">—</div>
+            <div class="kembalian-2col">
+              <div class="kembalian-col">
+                <label>Uang Cash</label>
+                <input type="number" id="uangDiterima" placeholder="0" oninput="hitungKembalian()">
+              </div>
+              <div class="kembalian-col">
+                <label>Kembalian</label>
+                <div class="kembalian-val" id="kembalianVal">—</div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Aksi -->
         <div class="struk-actions">
-          <button class="btn-simpan-trx" id="btnSimpan" onclick="simpanTransaksi()">
-            🖨️ Simpan & Cetak
-          </button>
-          <div class="btn-row">
-            <button class="btn-draft" onclick="simpanDraft()">📋 Simpan Draft</button>
-            <button class="btn-reset-struk" onclick="resetStruk()">🔄 Reset</button>
+          <div class="aksi-grid">
+            <button class="btn-simpan-trx" id="btnSimpan" onclick="simpanTransaksi()">
+              <span>🖨️</span>
+              <span>Simpan<br>&amp; Cetak</span>
+            </button>
+            <div class="aksi-kanan">
+              <button class="btn-draft" onclick="simpanDraft()">📋 Simpan Draft</button>
+              <button class="btn-reset-struk" onclick="resetStruk()">🔄 Reset</button>
+            </div>
           </div>
           <div class="simpan-status" id="simpanStatus"></div>
         </div>
