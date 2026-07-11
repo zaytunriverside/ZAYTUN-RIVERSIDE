@@ -791,6 +791,7 @@ async function simpanTransaksi() {
   const tgl  = document.getElementById('tglTrx').value;
   const meja = document.getElementById('mejaTrx').value;
   if (!tgl) { alert('Pilih tanggal'); return; }
+  if (!meja) { alert('Pilih Saung/Meja dulu sebelum menyimpan.'); document.getElementById('mejaTrx').focus(); return; }
   const items = Object.values(orderItems);
   if (!items.length) { alert('Belum ada menu dipilih'); return; }
 
@@ -866,6 +867,8 @@ async function loadDraftListFromServer() {
 async function simpanDraft() {
   const items = Object.values(orderItems);
   if (!items.length) { alert('Belum ada menu dipilih'); return; }
+  const meja = document.getElementById('mejaTrx').value;
+  if (!meja) { alert('Pilih Saung/Meja dulu sebelum menyimpan draft.'); document.getElementById('mejaTrx').focus(); return; }
   const tgl = document.getElementById('tglTrx').value;
 
   document.getElementById('simpanStatus').innerHTML =
