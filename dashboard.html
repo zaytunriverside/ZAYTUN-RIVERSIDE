@@ -397,8 +397,39 @@
   .printer-badge.printer-disconnected { background:var(--merah-pale); color:var(--merah); }
   .btn-printer-connect { background:var(--putih); border:1.5px solid var(--krem-gelap); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; color:var(--teks); }
   .btn-printer-connect:hover { background:var(--hijau); color:var(--putih); border-color:var(--hijau); }
-  .btn-cetak-ulang { background:none; border:1.5px solid var(--krem-gelap); border-radius:6px; padding:3px 8px; font-size:11px; cursor:pointer; color:var(--teks); }
-  .btn-cetak-ulang:hover { background:var(--hijau); color:var(--putih); border-color:var(--hijau); }
+
+  /* Popup Detail Struk */
+  .popup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; padding: 16px;
+  }
+  .popup-card {
+    background: var(--putih); border-radius: 16px; width: 100%; max-width: 380px;
+    max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  }
+  .popup-head {
+    background: var(--hijau-tua); color: var(--putih); padding: 14px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 700; font-size: 14px;
+  }
+  .popup-close { cursor: pointer; font-size: 16px; opacity: 0.8; }
+  .popup-close:hover { opacity: 1; }
+  .popup-body { padding: 16px 18px; overflow-y: auto; flex: 1; font-size: 13px; }
+  .popup-meta-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12.5px; color: var(--teks-abu); }
+  .popup-meta-row b { color: var(--teks); font-weight: 600; }
+  .popup-divider { border-top: 1.5px dashed var(--krem-gelap); margin: 10px 0; }
+  .popup-item-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+  .popup-item-row .pi-nama { color: var(--teks); }
+  .popup-item-row .pi-sub { color: var(--teks); font-weight: 600; }
+  .popup-total-row { display: flex; justify-content: space-between; padding: 8px 10px; margin-top: 8px; background: var(--hijau-pale); border-radius: 8px; font-weight: 700; color: var(--hijau-tua); }
+  .popup-actions { display: flex; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--krem-gelap); }
+  .btn-popup { flex: 1; padding: 11px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .btn-popup-print { background: var(--hijau); color: var(--putih); }
+  .btn-popup-print:hover { background: var(--hijau-mid); }
+  .btn-popup-share { background: var(--krem); color: var(--teks); border: 1.5px solid var(--krem-gelap); }
+  .btn-popup-share:hover { background: var(--krem-gelap); }
 
   .metode-badge {
     display: inline-block;
@@ -590,6 +621,23 @@
   </div>
 </main>
 
+<!-- Popup Detail Struk -->
+<div class="popup-overlay" id="popupStruk" style="display:none;">
+  <div class="popup-card">
+    <div class="popup-head">
+      <span>🧾 Detail Struk</span>
+      <span class="popup-close" onclick="tutupPopupStruk()">✕</span>
+    </div>
+    <div class="popup-body" id="popupStrukBody">
+      <div class="loading-state"><div class="loading-spinner"></div>Memuat...</div>
+    </div>
+    <div class="popup-actions">
+      <button class="btn-popup btn-popup-print" onclick="reprintStruk(popupStrukId)">🖨️ Cetak Ulang</button>
+      <button class="btn-popup btn-popup-share" onclick="shareStrukLink(popupStrukId)">🔗 Share Link</button>
+    </div>
+  </div>
+</div>
+
 <script src="_app.js"></script>
 <script src="printer.js"></script>
 <script>
@@ -687,7 +735,6 @@
         <th>Waktu</th>
         <th>Total</th>
         <th>Metode</th>
-        <th></th>
       </tr></thead><tbody>`;
 
     tampil.forEach(t => {
@@ -697,12 +744,11 @@
         'E-Money': 'metode-emoney',
       }[t.metode_bayar] || 'metode-lain';
 
-      html += `<tr>
+      html += `<tr class="clickable" onclick="bukaPopupStruk('${t.id_transaksi}')">
         <td style="font-size:12px; color:var(--teks-abu);">${t.id_transaksi}</td>
         <td>${t.tanggal}</td>
         <td style="font-weight:600; color:var(--hijau);">${rp(t.total)}</td>
         <td><span class="metode-badge ${metodeClass}">${t.metode_bayar || '-'}</span></td>
-        <td><button class="btn-cetak-ulang" onclick="reprintStruk('${t.id_transaksi}')">🖨️ Cetak</button></td>
       </tr>`;
     });
 
@@ -795,6 +841,73 @@
       await sendToPrinterBLE(bytes);
     } catch(e) {
       alert('Gagal cetak ulang: ' + e.message);
+    }
+  }
+
+  // ── Popup Detail Struk ─────────────────────────────
+  let popupStrukId = null;
+
+  async function bukaPopupStruk(idTransaksi) {
+    popupStrukId = idTransaksi;
+    document.getElementById('popupStruk').style.display = 'flex';
+    document.getElementById('popupStrukBody').innerHTML =
+      '<div class="loading-state"><div class="loading-spinner"></div>Memuat...</div>';
+
+    const trx = todayTrxList.find(t => String(t.id_transaksi) === String(idTransaksi));
+    if (!trx) {
+      document.getElementById('popupStrukBody').innerHTML = '<div class="empty-state">Data tidak ditemukan.</div>';
+      return;
+    }
+
+    try {
+      const detail = await apiGet({ action:'getDetailTrx', id_transaksi: idTransaksi });
+      const items = detail.status === 'ok' ? detail.data : [];
+
+      let html = `
+        <div class="popup-meta-row"><span>No. Faktur</span><b>${trx.id_transaksi}</b></div>
+        <div class="popup-meta-row"><span>Tanggal</span><b>${trx.tanggal}</b></div>
+        <div class="popup-meta-row"><span>Metode</span><b>${trx.metode_bayar || '-'}</b></div>
+        <div class="popup-divider"></div>`;
+
+      items.forEach(it => {
+        html += `<div class="popup-item-row">
+          <span class="pi-nama">${it.nama_menu} ×${it.qty}</span>
+          <span class="pi-sub">${rp(Number(it.subtotal)||0)}</span>
+        </div>`;
+      });
+
+      html += `<div class="popup-total-row"><span>TOTAL</span><span>${rp(Number(trx.total)||0)}</span></div>`;
+
+      document.getElementById('popupStrukBody').innerHTML = html;
+    } catch(e) {
+      document.getElementById('popupStrukBody').innerHTML = '<div class="empty-state">⚠️ Gagal memuat detail struk.</div>';
+    }
+  }
+
+  function tutupPopupStruk() {
+    document.getElementById('popupStruk').style.display = 'none';
+    popupStrukId = null;
+  }
+  document.getElementById('popupStruk').addEventListener('click', function(e) {
+    if (e.target === this) tutupPopupStruk();
+  });
+
+  // ── Share link invoice (Web Share API, fallback copy ke clipboard) ──
+  async function shareStrukLink(idTransaksi) {
+    if (!idTransaksi) return;
+    const url = `${location.origin}/invoice.html?id=${idTransaksi}&type=jual`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Invoice ${idTransaksi}`, url });
+      } catch(e) { /* dibatalkan user, biarkan saja */ }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        alert('Link invoice disalin ke clipboard:\n' + url);
+      } catch(e) {
+        prompt('Salin link invoice ini secara manual:', url);
+      }
     }
   }
 
